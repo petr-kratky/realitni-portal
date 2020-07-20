@@ -1,0 +1,27 @@
+# See https://help.github.com/ignore-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/data
+/src/server/public
+
+# build
+.next
+
+# production server output
+dist
+
+# IDE
+.idea
+.vscode
+
+# misc
+.DS_Store
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+commit-level.txt
+
+/src/utils/sql2geojson/out

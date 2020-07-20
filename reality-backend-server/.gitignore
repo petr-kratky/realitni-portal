@@ -1,0 +1,11 @@
+.idea/
+.vscode
+node_modules/
+*.iml
+dist/
+coverage/
+logs/
+.helm/
+pipeline-build-config.json
+test-report.xml
+.scannerwork/

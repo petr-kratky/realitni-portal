@@ -1,0 +1,49 @@
+// import { fileUpload } from './package/graphql/upload.mutation';
+// import { Formik, Form  } from "formik";
+// import { useUpload } from './package/components/useUpload';
+
+// import get from 'lodash/get';
+
+// const Upload = () => {
+//   const [uploadFiles, mutationStatus, progress, abort] = useUpload(fileUpload)
+//   return (
+//     <Formik
+//       initialValues={{
+//         fileInput: null,
+//       }}
+//       onSubmit={(values) => uploadFiles({ variables: values })}
+//     >
+//       {({formik}) => {
+//         return (
+//           <Form>
+//             <FieldUpload
+//               name="fileInput"
+//               StyledUploadLabel={{}}
+//               styledUploadLabelText="Vybrat soubory :)"
+//               multiple
+//             />
+//             Celkem nahráno: {Math.round((progress.loaded * 100) / progress.total)} <br />
+//             <button
+//               disabled={!get(formik, 'values.fileInput', null)}
+//               type="submit"
+//             >
+//               Submit
+//             </button>
+//             {mutationStatus.loading && (
+//               <button
+//                 type="button"
+//                 onClick={abort}
+//               >
+//                 Zrušit nahrávání
+//               </button>
+//             )}
+//           </Form>
+//         )
+//       }}
+//     </Formik>
+//   )
+// }
+
+// export {
+//   Upload,
+// }

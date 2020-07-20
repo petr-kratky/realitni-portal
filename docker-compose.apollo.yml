@@ -1,0 +1,40 @@
+version: '3.7'
+services:
+
+  # APOLLO GRAPHQL SERVER
+  reality-graphql:
+    container_name: reality-graphql
+    hostname: reality-graphql
+    image: services/reality-graphql:latest
+    build:
+      context: ./reality-apollo-server
+      dockerfile: ./Dockerfile
+    depends_on:
+      - reality-backend
+    environment:
+      NODE_ENV: production
+      MEDIA_SERVER_HOST: http://172.28.0.3:3000
+      DB_HOST: 46.28.109.203
+      DB_PORT: 5432
+      DB_USER: testuser
+      DB_PASS: admin
+      DB_NAME: realitysolution
+      DB_SCHEMA: reality
+      ACCESS_TOKEN_SECRET: ajlkqowieuqowueoi
+      REFRESH_TOKEN_SECRET: qopwieioque1
+    ports:
+      - 4000:4000
+    networks:
+      reality:
+        ipv4_address: 172.28.0.4
+        
+networks:
+  traefik:
+    external:
+      name: traefik
+  reality:
+    name: reality
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

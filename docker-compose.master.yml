@@ -1,0 +1,106 @@
+version: '3.7'
+services:
+  # DIRT POSTGIS SERVER
+  reality-postgis:
+    container_name: reality-postgis
+    hostname: reality-postgis
+    image: services/reality-postgis:latest
+    build:
+      context: ./reality-postgis-server
+      dockerfile: Dockerfile.prod
+    ports:
+      - 3004:3004
+    networks:
+      reality:
+        ipv4_address: 172.28.0.2
+
+  # REST BACKEND SERVER
+  reality-backend:
+    container_name: reality-backend
+    hostname: reality-backend
+    image: services/reality-backend:latest
+    build:
+      context: ./reality-backend-server
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      AWS_KEY_ID: AKIAJU3ON4KTVKQ2NPCQ
+      AWS_SECRET_KEY: 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
+      AWS_REGION: eu-central-1
+      BUCKET_NAME: realstat
+    ports:
+      - 5000:3000
+    networks:
+      reality:
+        ipv4_address: 172.28.0.3
+
+  # APOLLO GRAPHQL SERVER
+  reality-graphql:
+    container_name: reality-graphql
+    hostname: reality-graphql
+    image: services/reality-graphql:latest
+    build:
+      context: ./reality-apollo-server
+      dockerfile: ./Dockerfile
+    depends_on:
+      - reality-backend
+    environment:
+      HOST: 0.0.0.0
+      PORT: 4000
+      NODE_ENV: production
+      MEDIA_SERVER_HOST: http://172.28.0.3:3000
+      DB_HOST: 46.28.109.203
+      DB_PORT: 5432
+      DB_USER: testuser
+      DB_PASS: admin
+      DB_NAME: realitysolution
+      DB_SCHEMA: reality
+      ACCESS_TOKEN_SECRET: ajlkqowieuqowueoi
+      REFRESH_TOKEN_SECRET: qopwieioque1
+      DOMAIN: .realitydata.cz
+    ports:
+      - 4000:4000
+    networks:
+      traefik:
+      reality:
+        ipv4_address: 172.28.0.4
+
+  # NEXT FRONTEND SERVER
+  reality-frontend:
+    container_name: reality-frontend
+    hostname: reality-frontend
+    image: applications/reality-frontend:latest
+    build:
+      context: ./reality-frontend
+      dockerfile: ./Dockerfile
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 3000
+      GRAPHQL_SERVER: http://172.28.0.4:4000
+      GRAPHQL_REFRESH: http://172.28.0.4:4000
+      POSTGIS_SERVER: http://172.28.0.2:3004
+    labels:
+      - traefik.frontend.rule=Host:realitydata.cz
+      - traefik.enable=true
+      - traefik.frontend.entryPoints=http,https
+    ports:
+      - 3000:3000
+    networks:
+      traefik:
+      reality:
+        ipv4_address: 172.28.0.5
+
+
+networks:
+  traefik:
+    external:
+      name: traefik
+  reality:
+    name: reality
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16

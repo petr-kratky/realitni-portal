@@ -1,0 +1,51 @@
+import { DocumentNode } from 'graphql';
+import { useMutation, MutationHookOptions } from '@apollo/react-hooks';
+import { useState, useEffect } from 'react';
+
+import {
+  uploadLinkXhr,
+  UploadRequestInit,
+} from '../apollo/uploadLinkXhr';
+const useUpload = (id) => {
+  const MEDIA_SERVER_HOST: string | undefined = process.env.MEDIA_SERVER_HOST
+  console.log('MEDIA_SERVER_HOST', MEDIA_SERVER_HOST)
+  const fetchOptions = {
+    method: 'POST',
+    headers: {},
+    // headers: {'Content-Type': 'multipart/form-data'},
+    onUploadAbort: (abortHandler: any) => {
+      setUploadAbort(() => abortHandler);
+    },
+    onUploadProgress: ((progressEvent: any) => {
+      setUploadProgess(progressEvent); 
+    }),
+  }
+
+  const fetchData = async (files) => {
+    const result:any = await uploadLinkXhr(`${MEDIA_SERVER_HOST}/${id}/images/upload`, fetchOptions, files)
+    setResponse(result);
+  };
+
+  const [files, setFiles] = useState();
+  const [response, setResponse] = useState();
+  const [uploadAbort, setUploadAbort] = useState();
+  const [uploadProgress, setUploadProgess] = useState({ loaded: 0, total: 1 });
+
+  useEffect(() => { 
+    if(files){
+      fetchData(files);
+    }
+  }, files)
+
+  return [
+    setFiles as any,
+    response as any,
+    setResponse as any,
+    uploadProgress as any,
+    uploadAbort as any
+  ]
+}
+
+export {
+  useUpload
+}

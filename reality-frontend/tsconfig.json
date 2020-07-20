@@ -1,0 +1,59 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "allowJs": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "noEmit": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "skipLibCheck": true,
+    "sourceMap": true,
+    "noImplicitAny": false,
+    "strict": true,
+    "target": "es2019",
+    "esModuleInterop": true,
+    "jsx": "preserve",
+    "lib": [
+      "es2019.object",
+      "es2016",
+      "esnext.asynciterable",
+      "dom"
+    ],
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "typeRoots": [
+      "../../../typescript-typings",
+      "../typescript-typings",
+      "node_modules/@lab/typescript-typings",
+      "node_modules/@types"
+    ]
+  },
+  "exclude": [
+    "node_modules",
+    "**/__tests__/*",
+    "dist",
+    "**/*/*.test.ts",
+    "**/*/*.d.ts",
+    "**/.git",
+    "**/.svn",
+    "**/.hg",
+    "**/CVS",
+    "**/.DS_Store",
+    "**/tmp",
+    "**/node_modules",
+    "**/bower_components",
+    "**/dist",
+    "**/.next"
+  ],
+  "include": [
+    "next-env.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx", "src/lib/upload/package/components/useUpload.tsx-example"
+  ]
+}
