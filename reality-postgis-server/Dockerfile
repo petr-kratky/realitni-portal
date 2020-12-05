@@ -1,8 +1,14 @@
-FROM node:12
+FROM registry.access.redhat.com/ubi8/nodejs-12
+
 WORKDIR /usr/src/app
+
 COPY package.json ./
 COPY package-lock.json ./
+
 RUN npm install
+
 COPY . .
-EXPOSE 3004
-CMD [ "yarn", "start" ]
+
+EXPOSE 3000
+
+CMD npm start

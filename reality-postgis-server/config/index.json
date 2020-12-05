@@ -1,8 +1,8 @@
 {
   "db": "postgres://testuser:admin@46.28.109.203:5432/realitysolution",
   "cache": 3600,
-  "port": 3004,
-  "host": "0.0.0.0",
+  "port": 3000,
+  "host": "localhost",
   "swagger": {
     "basePath": null,
     "externalDocs": {
