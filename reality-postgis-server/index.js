@@ -4,23 +4,19 @@ const fastify = require('fastify')()
 
 // postgres connection
 fastify.register(require('fastify-postgres'), {
-  connectionString: config.db
+  connectionString: process.env.DB_CONNECTION_STRING
 })
 
 // compression - add x-protobuf
-fastify.register(
-  require('fastify-compress'), {
-    customTypes: /^text\/|\+json$|\+text$|\+xml|x-protobuf$/
-  }
-)
+fastify.register(require('fastify-compress'), {
+  customTypes: /^text\/|\+json$|\+text$|\+xml|x-protobuf$/
+})
 
 // cache
-fastify.register(
-  require('fastify-caching'), {
-    privacy: 'private',
-    expiresIn: config.cache
-  }
-)
+fastify.register(require('fastify-caching'), {
+  privacy: 'private',
+  expiresIn: process.env.CACHE_EXPIRY
+})
 
 // CORS
 fastify.register(require('fastify-cors'))
@@ -42,7 +38,7 @@ fastify.register(require('fastify-autoload'), {
 })
 
 // Launch server
-fastify.listen(config.port, config.host || 'localhost', function (err, address) {
+fastify.listen(process.env.PORT || 3000, process.env.HOST || 'localhost', function (err, address) {
   if (err) {
     console.log(err)
     process.exit(1)
