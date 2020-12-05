@@ -16,6 +16,6 @@ COPY --from=builder /opt/app-root/src/dist dist
 COPY package.json .
 RUN npm install --production
 
-EXPOSE 3005/tcp
+EXPOSE 3000/tcp
 
 CMD npm run serve
