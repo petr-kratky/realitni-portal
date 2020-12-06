@@ -10,7 +10,7 @@ module.exports = withCustomBabelConfigFile({
     config.plugins = [
       ...config.plugins,
       // Read the .env file
-      process.env.NODE_ENV !== production
+      process.env.NODE_ENV !== 'production'
         ? new Dotenv({
             path: path.join(__dirname, 'env', `.env.client.${process.env.NODE_ENV}`),
             systemvars: true

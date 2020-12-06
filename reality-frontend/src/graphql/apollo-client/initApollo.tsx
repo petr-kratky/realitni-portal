@@ -101,7 +101,7 @@ function create(
       }
     },
     fetchAccessToken: () => {
-      return fetch(`${LOOP}/api/refresh_token`, {
+      return fetch(`/api/refresh_token`, {
         method: "POST",
         credentials: "include",
         body:"{}"
