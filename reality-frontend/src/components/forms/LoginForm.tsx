@@ -76,11 +76,9 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
         });
       },
     });
-    console.log(response);
     if (response && response.data) {
       setAccessToken(response.data.login.accessToken);
     }
-    // Router.push("/");
   };
 
   return (
