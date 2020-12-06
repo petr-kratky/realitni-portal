@@ -65,6 +65,8 @@ function create(
     batchMax: 20,
     fetch: (uri: string, options: RequestInit) => {
       const fetchOptions: RequestInit = getRequestOptions(options);
+      console.log(uri)
+      
       return isomorphicFetch(uri, fetchOptions);
     },
   };
@@ -72,6 +74,7 @@ function create(
     ...commonOpts,
     fetch: (uri: string, options: UploadRequestInit) => {
       const fetchOptions: UploadRequestInit = getRequestOptions(options);
+      console.log(uri)
       return uploadLinkXhr(uri, fetchOptions);
     },
   };
@@ -101,6 +104,8 @@ function create(
       }
     },
     fetchAccessToken: () => {
+      console.log('fetching access token')
+      
       return fetch(`/api/refresh_token`, {
         method: "POST",
         credentials: "include",

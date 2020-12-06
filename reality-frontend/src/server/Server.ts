@@ -7,8 +7,7 @@ import cookieParser from 'cookie-parser'
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware'
 
 async function startServer(): Promise<{ protocol: string; port: number; host: string }> {
-  const graphqlUrl: string = process.env.GRAPHQL_SERVER || 'http://localhost:4000/graphql'
-  const refreshUrl: string = process.env.GRAPHQL_REFRESH || 'http://localhost:4000'
+  const apiServerUrl: string = process.env.API_SERVER || 'http://localhost:4000'
   const postgisUrl: string = process.env.POSTGIS_SERVER || 'http://localhost:3004'
   const protocol: string = process.env.PROTOCOL || 'http'
   const host: string = process.env.HOST || 'localhost'
@@ -23,13 +22,13 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
   const nextMiddleware = app.getRequestHandler()
 
   const refreshProxy: RequestHandler = createProxyMiddleware('/api/refresh_token', {
-    target: refreshUrl,
+    target: apiServerUrl,
     pathRewrite: { '^/api/refresh_token': '/refresh_token' },
     onError: err => console.error(err)
   })
 
   const graphqlProxy: RequestHandler = createProxyMiddleware('/api/graphql', {
-    target: graphqlUrl,
+    target: apiServerUrl,
     pathRewrite: { '/api/graphql': 'graphql' },
     onError: err => console.error(err)
   })
