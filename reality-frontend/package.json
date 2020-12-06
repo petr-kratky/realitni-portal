@@ -6,7 +6,7 @@
     "dev": "nodemon",
     "clean": "rimraf dist .next",
     "prebuild": "npm run clean",
-    "build": "next build && tsc --project tsconfig.server.json",
+    "build": "NODE_ENV=production next build && tsc --project tsconfig.server.json",
     "start": "NODE_ENV=production node dist/Server.js",
     "start:test": "NODE_ENV=test node dist/Server.js",
     "start:dev": "NODE_ENV=development ts-node --project tsconfig.server.json src/server/Server.ts",
