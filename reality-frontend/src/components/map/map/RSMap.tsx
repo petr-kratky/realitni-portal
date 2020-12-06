@@ -327,7 +327,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
       doubleClickZoom={false}
       interactiveLayerIds={['clusters', 'unclustered-point']}
       mapStyle={MAPBOX_MAP_STYLE_URL}
-      mapboxApiAccessToken={process.env.MAPBOX_TOKEN}
+      mapboxApiAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
       width="100%"
       height="100%"
       maxZoom={18}

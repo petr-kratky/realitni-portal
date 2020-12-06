@@ -37,8 +37,8 @@ export function getDeviceLocation(): Promise<Position> {
 }
 
 export async function geocodeLocation(address: string): Promise<any> {
-  const googleApiKey: string | undefined = process.env.GOOGLE_API_KEY
-  const googleGeocodeUrl: string | undefined = process.env.GOOGLE_GEOCODE_URL
+  const googleApiKey: string | undefined = process.env.NEXT_PUBLIC_GOOGLE_API_KEY
+  const googleGeocodeUrl: string | undefined = process.env.NEXT_PUBLIC_GOOGLE_GEOCODE_URL
 
   if (googleGeocodeUrl && googleApiKey) {
     const params = { address, language: 'cs', region: 'cz', key: googleApiKey }

@@ -31,7 +31,6 @@ const isServer = () => typeof window === "undefined";
  * @param {Boolean} [config.ssr=true]
  */
 export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
-  const APOLLO_SERVER_ADDRESS: string | undefined = process.env.APOLLO_SERVER_ADDRESS
   const WithApolloClient = ({
     apolloClient,
     serverAccessToken,
@@ -71,7 +70,7 @@ export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
       if (isServer()) {
         const cookies = cookie.parse(req.headers.cookie?? "");
         if (cookies.jid) {
-          const response = await fetch(`${APOLLO_SERVER_ADDRESS}/refresh_token`, {
+          const response = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/refresh_token`, {
             method: "POST",
             credentials: "include",
             headers: {
@@ -79,7 +78,6 @@ export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
             }
           });
           const data = await response.json();
-          console.log('data.accessToken', data.accessToken)
           serverAccessToken = data.accessToken;
         }
       }

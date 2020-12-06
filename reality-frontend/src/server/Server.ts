@@ -1,7 +1,5 @@
 import express, { Express } from 'express'
-import path from 'path'
 import next from 'next'
-import dotenv from 'dotenv'
 import helmet from 'helmet'
 import cookieParser from 'cookie-parser'
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware'
@@ -51,10 +49,6 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
   server.listen(port, host)
 
   return { protocol, host, port }
-}
-
-if (process.env.NODE_ENV !== 'production') {
-  dotenv.config({ path: path.join('./env', `.env.server.${process.env.NODE_ENV}`) })
 }
 
 startServer()
