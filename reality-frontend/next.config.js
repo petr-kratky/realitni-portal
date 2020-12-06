@@ -2,8 +2,6 @@ const path = require('path')
 const Dotenv = require('dotenv-webpack')
 const withCustomBabelConfigFile = require('next-plugin-custom-babel-config')
 
-const envPath = process.env.NODE_ENV === 'production' ? '.env.client.prod' : '.env.client.dev'
-
 module.exports = withCustomBabelConfigFile({
   babelConfigFile: path.resolve('babel.config.js'),
   webpack: config => {
@@ -12,10 +10,12 @@ module.exports = withCustomBabelConfigFile({
     config.plugins = [
       ...config.plugins,
       // Read the .env file
-      new Dotenv({
-        path: path.join(__dirname, 'env', envPath),
-        systemvars: true
-      })
+      process.env.NODE_ENV !== production
+        ? new Dotenv({
+            path: path.join(__dirname, 'env', `.env.client.${process.env.NODE_ENV}`),
+            systemvars: true
+          })
+        : null
     ]
 
     return config

@@ -54,12 +54,9 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
   return { protocol, host, port }
 }
 
-function loadEnv(): void {
-  const envPath = process.env.NODE_ENV === 'production' ? '.env.server.prod' : '.env.server.dev'
-  dotenv.config({ path: path.join('./env', envPath) })
+if (process.env.NODE_ENV !== 'production') {
+  dotenv.config({ path: path.join('./env', `.env.server.${process.env.NODE_ENV}`) })
 }
-
-loadEnv()
 
 startServer()
   .then(({ protocol, host, port }) => console.log(`Next.js is ready on ${protocol}://${host}:${port}`))
