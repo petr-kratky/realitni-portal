@@ -13,7 +13,7 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
   const host: string = process.env.HOST || 'localhost'
   // @ts-ignore
   const port: number = +process.env.PORT || 3000
-  const dev: boolean = process.env.NODE_ENV !== 'production'
+  const dev: boolean = process.env.NODE_ENV == 'development'
 
   const server: Express = express()
   const app = next({ dev: dev })
