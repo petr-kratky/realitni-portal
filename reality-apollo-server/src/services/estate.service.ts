@@ -32,6 +32,7 @@ export class EstateService implements EstateApi {
       const connection = getConnection();
       const estateRepository = connection.getRepository(Estate);
       const estate = await estateRepository.findOne(id);
+      await fetch(`${process.env.MEDIA_SERVER_HOST}/${id}/images/delete`)
       await estateRepository.remove(estate);
       return true
     } catch (err) {

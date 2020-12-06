@@ -156,26 +156,24 @@ const DetailHeader: FunctionComponent<TDetailTable> = ({
   refetch,
   setUpdatedId,
 }) => {
-  const deleteImages = async (id) => {
-    try {
-      const res = await fetch(
-        `${process.env.MEDIA_SERVER_HOST}/${id}/images/delete`
-      );
-      const data = await res.json();
-      console.log("delete images response >>>", data);
-      setIsImageDeleted(true);
-    } catch (err) {
-      console.error("err delete images", err);
-      setIsImageDeletedError(true);
-    }
-  };
+  // TODO: Move functionality to GraphQL server
+  // const deleteImages = async (id) => {
+  //   try {
+  //     const res = await fetch(
+  //       `${process.env.MEDIA_SERVER_HOST}/${id}/images/delete`
+  //     );
+  //     const data = await res.json();
+  //     setIsImageDeleted(true);
+  //   } catch (err) {
+  //     setIsImageDeletedError(true);
+  //   }
+  // };
   const deleteAll = async (id) => {
-    await deleteImages(id);
     estateDelete({ variables: { id: +id } });
   };
   // const [dataForDetail, setDataForDetail] = useState<any>(null);
-  const [isImageDeleted, setIsImageDeleted] = useState<any>(null);
-  const [isImageDeletedError, setIsImageDeletedError] = useState<any>(null);
+  // const [isImageDeleted, setIsImageDeleted] = useState<any>(null);
+  // const [isImageDeletedError, setIsImageDeletedError] = useState<any>(null);
 
   const [estateDelete, { data, loading }] = useMutation(ESTATE_MUTATION_DELETE);
   const {
@@ -191,30 +189,30 @@ const DetailHeader: FunctionComponent<TDetailTable> = ({
   } = useStyles();
 
   useEffect(() => {
-    if (!loading && data?.delete && isImageDeleted) {
+    if (!loading && data?.delete) {
       openNotificationSuccess("Estate was deleted successfuly");
       setVisibilityDetail(false);
     }
   }, [loading]);
-  useEffect(() => {
-    if (isImageDeleted) {
-      openNotificationSuccess("Images deleted successfuly");
-      setUpdatedId(estate.id);
-      setEditMode(false);
-      refetch();
-    }
-  }, [isImageDeleted]);
+  // useEffect(() => {
+  //   if (isImageDeleted) {
+  //     openNotificationSuccess("Images deleted successfuly");
+  //     setUpdatedId(estate.id);
+  //     setEditMode(false);
+  //     refetch();
+  //   }
+  // }, [isImageDeleted]);
 
   return (
     <>
-      {isImageDeletedError && <Alert message="Error" type="error" showIcon />}
+      {/* {isImageDeletedError && <Alert message="Error" type="error" showIcon />} */}
       {estate !== undefined && (
         <>
           <div className={blockB}>
             <div className={mainItem}>
               {editMode && (
                 <>
-                  <Button
+                  {/* <Button
                     onClick={() => deleteImages(estate.id)}
                     type="primary"
                     danger
@@ -222,7 +220,7 @@ const DetailHeader: FunctionComponent<TDetailTable> = ({
                   >
                     <DeleteOutlined />
                     DELETE files
-                  </Button>
+                  </Button> */}
 
                   <Button
                     onClick={() => deleteAll(estate.id)}
