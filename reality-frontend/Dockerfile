@@ -1,9 +1,18 @@
-FROM node:12
-WORKDIR /usr/src/app
+FROM registry.access.redhat.com/ubi8/nodejs-12
+
+WORKDIR /opt/app-root/src
+
 COPY package.json ./
 COPY package-lock.json ./
+
 RUN npm install
+
 COPY . .
+
 RUN npm run build
-EXPOSE 3007
-CMD [ "npm","run","start" ]
+
+ENV HOST=0.0.0.0 PORT=3000
+
+EXPOSE 3000/tcp
+
+CMD npm run start
