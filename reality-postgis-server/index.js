@@ -4,7 +4,7 @@ const fastify = require('fastify')()
 
 // postgres connection
 fastify.register(require('fastify-postgres'), {
-  connectionString: process.env.DB_CONNECTION_STRING
+  connectionString: process.env.DB_CONNECTION_STRING || config.db
 })
 
 // compression - add x-protobuf
@@ -15,7 +15,7 @@ fastify.register(require('fastify-compress'), {
 // cache
 fastify.register(require('fastify-caching'), {
   privacy: 'private',
-  expiresIn: process.env.CACHE_EXPIRY
+  expiresIn: process.env.CACHE_EXPIRY || 3600
 })
 
 // CORS
