@@ -2,7 +2,7 @@ import { ApolloClient } from "apollo-client";
 import { HttpLink } from "apollo-link-http";
 import { InMemoryCache, NormalizedCacheObject } from "apollo-cache-inmemory";
 import { NextPageContext } from "next";
-import { ApolloLink, Observable } from "apollo-link";
+import { ApolloLink } from "apollo-link";
 import { onError } from "apollo-link-error";
 import { setContext } from "apollo-link-context";
 import jwtDecode from "jwt-decode";
@@ -16,7 +16,6 @@ import {
   setAccessToken,
 } from "src/lib/user-management/accessToken";
 
-import { BatchHttpLink } from "apollo-link-batch-http";
 import { createUploadLink } from "apollo-upload-client";
 import {
   uploadLinkXhr,
@@ -32,8 +31,7 @@ function create(
   context?: NextPageContext,
   serverAccessToken?: string
 ) {
-  const LOOP: string | undefined =
-    process.env.LOOP;
+  const origin = isServer() ? `http://${process.env.HOST}:${process.env.PORT}` : ''
   // We want to get fresh csrf token for each request, csrf based on cookie secret
   // csrf token is provided by _app.js
   const getRequestOptions = <T extends RequestInit>(options: T): T => {
@@ -65,21 +63,18 @@ function create(
     batchMax: 20,
     fetch: (uri: string, options: RequestInit) => {
       const fetchOptions: RequestInit = getRequestOptions(options);
-      console.log(uri)
-      
-      return isomorphicFetch(uri, fetchOptions);
+      return isomorphicFetch(origin + uri, fetchOptions);
     },
   };
   const uploadOpts = {
     ...commonOpts,
     fetch: (uri: string, options: UploadRequestInit) => {
       const fetchOptions: UploadRequestInit = getRequestOptions(options);
-      console.log(uri)
-      return uploadLinkXhr(uri, fetchOptions);
+      return uploadLinkXhr(origin + uri, fetchOptions);
     },
   };
   const httpLink = ApolloLink.split(
-    (operation: any) => operation.getContext().hasUpload,
+    (operation) => operation.getContext().hasUpload,
     createUploadLink(uploadOpts),
     new HttpLink(batchOpts)
   );
@@ -104,9 +99,7 @@ function create(
       }
     },
     fetchAccessToken: () => {
-      console.log('fetching access token')
-      
-      return fetch(`/api/refresh_token`, {
+      return fetch(`${origin}/api/refresh_token`, {
         method: "POST",
         credentials: "include",
         body:"{}"
