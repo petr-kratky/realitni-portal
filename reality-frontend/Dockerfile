@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/nodejs-12
+FROM registry.access.redhat.com/ubi8/nodejs-10
 
 WORKDIR /opt/app-root/src
 

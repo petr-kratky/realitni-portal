@@ -13,8 +13,8 @@ COPY --from=builder /opt/app-root/src/dist dist
 COPY package.json .
 RUN npm install --production
 
-ENV HOST=0.0.0.0 PORT=4000
+ENV HOST=0.0.0.0 PORT=3100
 
-EXPOSE 4000/tcp
+EXPOSE 3100/tcp
 
 CMD npm run serve

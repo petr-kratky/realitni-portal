@@ -2,10 +2,9 @@ import { Column, Entity, Index, PrimaryGeneratedColumn, BaseEntity } from "typeo
 import { Field, ObjectType, ID, Int } from 'type-graphql';
 
 @ObjectType()
-@Index("account_email_key", ["email"], { unique: true })
-@Index("account_pkey", ["userId"], { unique: true })
-@Index("account_username_key", ["username"], { unique: true })
-@Entity("account", { schema: "reality" })
+@Index("users_email_key", ["email"], { unique: true })
+@Index("users_username_key", ["username"], { unique: true })
+@Entity("users", { schema: "public" })
 export class Account extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn({ type: "integer", name: "user_id" })

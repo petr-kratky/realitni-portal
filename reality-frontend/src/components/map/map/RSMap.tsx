@@ -100,6 +100,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
       // Get initial viewport 'height' and 'width' to match its container div
       const { clientWidth: width, clientHeight: height } = map.getContainer()
       setCachedViewport({ variables: { cachedViewport: { ...mapViewport, width, height } } })
+      //@ts-ignore
       pushViewportToUrl(router, { width, height, ...mapViewport })
 
       setIsDataLoaded(true)
@@ -269,7 +270,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
         filter: getGeojsonSourceFilter()
       }
 
-      const geojsonEndpointUri: URL = new URL(window.location.origin + `/api/postgis/v1/geojson/estate`)
+      const geojsonEndpointUri: URL = new URL(window.location.origin + `/api/postgis/v1/geojson/estates`)
       Object.entries(parameters).forEach(entry => {
         geojsonEndpointUri.searchParams.append(entry[0], entry[1])
       })

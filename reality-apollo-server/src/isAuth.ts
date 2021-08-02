@@ -13,7 +13,7 @@ export const isAuth: MiddlewareFn<MyContext> = ({ context }, next) => {
   }
 
   if ((!authorization)){
-    throw new Error("not authenticated");
+    throw new Error("authorization header missing");
   }
 
   try {
@@ -23,7 +23,7 @@ export const isAuth: MiddlewareFn<MyContext> = ({ context }, next) => {
     context.payload = payload as any;
   } catch (err) {
     console.log(err);
-    throw new Error("not authenticated");
+    throw new Error("not authenticated - token invalid");
   }
 
   return next();

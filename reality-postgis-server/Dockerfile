@@ -1,4 +1,4 @@
-FROM registry.access.redhat.com/ubi8/nodejs-12
+FROM registry.access.redhat.com/ubi8/nodejs-10
 
 WORKDIR /usr/src/app
 
@@ -9,6 +9,6 @@ RUN npm install
 
 COPY . .
 
-EXPOSE 3000
+EXPOSE 3300
 
 CMD npm start

@@ -1,12 +1,12 @@
 const sm = require('@mapbox/sphericalmercator')
 const merc = new sm({
   size: 256
-});
+})
 
 // route query
 const sql = (params, query) => {
-  let bounds = query.bounds ? query.bounds.split(',').map(Number) : null;
-  bounds && bounds.length === 3 ? bounds = merc.bbox(bounds[1], bounds[2], bounds[0]) : null;
+  let bounds = query.bounds ? query.bounds.split(',').map(Number) : null
+  bounds && bounds.length === 3 ? (bounds = merc.bbox(bounds[1], bounds[2], bounds[0])) : null
   return `
   SELECT 
     Row_to_json(fc) as geojson
@@ -20,7 +20,9 @@ const sql = (params, query) => {
     SELECT 
       'Feature' AS type, 
       St_asgeojson(ST_Transform(lg.${query.geom_column}, 4326))::json AS geometry,
-      ${query.columns ? ` 
+      ${
+        query.columns
+          ? ` 
       Row_to_json(
         (
           SELECT 
@@ -29,7 +31,9 @@ const sql = (params, query) => {
          (SELECT ${query.columns}) AS l
         )
       ) AS properties 
-      ` : `'{}'::json AS properties`}
+      `
+          : `'{}'::json AS properties`
+      }
                 
     FROM   
       ${params.table} AS lg
@@ -38,15 +42,19 @@ const sql = (params, query) => {
     
     -- Optional Filter
     ${query.filter || bounds ? 'WHERE' : ''}
-    ${query.filter ? `${query.filter}` : '' }
+    ${query.filter ? `${query.filter}` : ''}
     ${query.filter && bounds ? 'AND' : ''}
-    ${bounds ? `      
+    ${
+      bounds
+        ? `      
       ${query.geom_column} &&
       ST_Transform(
         ST_MakeEnvelope(${bounds.join()}, 4326), 
         srid
       )      
-    ` : ''}
+    `
+        : ''
+    }
 
     ) AS f
   ) AS fc; 
@@ -72,7 +80,8 @@ const schema = {
     },
     columns: {
       type: 'string',
-      description: 'Columns to return as GeoJSON properites. The default is no columns. <br/><em>Note: the geometry column should not be listed here, and columns must be explicitly named.</em>'
+      description:
+        'Columns to return as GeoJSON properites. The default is no columns. <br/><em>Note: the geometry column should not be listed here, and columns must be explicitly named.</em>'
     },
     filter: {
       type: 'string',
@@ -81,7 +90,8 @@ const schema = {
     bounds: {
       type: 'string',
       pattern: '^-?[0-9]{0,20}.?[0-9]{1,20}?(,-?[0-9]{0,20}.?[0-9]{1,20}?){2,3}$',
-      description: 'Optionally limit output to features that intersect bounding box. Can be expressed as a bounding box (sw.lng, sw.lat, ne.lng, ne.lat) or a Z/X/Y tile (0,0,0).'
+      description:
+        'Optionally limit output to features that intersect bounding box. Can be expressed as a bounding box (sw.lng, sw.lat, ne.lng, ne.lat) or a Z/X/Y tile (0,0,0).'
     }
   }
 }
@@ -96,19 +106,22 @@ module.exports = function (fastify, opts, next) {
       fastify.pg.connect(onConnect)
 
       function onConnect(err, client, release) {
-        if (err) return reply.send({
-          "statusCode": 500,
-          "error": "Internal Server Error",
-          "message": "unable to connect to database server"
+        if (err) {
+          console.log('cannot connect to DB')
+
+          return reply.send({
+            statusCode: 500,
+            error: 'Internal Server Error',
+            message: 'unable to connect to database server'
+          })
+        }
+
+        console.log('sql', sql(request.params, request.query))
+
+        client.query(sql(request.params, request.query), function onResult(err, result) {
+          release()
+          reply.send(err || result.rows[0].geojson)
         })
-        // console.log('sql', sql(request.params, request.query))
-        client.query(
-          sql(request.params, request.query),
-          function onResult(err, result) {
-            release()
-            reply.send(err || result.rows[0].geojson)
-          }
-        )
       }
     }
   })
