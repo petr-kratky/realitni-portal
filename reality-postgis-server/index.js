@@ -1,10 +1,17 @@
 const path = require('path')
+const dotenv = require('dotenv')
 const config = require('./config')
+
+if (process.env.NODE_ENV !== 'production') {
+  console.log('DEV MODE IDENTIFIED! Loading environment variables via dotenv.')
+  dotenv.config()
+}
+
 const fastify = require('fastify')()
 
 // postgres connection
 fastify.register(require('fastify-postgres'), {
-  connectionString: process.env.DB_CONNECTION_STRING || config.db
+  connectionString: process.env.DB_CONNECTION_STRING
 })
 
 // compression - add x-protobuf
