@@ -5,17 +5,19 @@ import cookieParser from 'cookie-parser'
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware'
 
 async function startServer(): Promise<{ protocol: string; port: number; host: string }> {
-  const apiServerUrl: string = process.env.API_SERVER || 'http://localhost:4000'
-  const postgisUrl: string = process.env.POSTGIS_SERVER || 'http://localhost:3004'
-  const protocol: string = process.env.PROTOCOL || 'http'
-  const host: string = process.env.HOST || 'localhost'
-  // @ts-ignore
-  const port: number = +process.env.PORT || 3000
   const dev: boolean = process.env.NODE_ENV == 'development'
 
   const server: Express = express()
   const app = next({ dev: dev })
   await app.prepare()
+
+  // Env vars can only be loaded after app.prepare() to allow NextJS to first load the values from .env.*
+  const apiServerUrl: string = process.env.API_SERVER || ''
+  const postgisUrl: string = process.env.POSTGIS_SERVER || ''
+  const protocol: string = process.env.PROTOCOL || 'http'
+  const host: string = process.env.HOST || 'localhost'
+  // @ts-ignore
+  const port: number = +process.env.PORT || 3000
 
   const nextMiddleware = app.getRequestHandler()
 
