@@ -80,7 +80,7 @@ const MapPage: NextPage<MapPageProps> = () => {
   return (
     <div className={classes.contentContainer}>
       <Head>
-        <title>RealityData.cz | Mapa</title>
+        <title>Realitní Portál</title>
         <link href="https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.css" rel="stylesheet" />
       </Head>
       <EstatesSidebar open={sidebarOpen} estates={onScreenEstates} toggleOpen={_handleSidebarToggle} />
