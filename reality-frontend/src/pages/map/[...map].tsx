@@ -35,7 +35,7 @@ const useStyles = createUseStyles({
 function getQueryViewport(query: string | undefined): QueryViewport {
   const viewportRegex = /@([+-]?([0-9]*[.])?[0-9]+,){2}\dz/g
 
-  if (typeof query === 'undefined' || !(viewportRegex.test(query))) return {}
+  if ((typeof query === 'undefined' || !(viewportRegex.test(query)))) return {}
 
   const [latStr, lngStr, zStr]: string[] = query
     .match(viewportRegex)?.[0]
