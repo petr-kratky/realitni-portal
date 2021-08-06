@@ -1,13 +1,12 @@
-import React, { FunctionComponent } from "react";
+import React, { FunctionComponent, useState } from "react";
 import { Formik, FormikHelpers } from "formik";
-import { createUseStyles } from "react-jss";
-import { useApolloClient, useMutation, useQuery } from "@apollo/react-hooks";
+import { Button, TextField, Theme, makeStyles, createStyles, Snackbar, Typography } from '@material-ui/core'
+import Alert from '@material-ui/lab/Alert'
 import * as Yup from "yup";
-import TextInput from "./TextInput";
-import Button from "./Button";
+
 import { useLoginMutation, MeQuery, MeDocument } from "src/graphql/queries/generated/graphql";
-import Router from "next/router";
 import { setAccessToken } from "src/lib/user-management/accessToken";
+import { useRouter } from "next/router";
 
 type TSearchFormProps = {};
 
@@ -21,68 +20,83 @@ type TOnSubmitFunction = (
   actions: FormikHelpers<FormValues>
 ) => void;
 
-const useStyles = createUseStyles({
-  submitButton: {
-    "&&": {
-      marginTop: 16,
-    },
+const useStyles = makeStyles((theme: Theme) => createStyles({
+  loginFormContainer: {
+    display: 'flex',
+    height: '100vh',
+    justifyContent: 'center',
+    alignItems: 'center'
   },
-  LoginForm: {
-    "& > div": {
-      marginTop: 8,
-    },
-  },
-  priceInputContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    "& > div": {
-      width: "47.5%",
-    },
-  },
-});
+  loginForm: {
+    display: 'flex',
+    flexDirection: 'column',
+    '& > *': {
+      margin: theme.spacing(1)
+    }
+  }
+}));
 
 const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
   const classes = useStyles();
+  const router = useRouter();
+
   const [login] = useLoginMutation();
-  
+
+  const [loginError, setLoginError] = useState('')
+  const [snackOpen, setSnackOpen] = useState(false)
+
   const initialValues: FormValues = {
     email: "",
     password: "",
   };
 
   const formSchema = Yup.object().shape({
-    email: Yup.string(),
-    password: Yup.string()
+    email: Yup.string().required('Toto pole je povinné'),
+    password: Yup.string().required('Toto pole je povinné')
   });
+
+  const handleSnackClose = () => {
+    setSnackOpen(false)
+  }
 
   const onFormSubmit: TOnSubmitFunction = async (values, actions) => {
     const { email, password } = values;
-    const response = await login({
-      variables: {
-        email,
-        password,
+
+    try {
+      const response = await login({
+        variables: {
+          email,
+          password,
+        },
+        update: (store, { data }) => {
+          if (!data) {
+            return null;
+          }
+          store.writeQuery<MeQuery>({
+            query: MeDocument,
+            data: {
+              me: data.login.account,
+            },
+          });
+        },
+      });
+
+      if (response?.data) {
+        setAccessToken(response.data.login.accessToken);
+        router.push('/map');
       }
-      ,
-      update: (store, { data }) => {
-        if (!data) {
-          return null;
-        }
-
-        store.writeQuery<MeQuery>({
-          query: MeDocument,
-          data: {
-            me: data.login.account,
-          },
-        });
-      },
-    });
-    if (response && response.data) {
-      setAccessToken(response.data.login.accessToken);
+    } catch (e) {
+      setLoginError(e.message)
+      setSnackOpen(true)
     }
-  };
+  }
 
+handleSnackClose
   return (
-    <div style={{ width: "100%", padding: "24px", boxSizing: "border-box" }}>
+    <div className={classes.loginFormContainer}>
+      <Snackbar open={snackOpen} autoHideDuration={6000} onClose={handleSnackClose}>
+        <Alert variant="filled" severity="error" elevation={6} onClose={handleSnackClose}>{loginError}</Alert>
+      </Snackbar>
       <Formik
         initialValues={initialValues}
         onSubmit={onFormSubmit}
@@ -93,46 +107,40 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
             values,
             errors,
             handleChange,
-            handleBlur,
             handleSubmit,
             isSubmitting,
-            setFieldValue,
-            setFieldTouched,
-            touched,
             submitForm,
           } = formikProps;
 
           return (
-            <form onSubmit={handleSubmit} className={classes.LoginForm}>
-              <TextInput
-                type="text"
-                label="E-mail"
+            <form onSubmit={handleSubmit} className={classes.loginForm}>
+              <TextField
                 id="email"
-                onBlur={handleBlur}
-                placeholder=""
                 onChange={handleChange}
                 value={values.email}
-                error={errors.email}
-                touched={touched.email}
+                error={!!errors.email?.length}
+                helperText={errors.email ?? ""}
+                label="E-mail"
+                variant="outlined"
               />
-
-              <TextInput
-                type="password"
-                label="Password"
+              <TextField
                 id="password"
-                onBlur={handleBlur}
-                placeholder=""
                 onChange={handleChange}
                 value={values.password}
-                error={errors.password}
-                touched={touched.password}
+                error={!!errors.password?.length}
+                helperText={errors.password ?? ""}
+                label="Heslo"
+                variant="outlined"
+                type="password"
+                autoComplete="current-password"
               />
               <Button
                 onClick={submitForm}
                 disabled={isSubmitting}
-                className={classes.submitButton}
+                color='primary'
+                variant='contained'
               >
-                zobrazit
+                Přihlásit
               </Button>
             </form>
           );

@@ -1,44 +1,38 @@
-import { Inject } from "typescript-ioc";
 import {
+  Field,
+  ObjectType,
+  Ctx,
   Arg,
-  FieldResolver,
   Mutation,
   Query,
   Resolver,
-  Root,
 } from "type-graphql";
+import { AuthenticationError } from 'apollo-server-express'
+import { hash, compare } from "bcryptjs";
+import { verify } from "jsonwebtoken";
+
 import { Account } from "../models";
 import { resolverManager } from "./_resolver-manager";
-import { getConnection, Connection } from "typeorm";
-import { hash, compare } from "bcryptjs";
-import { Field, ObjectType, Ctx } from "type-graphql";
 import { MyContext } from "../MyContext";
 import { createRefreshToken, createAccessToken } from "../auth";
 import { sendRefreshToken } from "../sendRefreshToken";
-import { verify } from "jsonwebtoken";
 
 
 @ObjectType()
 class LoginResponse {
-  @Field()
+  @Field(() => String)
   accessToken: string;
   @Field(() => Account)
   account: Account;
 }
 @Resolver((of) => Account)
 export class AccountResolver {
-
-
-
-
-  @Query(() => String)
-  hello() {
-    return "hi!";
-  }
   @Query(() => String)
   bye(@Ctx() { payload }: MyContext) {
     return `your user id is: ${payload!.userId}`;
   }
+
+
   @Query(() => Account, { nullable: true })
   me(@Ctx() context: MyContext) {
     const authorization = context.req.headers["authorization"];
@@ -56,13 +50,14 @@ export class AccountResolver {
       return null;
     }
   }
+
+
   @Mutation(() => Boolean)
   async logout(@Ctx() { res }: MyContext) {
     sendRefreshToken(res, "", process.env.DOMAIN);
 
     return true;
   }
-
 
 
   @Mutation(() => LoginResponse)
@@ -73,18 +68,23 @@ export class AccountResolver {
   ): Promise<LoginResponse> {
     const account = await Account.findOne({ where: { email } });
     if (!account) {
-      throw new Error("could not find Account");
+      throw new AuthenticationError('AUTH_INVALID_ACCOUNT')
     }
+
     const valid = await compare(password, account.password);
     if (!valid) {
-      throw new Error("bad password");
+      throw new AuthenticationError('AUTH_INVALID_PASSWORD')
     }
+
     sendRefreshToken(res, createRefreshToken(account), process.env.DOMAIN);
+
     return {
       accessToken: createAccessToken(account),
       account,
-    };
+    }
   }
+
+
   @Mutation(() => Boolean)
   async register(
     @Arg("username") username: string,

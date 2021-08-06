@@ -1,12 +1,14 @@
 import { ApolloProvider } from "@apollo/react-common";
 import App from "next/app";
 import React, { useState, useEffect } from "react";
+import { ThemeProvider } from '@material-ui/styles';
 
 import { withApolloClient } from "../graphql/apollo-client/withApolloClient";
 import { IAppRoot } from "../types";
 import { useMeQuery } from "src/graphql/queries/generated/graphql";
 
 import "antd/dist/antd.css";
+import { theme } from '../lib/styles/mui-theme'
 import LoginForm from "src/components/forms/LoginForm";
 import I18n from "../lib/localization/i18n";
 import useI18n from "../lib/hooks/use-i18n";
@@ -29,6 +31,7 @@ function MyComponent({ children, pageProps }) {
     </>
   );
 }
+
 class Application extends App<IAppRoot> {
   render() {
     const { Component, apolloClient, pageProps, lngDict, lng } = this.props;
@@ -36,9 +39,11 @@ class Application extends App<IAppRoot> {
     return (
       <I18n lngDict={lngDict} locale={lng}>
         <ApolloProvider client={apolloClient}>
-          <MyComponent pageProps={pageProps}>
-            <Component {...pageProps} />
-          </MyComponent>
+          <ThemeProvider theme={theme}>
+            <MyComponent pageProps={pageProps}>
+              <Component {...pageProps} />
+            </MyComponent>
+          </ThemeProvider>
         </ApolloProvider>
       </I18n>
     );

@@ -125,8 +125,8 @@ function create(
   });
 
   const errorLink = onError(({ graphQLErrors, networkError }) => {
-    console.log(graphQLErrors);
-    console.log(networkError);
+    console.log('GraphQL error(s):', graphQLErrors);
+    console.log('Network error(s):', networkError);
   });
 
   return new ApolloClient({

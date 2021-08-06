@@ -42,11 +42,12 @@ export default class JssDocument extends Document {
       <Html>
         <Head>
           <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
           <link rel="icon" type="image/png" href="/web/home--front.svg" />
           <style global jsx>
             {`
               body {
-                font-family: 'Open Sans', sans-serif;
+                font-family: 'Roboto', sans-serif;
                 margin: 0;
               }
             `}

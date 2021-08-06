@@ -279,7 +279,6 @@ export type Query = {
   tasks: Array<Task>;
   task?: Maybe<Task>;
   estate?: Maybe<Estate>;
-  hello: Scalars['String'];
   bye: Scalars['String'];
   me?: Maybe<Account>;
 };
@@ -387,14 +386,6 @@ export type EstateFullQuery = (
       & Pick<Files, 'url' | 'key'>
     )>> }
   )> }
-);
-
-export type HelloQueryVariables = {};
-
-
-export type HelloQuery = (
-  { __typename?: 'Query' }
-  & Pick<Query, 'hello'>
 );
 
 export type LoginMutationVariables = {
@@ -689,36 +680,6 @@ export function useEstateFullLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryH
 export type EstateFullQueryHookResult = ReturnType<typeof useEstateFullQuery>;
 export type EstateFullLazyQueryHookResult = ReturnType<typeof useEstateFullLazyQuery>;
 export type EstateFullQueryResult = ApolloReactCommon.QueryResult<EstateFullQuery, EstateFullQueryVariables>;
-export const HelloDocument = gql`
-    query Hello {
-  hello
-}
-    `;
-
-/**
- * __useHelloQuery__
- *
- * To run a query within a React component, call `useHelloQuery` and pass it any options that fit your needs.
- * When your component renders, `useHelloQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useHelloQuery({
- *   variables: {
- *   },
- * });
- */
-export function useHelloQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<HelloQuery, HelloQueryVariables>) {
-        return ApolloReactHooks.useQuery<HelloQuery, HelloQueryVariables>(HelloDocument, baseOptions);
-      }
-export function useHelloLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<HelloQuery, HelloQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<HelloQuery, HelloQueryVariables>(HelloDocument, baseOptions);
-        }
-export type HelloQueryHookResult = ReturnType<typeof useHelloQuery>;
-export type HelloLazyQueryHookResult = ReturnType<typeof useHelloLazyQuery>;
-export type HelloQueryResult = ApolloReactCommon.QueryResult<HelloQuery, HelloQueryVariables>;
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {

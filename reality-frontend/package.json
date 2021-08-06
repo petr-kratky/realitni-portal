@@ -45,6 +45,9 @@
     "@graphql-codegen/introspection": "1.13.4"
   },
   "dependencies": {
+    "@material-ui/core": "^4.12.3",
+    "@material-ui/lab": "^4.0.0-alpha.60",
+    "@material-ui/styles": "^4.11.4",
     "antd": "^4.2.0",
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
