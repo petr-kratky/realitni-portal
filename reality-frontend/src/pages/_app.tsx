@@ -2,6 +2,8 @@ import { ApolloProvider } from "@apollo/react-common";
 import { AppProps } from "next/app";
 import React, { useEffect } from "react";
 import { ThemeProvider } from '@material-ui/styles';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import { CircularProgress } from '@material-ui/core';
 
 import { withApolloClient } from "../graphql/apollo-client/withApolloClient";
 import { useCurrentUserQuery } from "../graphql/queries/generated/graphql";
@@ -23,8 +25,7 @@ function MyComponent({ children, pageProps }) {
 
   return (
     <>
-      {loading && <h1> Loading ...</h1>}
-      {!loading && data?.currentUser?.id ? children : <LoginForm {...pageProps} />}
+      {!loading && (data?.currentUser?.id ? children : <LoginForm {...pageProps} />)}
     </>
   );
 }
@@ -48,6 +49,7 @@ function Application({ Component, apolloClient, pageProps, lngDict, lng }: AppPr
           </MyComponent>
         </ApolloProvider>
       </I18n>
+      <CssBaseline />
     </ThemeProvider>
   );
 }

@@ -2,11 +2,8 @@ import React, {
   CSSProperties,
   FunctionComponent,
   useState,
-  useEffect,
 } from "react";
 
-// import ESTATE_MUTATION_CREATE from "../../../graphql/queries/user-management/estate/create";
-import { useMutation } from "@apollo/react-hooks";
 import SideBar, { DEFAULT_WIDTH } from "./SideBar";
 import EstatesList from "./EstatesList";
 import EstateCard from "./EstateCard";
@@ -127,7 +124,6 @@ const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({
     if (open && activeTab == tabIndex) toggleOpen();
     setActiveTab(tabIndex);
   };
-  const showDetail = () => setVisibilityDetail(!visibilityDetail);
 
   const menuTabs: TMenuTab[] = [
     {
@@ -241,18 +237,6 @@ const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({
             }}
           </Transition>
         </SwitchTransition>
-      </SideBar>
-
-      <SideBar
-        open={visibilityDetail}
-        toggleOpen={showDetail}
-        offset={65 + DEFAULT_WIDTH}
-        width={2 * DEFAULT_WIDTH}
-        classes={{
-          container: classes.detailSliderContainer,
-          content: classes.sidebarContent,
-        }}
-      >
       </SideBar>
     </>
   );
