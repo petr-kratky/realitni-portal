@@ -11,6 +11,7 @@ import { resolverManager } from "./_resolver-manager";
 import { EstateService } from "../services";
 import { Estate, EstateInput } from "../models";
 import { RequireAuthentication } from "../decorators/RequireAuthentication";
+import { ApolloError } from "apollo-server-express";
 
 @Resolver((of) => Estate)
 export class EstateResolver {
@@ -19,10 +20,19 @@ export class EstateResolver {
 
   @Query((returns) => Estate, { nullable: true })
   @RequireAuthentication()
-  async estate(@Arg("id") id: string): Promise<Estate | undefined> {
-    console.log("estate resolver", this.estateService.getEstateById(id));
+  async estate(@Arg("id") id: string): Promise<Estate> {
+    return await this.estateService.getEstateById(id);
+  }
 
-    return this.estateService.getEstateById(id);
+
+  @Query((returns) => [Estate])
+  @RequireAuthentication()
+  async estates(@Arg("skip") skip: number, @Arg("take") take: number) {
+    try {
+      return await this.estateService.getEstates(skip, take)
+    } catch (e) {
+      throw new ApolloError(e, "500")
+    }
   }
 
 
@@ -55,21 +65,24 @@ export class EstateResolver {
   //   }
   // }
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Estate)
   @RequireAuthentication()
-  async deleteEstate(@Arg("id") id: string): Promise<Boolean> {
-    return this.estateService.deleteEstateById(id);
+  async deleteEstate(@Arg("id") id: string): Promise<Estate> {
+    const estate = await this.estateService.getEstateById(id)
+
+    try {
+      await this.estateService.deleteEstate(estate);
+      return Estate.merge(estate, { id })
+    } catch (e) {
+      throw new ApolloError(e, "500")
+    }
   }
 
-  // @Mutation(() => RespUpdate)
-  // async update(@Arg("estate") estate: EstateInput): Promise<RespUpdate> {
-  //   return await this.estateService.saveEstate(estate)
-  // }
 
   @Mutation(() => Estate)
   @RequireAuthentication()
   async createEstate(@Arg("estateInput") estateInput: EstateInput): Promise<Estate> {
-    return this.estateService.createEstate(estateInput);
+    return await this.estateService.createEstate(estateInput);
   }
 }
 

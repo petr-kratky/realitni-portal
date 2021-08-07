@@ -4,7 +4,7 @@ import { Button, TextField, Theme, makeStyles, createStyles, Snackbar, Typograph
 import Alert from '@material-ui/lab/Alert'
 import * as Yup from "yup";
 
-import { useLoginMutation, MeQuery, MeDocument } from "src/graphql/queries/generated/graphql";
+import { useLoginMutation, CurrentUserDocument, CurrentUserQuery } from "src/graphql/queries/generated/graphql";
 import { setAccessToken } from "src/lib/user-management/accessToken";
 import { useRouter } from "next/router";
 
@@ -72,10 +72,10 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
           if (!data) {
             return null;
           }
-          store.writeQuery<MeQuery>({
-            query: MeDocument,
+          store.writeQuery<CurrentUserQuery>({
+            query: CurrentUserDocument,
             data: {
-              me: data.login.account,
+              currentUser: data.login.account,
             },
           });
         },

@@ -1,47 +1,15 @@
 import React from 'react'
-import { createGenerateId, JssProvider, SheetsRegistry, ThemeProvider } from 'react-jss'
 import Document, { DocumentContext, Head, Html, Main, NextScript } from 'next/document'
+import { ServerStyleSheets } from '@material-ui/core/styles';
+import { theme } from '../lib/styles/mui-theme'
 
-const theme = {
-  colorPrimary: 'green',
-  background: ''
-}
+// https://github.com/mui-org/material-ui/blob/master/examples/nextjs/pages/_document.js
 export default class JssDocument extends Document {
-  static async getInitialProps(ctx: DocumentContext) {
-    const registry = new SheetsRegistry()
-    const generateId = createGenerateId()
-    const originalRenderPage = ctx.renderPage
-
-    ctx.renderPage = () =>
-      originalRenderPage({
-        enhanceApp: (App) => (props) => {
-          return (
-            <JssProvider registry={registry} generateId={generateId}>
-              <ThemeProvider theme={theme}>
-                <App {...props} />
-              </ThemeProvider>
-            </JssProvider>
-          )
-        }
-      })
-    const initialProps = await Document.getInitialProps(ctx)
-
-    return {
-      ...initialProps,
-      styles: (
-        <>
-          {initialProps.styles}
-          <style id="server-side-styles">{registry.toString()}</style>
-        </>
-      )
-    }
-  }
-
   render() {
     return (
       <Html>
         <Head>
-          <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap" rel="stylesheet" />
+          <meta name="theme-color" content={theme.palette.primary.main} />
           <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
           <link rel="icon" type="image/png" href="/web/home--front.svg" />
           <style global jsx>
@@ -49,15 +17,31 @@ export default class JssDocument extends Document {
               body {
                 font-family: 'Roboto', sans-serif;
                 margin: 0;
-              }
             `}
           </style>
         </Head>
         <body>
-        <Main />
-        <NextScript />
+          <Main />
+          <NextScript />
         </body>
       </Html>
     )
+  }
+
+  static async getInitialProps(ctx: DocumentContext) {
+    const sheets = new ServerStyleSheets();
+    const originalRenderPage = ctx.renderPage
+
+    ctx.renderPage = () =>
+      originalRenderPage({
+        enhanceApp: (App) => (props) => sheets.collect(<App {...props} />)
+      })
+
+    const initialProps = await Document.getInitialProps(ctx)
+
+    return {
+      ...initialProps,
+      styles: [...React.Children.toArray(initialProps.styles), sheets.getStyleElement()]
+    }
   }
 }

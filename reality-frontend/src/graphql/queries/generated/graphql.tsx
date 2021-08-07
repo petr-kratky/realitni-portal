@@ -36,6 +36,12 @@ export type Estate = {
   latitude: Scalars['Float'];
 };
 
+export type EstateInput = {
+  name?: Maybe<Scalars['String']>;
+  longitude: Scalars['Float'];
+  latitude: Scalars['Float'];
+};
+
 export type File = {
    __typename?: 'File';
   filename: Scalars['String'];
@@ -51,10 +57,22 @@ export type LoginResponse = {
 
 export type Mutation = {
    __typename?: 'Mutation';
+  deleteEstate: Estate;
+  createEstate: Estate;
   logout: Scalars['Boolean'];
   login: LoginResponse;
   register: Scalars['Boolean'];
   fileUpload: UploadResult;
+};
+
+
+export type MutationDeleteEstateArgs = {
+  id: Scalars['String'];
+};
+
+
+export type MutationCreateEstateArgs = {
+  estateInput: EstateInput;
 };
 
 
@@ -78,8 +96,21 @@ export type MutationFileUploadArgs = {
 
 export type Query = {
    __typename?: 'Query';
+  estate?: Maybe<Estate>;
+  estates: Array<Estate>;
   bye: Scalars['String'];
-  me?: Maybe<Account>;
+  currentUser?: Maybe<Account>;
+};
+
+
+export type QueryEstateArgs = {
+  id: Scalars['String'];
+};
+
+
+export type QueryEstatesArgs = {
+  take: Scalars['Float'];
+  skip: Scalars['Float'];
 };
 
 
@@ -96,6 +127,17 @@ export type ByeQuery = (
   & Pick<Query, 'bye'>
 );
 
+export type CurrentUserQueryVariables = {};
+
+
+export type CurrentUserQuery = (
+  { __typename?: 'Query' }
+  & { currentUser?: Maybe<(
+    { __typename?: 'Account' }
+    & Pick<Account, 'id' | 'username' | 'email'>
+  )> }
+);
+
 export type LoginMutationVariables = {
   email: Scalars['String'];
   password: Scalars['String'];
@@ -109,7 +151,7 @@ export type LoginMutation = (
     & Pick<LoginResponse, 'accessToken'>
     & { account: (
       { __typename?: 'Account' }
-      & Pick<Account, 'id' | 'email'>
+      & Pick<Account, 'id' | 'email' | 'username'>
     ) }
   ) }
 );
@@ -120,17 +162,6 @@ export type LogoutMutationVariables = {};
 export type LogoutMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'logout'>
-);
-
-export type MeQueryVariables = {};
-
-
-export type MeQuery = (
-  { __typename?: 'Query' }
-  & { me?: Maybe<(
-    { __typename?: 'Account' }
-    & Pick<Account, 'id' | 'email'>
-  )> }
 );
 
 export type RegisterMutationVariables = {
@@ -176,6 +207,40 @@ export function useByeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOpti
 export type ByeQueryHookResult = ReturnType<typeof useByeQuery>;
 export type ByeLazyQueryHookResult = ReturnType<typeof useByeLazyQuery>;
 export type ByeQueryResult = ApolloReactCommon.QueryResult<ByeQuery, ByeQueryVariables>;
+export const CurrentUserDocument = gql`
+    query CurrentUser {
+  currentUser {
+    id
+    username
+    email
+  }
+}
+    `;
+
+/**
+ * __useCurrentUserQuery__
+ *
+ * To run a query within a React component, call `useCurrentUserQuery` and pass it any options that fit your needs.
+ * When your component renders, `useCurrentUserQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useCurrentUserQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useCurrentUserQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
+        return ApolloReactHooks.useQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, baseOptions);
+      }
+export function useCurrentUserLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, baseOptions);
+        }
+export type CurrentUserQueryHookResult = ReturnType<typeof useCurrentUserQuery>;
+export type CurrentUserLazyQueryHookResult = ReturnType<typeof useCurrentUserLazyQuery>;
+export type CurrentUserQueryResult = ApolloReactCommon.QueryResult<CurrentUserQuery, CurrentUserQueryVariables>;
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
@@ -183,6 +248,7 @@ export const LoginDocument = gql`
     account {
       id
       email
+      username
     }
   }
 }
@@ -242,39 +308,6 @@ export function useLogoutMutation(baseOptions?: ApolloReactHooks.MutationHookOpt
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
 export type LogoutMutationResult = ApolloReactCommon.MutationResult<LogoutMutation>;
 export type LogoutMutationOptions = ApolloReactCommon.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
-export const MeDocument = gql`
-    query Me {
-  me {
-    id
-    email
-  }
-}
-    `;
-
-/**
- * __useMeQuery__
- *
- * To run a query within a React component, call `useMeQuery` and pass it any options that fit your needs.
- * When your component renders, `useMeQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useMeQuery({
- *   variables: {
- *   },
- * });
- */
-export function useMeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<MeQuery, MeQueryVariables>) {
-        return ApolloReactHooks.useQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
-      }
-export function useMeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<MeQuery, MeQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<MeQuery, MeQueryVariables>(MeDocument, baseOptions);
-        }
-export type MeQueryHookResult = ReturnType<typeof useMeQuery>;
-export type MeLazyQueryHookResult = ReturnType<typeof useMeLazyQuery>;
-export type MeQueryResult = ApolloReactCommon.QueryResult<MeQuery, MeQueryVariables>;
 export const RegisterDocument = gql`
     mutation Register($email: String!, $usermane: String!, $password: String!) {
   register(email: $email, username: $usermane, password: $password)

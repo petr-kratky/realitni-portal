@@ -22,22 +22,18 @@ export class EstateService {
   }
 
   public async getEstateById(id: string): Promise<Estate> {
-    const estate = await Estate.getRepository().findOne(id);
+    const estate = await Estate.findOne(id);
+    if (!estate) throw new ApolloError("ESTATE_NOT_FOUND", "404");
     return estate;
   }
 
-  public async deleteEstateById(id: string): Promise<boolean> {
-    try {
-      const connection = getConnection();
-      const estateRepository = connection.getRepository(Estate);
-      const estate = await estateRepository.findOne(id);
-      await fetch(`${process.env.MEDIA_SERVER_HOST}/${id}/images/delete`)
-      await estateRepository.remove(estate);
-      return true
-    } catch (err) {
-      console.log(`!! NEW ESTATE!! CREATE FAIL\n\n ${err}\n\n`);
-      return false;
-    }
+  public async getEstates(skip: number, take: number): Promise<Estate[]> {
+    const estates = await Estate.find({ skip, take: take > 100 ? 100 : take })
+    return estates
+  }
+
+  public async deleteEstate(estate: Estate): Promise<void> {
+    await estate.remove()
   }
 
   private static validateCoordinates(lat: number, lng: number): boolean {

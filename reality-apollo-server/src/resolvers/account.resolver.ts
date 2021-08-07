@@ -7,7 +7,7 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-import { ApolloError} from 'apollo-server-express'
+import { ApolloError, AuthenticationError} from 'apollo-server-express'
 import { hash, compare } from "bcryptjs";
 import { verify } from "jsonwebtoken";
 
@@ -38,21 +38,20 @@ export class AccountResolver {
 
 
   @Query(() => Account, { nullable: true })
-  @RequireAuthentication()
-  me(@Ctx() context: MyContext) {
-    const authorization = context.req.headers["authorization"];
-
-    if (!authorization) {
+  currentUser(@Ctx() context: MyContext) {
+    const authHeader = context.req.headers["authorization"];
+    if (!authHeader) {
       return null;
     }
 
     try {
-      const token = authorization.split(" ")[1];
+      const token = authHeader.split(" ")[1];
       const payload: any = verify(token, process.env.ACCESS_TOKEN_SECRET!);
       return Account.findOne(payload.id);
+
     } catch (err) {
-      console.log(err);
-      return null;
+      console.error(err)
+      throw new AuthenticationError(err)
     }
   }
 
@@ -92,6 +91,7 @@ export class AccountResolver {
 
 
   @Mutation(() => Boolean)
+  @RequireAuthentication()
   async register(
     @Arg("username") username: string,
     @Arg("email") email: string,
