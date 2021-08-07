@@ -3,7 +3,6 @@ import { AppProps } from "next/app";
 import React, { useEffect } from "react";
 import { ThemeProvider } from '@material-ui/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { CircularProgress } from '@material-ui/core';
 
 import { withApolloClient } from "../graphql/apollo-client/withApolloClient";
 import { useCurrentUserQuery } from "../graphql/queries/generated/graphql";
