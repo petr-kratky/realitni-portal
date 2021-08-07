@@ -1,31 +1,32 @@
-import { EstateApi } from "./estate.api";
-import { Estate } from "../models";
+import { ApolloError } from "apollo-server-express";
 import { getConnection } from "typeorm";
+import { Singleton } from "typescript-ioc";
 
-export class EstateService implements EstateApi {
-  public async createEstate(surceId: any, localityLatitude: any, localityLongitude: any): Promise<Number> {
-    const connection = getConnection();
-    const estateNew = new Estate();
-    let newSavedEstate = undefined;
-    estateNew.latitude = localityLatitude
-    estateNew.longitude = localityLongitude
-    const estateRepository = connection.getRepository(Estate);
+import { Estate, EstateInput } from "../models";
+
+@Singleton
+export class EstateService {
+  public async createEstate(estateInput: EstateInput): Promise<Estate> {
+    const { latitude, longitude } = estateInput
+
+    const isLocationValid = EstateService.validateCoordinates(latitude, longitude)
+    if (!isLocationValid) throw new ApolloError('ESTATE_INVALID_LOCATION_RANGE')
+
     try {
-      newSavedEstate = await estateRepository.save(estateNew);
-    } catch (err) {
-      console.log(`!! NEW ESTATE!! CREATE FAIL\n\n ${err}\n\n`);
-      return -1;
+      const newEstate = await Estate.merge(new Estate(), estateInput).save()
+      return newEstate
+    } catch (e) {
+      console.error(e)
+      throw new ApolloError('ESTATE_CREATION_FAILED')
     }
-    return newSavedEstate.id;
   }
 
-  public async getEstateById(id: number): Promise<Estate> {
-    const connection = getConnection();
-    const estate = await connection.getRepository(Estate).findOne(id);
+  public async getEstateById(id: string): Promise<Estate> {
+    const estate = await Estate.getRepository().findOne(id);
     return estate;
   }
 
-  public async deleteEstateById(id: number): Promise<boolean> {
+  public async deleteEstateById(id: string): Promise<boolean> {
     try {
       const connection = getConnection();
       const estateRepository = connection.getRepository(Estate);
@@ -36,6 +37,14 @@ export class EstateService implements EstateApi {
     } catch (err) {
       console.log(`!! NEW ESTATE!! CREATE FAIL\n\n ${err}\n\n`);
       return false;
+    }
+  }
+
+  private static validateCoordinates(lat: number, lng: number): boolean {
+    if ((lat < -90 || lat > 90) || (lng < -180 || lng > 180)) {
+      return false
+    } else {
+      return true
     }
   }
 

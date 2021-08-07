@@ -7,15 +7,16 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-import { AuthenticationError } from 'apollo-server-express'
+import { ApolloError} from 'apollo-server-express'
 import { hash, compare } from "bcryptjs";
 import { verify } from "jsonwebtoken";
 
 import { Account } from "../models";
 import { resolverManager } from "./_resolver-manager";
-import { MyContext } from "../MyContext";
+import { MyContext } from "../typings";
 import { createRefreshToken, createAccessToken } from "../auth";
 import { sendRefreshToken } from "../sendRefreshToken";
+import { RequireAuthentication } from "../decorators/RequireAuthentication";
 
 
 @ObjectType()
@@ -25,15 +26,19 @@ class LoginResponse {
   @Field(() => Account)
   account: Account;
 }
+
+
 @Resolver((of) => Account)
 export class AccountResolver {
   @Query(() => String)
+  @RequireAuthentication()
   bye(@Ctx() { payload }: MyContext) {
     return `your user id is: ${payload!.id}`;
   }
 
 
   @Query(() => Account, { nullable: true })
+  @RequireAuthentication()
   me(@Ctx() context: MyContext) {
     const authorization = context.req.headers["authorization"];
 
@@ -52,6 +57,7 @@ export class AccountResolver {
   }
 
 
+  @RequireAuthentication()
   @Mutation(() => Boolean)
   async logout(@Ctx() { res }: MyContext) {
     sendRefreshToken(res, "", process.env.DOMAIN);
@@ -68,12 +74,12 @@ export class AccountResolver {
   ): Promise<LoginResponse> {
     const account = await Account.findOne({ where: { email } });
     if (!account) {
-      throw new AuthenticationError('AUTH_INVALID_ACCOUNT')
+      throw new ApolloError('LOGIN_INVALID_ACCOUNT')
     }
 
     const valid = await compare(password, account.password);
     if (!valid) {
-      throw new AuthenticationError('AUTH_INVALID_PASSWORD')
+      throw new ApolloError('LOGIN_INVALID_ACCOUNT')
     }
 
     sendRefreshToken(res, createRefreshToken(account), process.env.DOMAIN);

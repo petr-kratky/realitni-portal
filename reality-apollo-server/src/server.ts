@@ -40,7 +40,7 @@ export class ApiServer {
     }
     return this.graphQLServerPromise = new Promise(async (resolve, reject) => {
       const graphqlServer = new ApolloServer({
-        schema: (await buildGraphqlSchema() as any),
+        schema: (await buildGraphqlSchema()),
         context: ({ req, res }) => ({ req, res }),
         uploads: false
       });
@@ -60,7 +60,7 @@ export class ApiServer {
         })
       );
       expressServer.use(cookieParser());
-      this.logger.apply(expressServer);
+      // this.logger.apply(expressServer);
       expressServer.use(apiRouter);
       expressServer.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
       expressServer.post("/refresh_token", RefreshTokenReguestHandler);

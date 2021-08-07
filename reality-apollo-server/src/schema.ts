@@ -4,7 +4,6 @@ import { join } from 'path';
 
 import { resolverManager } from './resolvers';
 import { timer } from './util';
-import { isAuth } from './isAuth';
 
 export async function buildGraphqlSchema(): Promise<GraphQLSchema> {
   await timer('', 2);
@@ -17,7 +16,7 @@ export async function buildGraphqlSchema(): Promise<GraphQLSchema> {
   const schema: GraphQLSchema = await buildSchema({
     resolvers,
     emitSchemaFile: {path: join(process.cwd(), 'schema.gql')},
-    globalMiddlewares: [isAuth],
+    globalMiddlewares: [],
   });
 
   return schema;

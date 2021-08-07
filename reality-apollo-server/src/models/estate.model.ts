@@ -1,13 +1,12 @@
-import { Column, Entity, Index, PrimaryColumn, BaseEntity } from "typeorm";
+import { Column, Entity, Index, BaseEntity, PrimaryGeneratedColumn } from "typeorm";
+import { Field, ObjectType, ID, Float, InputType } from 'type-graphql';
 import { Point } from 'geojson'
-import { Files } from './files.model'
-import { Field, ObjectType, ID, Float } from 'type-graphql';
 
 @ObjectType()
 @Entity("estates", { schema: "public" })
 export class Estate extends BaseEntity {
   @Field(() => ID)
-  @PrimaryColumn({ type: "uuid", name: "id", generated: 'uuid' })
+  @PrimaryGeneratedColumn("uuid")
   id: string;
 
   @Field(() => String)
@@ -35,5 +34,17 @@ export class Estate extends BaseEntity {
     precision: 20,
     scale: 10,
   })
+  latitude: number;
+}
+
+@InputType()
+export class EstateInput implements Partial<Estate> {
+  @Field(() => String, { nullable: true })
+  name?: string;
+
+  @Field(() => Float)
+  longitude: number;
+
+  @Field(() => Float)
   latitude: number;
 }
