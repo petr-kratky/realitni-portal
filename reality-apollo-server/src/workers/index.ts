@@ -1,2 +1,2 @@
 export * from './worker-manager';
-export * from './simple.worker';
+// export * from './simple.worker';
