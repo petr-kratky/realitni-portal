@@ -4,7 +4,7 @@ import { sendRefreshToken } from "./sendRefreshToken"
 
 export const createAccessToken = (account: Account) => {
   return sign({ id: account.id }, process.env.ACCESS_TOKEN_SECRET!, {
-    expiresIn: "15m"
+    expiresIn: "7d"
   });
 };
 

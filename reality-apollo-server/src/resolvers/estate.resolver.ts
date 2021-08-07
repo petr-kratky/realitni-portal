@@ -6,12 +6,12 @@ import {
   Resolver,
 } from "type-graphql";
 const isomorphicFetch = require("isomorphic-fetch");
+import { ApolloError } from "apollo-server-express";
 
 import { resolverManager } from "./_resolver-manager";
 import { EstateService } from "../services";
-import { Estate, EstateInput } from "../models";
+import { Estate, EstateCreateInput, EstateUpdateInput } from "../models";
 import { RequireAuthentication } from "../decorators/RequireAuthentication";
-import { ApolloError } from "apollo-server-express";
 
 @Resolver((of) => Estate)
 export class EstateResolver {
@@ -32,6 +32,37 @@ export class EstateResolver {
       return await this.estateService.getEstates(skip, take)
     } catch (e) {
       throw new ApolloError(e, "500")
+    }
+  }
+
+  @Mutation((returns) => Estate)
+  @RequireAuthentication()
+  async deleteEstate(@Arg("id") id: string): Promise<Estate> {
+    const estate = await this.estateService.getEstateById(id)
+    try {
+      await estate.remove()
+      return Estate.merge(estate, { id })
+    } catch (e) {
+      console.error(e)
+      throw new ApolloError("ESTATE_DELETE_FAILED", "500")
+    }
+  }
+
+  @Mutation((returns) => Estate)
+  @RequireAuthentication()
+  async createEstate(@Arg("estateInput") estateInput: EstateCreateInput): Promise<Estate> {
+    return await this.estateService.createEstate(estateInput);
+  }
+
+  @Mutation((returns) => Estate)
+  @RequireAuthentication()
+  async updateEstate(@Arg("id") id: string, @Arg("estateInput") estateInput: EstateUpdateInput): Promise<Estate> {
+    const estate = await this.estateService.getEstateById(id)
+    try {
+      return await Estate.merge(estate, estateInput).save()
+    } catch (e) {
+      console.error(e)
+      throw new ApolloError("ESTATE_UPDATE_FAILED", "500")
     }
   }
 
@@ -64,26 +95,6 @@ export class EstateResolver {
   //     console.error(err);
   //   }
   // }
-
-  @Mutation(() => Estate)
-  @RequireAuthentication()
-  async deleteEstate(@Arg("id") id: string): Promise<Estate> {
-    const estate = await this.estateService.getEstateById(id)
-
-    try {
-      await this.estateService.deleteEstate(estate);
-      return Estate.merge(estate, { id })
-    } catch (e) {
-      throw new ApolloError(e, "500")
-    }
-  }
-
-
-  @Mutation(() => Estate)
-  @RequireAuthentication()
-  async createEstate(@Arg("estateInput") estateInput: EstateInput): Promise<Estate> {
-    return await this.estateService.createEstate(estateInput);
-  }
 }
 
 resolverManager.registerResolver(EstateResolver);

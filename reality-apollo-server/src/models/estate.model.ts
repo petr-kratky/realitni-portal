@@ -37,11 +37,22 @@ export class Estate extends BaseEntity {
   latitude: number;
 }
 
+
 @InputType()
-export class EstateInput implements Partial<Estate> {
+export class EstateUpdateInput implements Partial<Estate> {
   @Field(() => String, { nullable: true })
   name?: string;
 
+  @Field(() => Float, { nullable: true })
+  longitude?: number;
+
+  @Field(() => Float, { nullable: true })
+  latitude?: number;
+}
+
+
+@InputType()
+export class EstateCreateInput extends EstateUpdateInput {
   @Field(() => Float)
   longitude: number;
 
