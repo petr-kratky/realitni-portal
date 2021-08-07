@@ -1,14 +1,12 @@
-import { Column, Entity, Index, PrimaryGeneratedColumn, BaseEntity } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, PrimaryColumn } from "typeorm";
 import { Field, ObjectType, ID, Int } from 'type-graphql';
 
 @ObjectType()
-@Index("users_email_key", ["email"], { unique: true })
-@Index("users_username_key", ["username"], { unique: true })
 @Entity("users", { schema: "public" })
 export class Account extends BaseEntity {
   @Field(() => ID)
-  @PrimaryGeneratedColumn({ type: "integer", name: "user_id" })
-  userId: number;
+  @PrimaryColumn({ type: "uuid", name: "id", generated: 'uuid' })
+  id: string;
 
   @Field(() => String)
   @Column("character varying", { name: "username", unique: true, length: 50 })
@@ -22,13 +20,13 @@ export class Account extends BaseEntity {
   @Column("character varying", { name: "email", unique: true, length: 355 })
   email: string;
 
-  @Field(() => Date, { nullable: true })
-  @Column("timestamp without time zone", { name: "created_on" })
-  createdOn: Date| null;;
+  @Field(() => Date)
+  @Column("timestamp without time zone", { name: "created_on", nullable: true })
+  createdOn: Date;
 
   @Field(() => Date, { nullable: true })
   @Column("timestamp without time zone", { name: "last_login", nullable: true })
-  lastLogin: Date | null;
+  lastLogin: Date;
 
   @Field(() => Int)
   @Column("integer", {
@@ -36,5 +34,5 @@ export class Account extends BaseEntity {
     nullable: true,
     default: () => "0",
   })
-  tokenVersion: number | null;
+  tokenVersion: number;
 }

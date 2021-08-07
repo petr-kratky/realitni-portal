@@ -1,5 +1,5 @@
 import { DatabaseConfig, ServerConfig } from '../typings'
-import { Estate, Source, Account } from '../models/'
+import { Estate, Account } from '../models/'
 import { Singleton } from 'typescript-ioc'
 import { getEnv } from '../util/get-env'
 
@@ -33,7 +33,7 @@ export class ServiceConfig {
       synchronize: false,
       logging: false,
       // entities: [...Object.values(DatabaseModels)],
-      entities: [Source, Estate, Account],
+      entities: [Estate, Account],
       ssl: {
         rejectUnauthorized: false
       },

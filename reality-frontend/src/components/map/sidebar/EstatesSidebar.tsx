@@ -5,7 +5,7 @@ import React, {
   useEffect,
 } from "react";
 
-import ESTATE_MUTATION_CREATE from "../../../graphql/queries/user-management/estate/create";
+// import ESTATE_MUTATION_CREATE from "../../../graphql/queries/user-management/estate/create";
 import { useMutation } from "@apollo/react-hooks";
 import SideBar, { DEFAULT_WIDTH } from "./SideBar";
 import EstatesList from "./EstatesList";
@@ -13,7 +13,6 @@ import EstateCard from "./EstateCard";
 import { createUseStyles } from "react-jss";
 import SearchForm from "./SearchForm";
 import { SwitchTransition, Transition } from "react-transition-group";
-import Detail from "src/components/estate/Detail";
 
 type TEstatesSidebarProps = {
   open: boolean;
@@ -88,7 +87,7 @@ const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({
     <span style={{ color: "#e3e3e3" }}>waiting for fill</span>
   );
   const classes = useStyles();
-  const [estateCreate, { data, loading }] = useMutation(ESTATE_MUTATION_CREATE);
+  // const [estateCreate, { data, loading }] = useMutation(ESTATE_MUTATION_CREATE);
   const [activeTab, setActiveTab] = useState<number>(0);
   const [visibilityDetail, setVisibilityDetail] = useState<boolean>(false);
   const [focusedEstate, setFocusedEstate] = useState<number | null>(null);
@@ -96,28 +95,28 @@ const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({
   const [updatedId, setUpdatedId] = useState<any>();
   const [initialValues, setInitialValues] = useState<any>(null);
 
-  useEffect(() => {
-    if (!loading && data?.create) {
-      const values = {
-        images: []
-      }
-      setInitialValues(values)
-      setFocusedEstate(data.create);
-      setVisibilityDetail(true);
-      setEditMode(true);
-    }
-  }, [data]);
+  // useEffect(() => {
+  //   if (!loading && data?.create) {
+  //     const values = {
+  //       images: []
+  //     }
+  //     setInitialValues(values)
+  //     setFocusedEstate(data.create);
+  //     setVisibilityDetail(true);
+  //     setEditMode(true);
+  //   }
+  // }, [data]);
 
   const menuTabsHandler = (tab, index) => (): void => {
     switch (tab.action) {
       case "TAB-CHANGE":
         handleTabChange(index);
         break;
-      case "CREATE-ESTATE":
-        estateCreate({
-          variables: { localityLatitude: 0, localityLongitude: 0, sourceId: 3 },
-        }); // sourceId = 3 means source for statikum
-        break;
+      // case "CREATE-ESTATE":
+      //   estateCreate({
+      //     variables: { localityLatitude: 0, localityLongitude: 0, sourceId: 3 },
+      //   }); // sourceId = 3 means source for statikum
+      //   break;
       default:
         break;
     }
@@ -254,18 +253,6 @@ const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({
           content: classes.sidebarContent,
         }}
       >
-        {focusedEstate && (
-          <Detail
-            initialValues={initialValues}
-            setInitialValues={setInitialValues}
-            setUpdatedId={setUpdatedId}
-            estateId={focusedEstate}
-            setVisibilityDetail={setVisibilityDetail}
-            PlaceholderRender={PlaceholderRender}
-            setEditMode={setEditMode}
-            editMode={editMode}
-          />
-        )}
       </SideBar>
     </>
   );

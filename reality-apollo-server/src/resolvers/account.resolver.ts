@@ -29,7 +29,7 @@ class LoginResponse {
 export class AccountResolver {
   @Query(() => String)
   bye(@Ctx() { payload }: MyContext) {
-    return `your user id is: ${payload!.userId}`;
+    return `your user id is: ${payload!.id}`;
   }
 
 
@@ -44,7 +44,7 @@ export class AccountResolver {
     try {
       const token = authorization.split(" ")[1];
       const payload: any = verify(token, process.env.ACCESS_TOKEN_SECRET!);
-      return Account.findOne(payload.userId);
+      return Account.findOne(payload.id);
     } catch (err) {
       console.log(err);
       return null;

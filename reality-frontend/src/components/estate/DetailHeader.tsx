@@ -10,7 +10,7 @@ import {
 } from "@ant-design/icons";
 import { useMutation } from "@apollo/react-hooks";
 
-import ESTATE_MUTATION_DELETE from "../../graphql/queries/user-management/estate/delete";
+// import ESTATE_MUTATION_DELETE from "../../graphql/queries/user-management/estate/delete";
 
 import {
   EditOutlined,
@@ -168,14 +168,14 @@ const DetailHeader: FunctionComponent<TDetailTable> = ({
   //     setIsImageDeletedError(true);
   //   }
   // };
-  const deleteAll = async (id) => {
-    estateDelete({ variables: { id: +id } });
-  };
+  // const deleteAll = async (id) => {
+  //   estateDelete({ variables: { id: +id } });
+  // };
   // const [dataForDetail, setDataForDetail] = useState<any>(null);
   // const [isImageDeleted, setIsImageDeleted] = useState<any>(null);
   // const [isImageDeletedError, setIsImageDeletedError] = useState<any>(null);
 
-  const [estateDelete, { data, loading }] = useMutation(ESTATE_MUTATION_DELETE);
+  // const [estateDelete, { data, loading }] = useMutation(ESTATE_MUTATION_DELETE);
   const {
     blockB,
     mainItem,
@@ -188,12 +188,12 @@ const DetailHeader: FunctionComponent<TDetailTable> = ({
     colorButton,
   } = useStyles();
 
-  useEffect(() => {
-    if (!loading && data?.delete) {
-      openNotificationSuccess("Estate was deleted successfuly");
-      setVisibilityDetail(false);
-    }
-  }, [loading]);
+  // useEffect(() => {
+  //   if (!loading && data?.delete) {
+  //     openNotificationSuccess("Estate was deleted successfuly");
+  //     setVisibilityDetail(false);
+  //   }
+  // }, [loading]);
   // useEffect(() => {
   //   if (isImageDeleted) {
   //     openNotificationSuccess("Images deleted successfuly");
@@ -223,7 +223,7 @@ const DetailHeader: FunctionComponent<TDetailTable> = ({
                   </Button> */}
 
                   <Button
-                    onClick={() => deleteAll(estate.id)}
+                    // onClick={() => deleteAll(estate.id)}
                     className={colorButton}
                     type="primary"
                     danger

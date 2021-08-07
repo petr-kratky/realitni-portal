@@ -3,14 +3,14 @@ import { sign, verify } from "jsonwebtoken";
 import { sendRefreshToken } from "./sendRefreshToken"
 
 export const createAccessToken = (account: Account) => {
-  return sign({ userId: account.userId }, process.env.ACCESS_TOKEN_SECRET!, {
+  return sign({ id: account.id }, process.env.ACCESS_TOKEN_SECRET!, {
     expiresIn: "15m"
   });
 };
 
 export const createRefreshToken = (account: Account) => {
   return sign(
-    { userId: account.userId, tokenVersion: account.tokenVersion },
+    { id: account.id, tokenVersion: account.tokenVersion },
     process.env.REFRESH_TOKEN_SECRET!,
     {
       expiresIn: "7d"
@@ -30,7 +30,7 @@ export const RefreshTokenReguestHandler = async (req, res) => {
     console.log(err);
     return res.send({ ok: false, accessToken: "" });
   }
-  const user = await Account.findOne({ userId: payload.userId });
+  const user = await Account.findOne({ id: payload.id });
   if (!user) {
     return res.send({ ok: false, accessToken: "" });
   }
