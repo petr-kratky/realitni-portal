@@ -12,7 +12,7 @@ export type MapComponentProps = {
   setContextMenuProps: Dispatch<SetStateAction<ContextMenuProps>>
   popupProps: CustomPopupProps
   setPopupProps: Dispatch<SetStateAction<CustomPopupProps>>
-  setOnScreenEstates: Dispatch<SetStateAction<number[]>>
+  setOnScreenEstates: Dispatch<SetStateAction<string[]>>
 }
 
 export type MapViewport = {
@@ -42,7 +42,7 @@ export type EstateClusterProperties = {
 }
 
 export type EstateFeatureProperties = {
-  id: number
+  id: string
 }
 
 

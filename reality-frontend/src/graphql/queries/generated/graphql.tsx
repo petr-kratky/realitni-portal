@@ -26,6 +26,11 @@ export type Account = {
   tokenVersion: Scalars['Int'];
 };
 
+export type AccountUpdateInput = {
+  username?: Maybe<Scalars['String']>;
+  email?: Maybe<Scalars['String']>;
+};
+
 
 export type Estate = {
    __typename?: 'Estate';
@@ -36,10 +41,16 @@ export type Estate = {
   latitude: Scalars['Float'];
 };
 
-export type EstateInput = {
+export type EstateCreateInput = {
   name?: Maybe<Scalars['String']>;
   longitude: Scalars['Float'];
   latitude: Scalars['Float'];
+};
+
+export type EstateUpdateInput = {
+  name?: Maybe<Scalars['String']>;
+  longitude?: Maybe<Scalars['Float']>;
+  latitude?: Maybe<Scalars['Float']>;
 };
 
 export type File = {
@@ -57,11 +68,14 @@ export type LoginResponse = {
 
 export type Mutation = {
    __typename?: 'Mutation';
-  deleteEstate: Estate;
+  deleteEstate: Scalars['ID'];
   createEstate: Estate;
+  updateEstate: Estate;
   logout: Scalars['Boolean'];
   login: LoginResponse;
-  register: Scalars['Boolean'];
+  updateAccount: Account;
+  deleteAccount: Scalars['ID'];
+  register: Account;
   fileUpload: UploadResult;
 };
 
@@ -72,13 +86,24 @@ export type MutationDeleteEstateArgs = {
 
 
 export type MutationCreateEstateArgs = {
-  estateInput: EstateInput;
+  estateInput: EstateCreateInput;
+};
+
+
+export type MutationUpdateEstateArgs = {
+  estateInput: EstateUpdateInput;
+  id: Scalars['String'];
 };
 
 
 export type MutationLoginArgs = {
   password: Scalars['String'];
   email: Scalars['String'];
+};
+
+
+export type MutationUpdateAccountArgs = {
+  accountInput: AccountUpdateInput;
 };
 
 
@@ -98,7 +123,6 @@ export type Query = {
    __typename?: 'Query';
   estate?: Maybe<Estate>;
   estates: Array<Estate>;
-  bye: Scalars['String'];
   currentUser?: Maybe<Account>;
 };
 
@@ -119,12 +143,54 @@ export type UploadResult = {
   uploaded: Scalars['Boolean'];
 };
 
-export type ByeQueryVariables = {};
+export type CreateEstateMutationVariables = {
+  estateInput: EstateCreateInput;
+};
 
 
-export type ByeQuery = (
+export type CreateEstateMutation = (
+  { __typename?: 'Mutation' }
+  & { createEstate: (
+    { __typename?: 'Estate' }
+    & Pick<Estate, 'id' | 'name' | 'longitude' | 'latitude'>
+  ) }
+);
+
+export type DeleteEstateMutationVariables = {
+  id: Scalars['String'];
+};
+
+
+export type DeleteEstateMutation = (
+  { __typename?: 'Mutation' }
+  & Pick<Mutation, 'deleteEstate'>
+);
+
+export type EstateQueryVariables = {
+  id: Scalars['String'];
+};
+
+
+export type EstateQuery = (
   { __typename?: 'Query' }
-  & Pick<Query, 'bye'>
+  & { estate?: Maybe<(
+    { __typename?: 'Estate' }
+    & Pick<Estate, 'id' | 'name' | 'longitude' | 'latitude'>
+  )> }
+);
+
+export type UpdateEstateMutationVariables = {
+  id: Scalars['String'];
+  estateInput: EstateUpdateInput;
+};
+
+
+export type UpdateEstateMutation = (
+  { __typename?: 'Mutation' }
+  & { updateEstate: (
+    { __typename?: 'Estate' }
+    & Pick<Estate, 'id' | 'name' | 'longitude' | 'latitude'>
+  ) }
 );
 
 export type CurrentUserQueryVariables = {};
@@ -173,40 +239,150 @@ export type RegisterMutationVariables = {
 
 export type RegisterMutation = (
   { __typename?: 'Mutation' }
-  & Pick<Mutation, 'register'>
+  & { register: (
+    { __typename?: 'Account' }
+    & Pick<Account, 'id' | 'createdOn'>
+  ) }
 );
 
 
-export const ByeDocument = gql`
-    query Bye {
-  bye
+export const CreateEstateDocument = gql`
+    mutation CreateEstate($estateInput: EstateCreateInput!) {
+  createEstate(estateInput: $estateInput) {
+    id
+    name
+    longitude
+    latitude
+  }
+}
+    `;
+export type CreateEstateMutationFn = ApolloReactCommon.MutationFunction<CreateEstateMutation, CreateEstateMutationVariables>;
+
+/**
+ * __useCreateEstateMutation__
+ *
+ * To run a mutation, you first call `useCreateEstateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useCreateEstateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [createEstateMutation, { data, loading, error }] = useCreateEstateMutation({
+ *   variables: {
+ *      estateInput: // value for 'estateInput'
+ *   },
+ * });
+ */
+export function useCreateEstateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateEstateMutation, CreateEstateMutationVariables>) {
+        return ApolloReactHooks.useMutation<CreateEstateMutation, CreateEstateMutationVariables>(CreateEstateDocument, baseOptions);
+      }
+export type CreateEstateMutationHookResult = ReturnType<typeof useCreateEstateMutation>;
+export type CreateEstateMutationResult = ApolloReactCommon.MutationResult<CreateEstateMutation>;
+export type CreateEstateMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateEstateMutation, CreateEstateMutationVariables>;
+export const DeleteEstateDocument = gql`
+    mutation DeleteEstate($id: String!) {
+  deleteEstate(id: $id)
+}
+    `;
+export type DeleteEstateMutationFn = ApolloReactCommon.MutationFunction<DeleteEstateMutation, DeleteEstateMutationVariables>;
+
+/**
+ * __useDeleteEstateMutation__
+ *
+ * To run a mutation, you first call `useDeleteEstateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteEstateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteEstateMutation, { data, loading, error }] = useDeleteEstateMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useDeleteEstateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteEstateMutation, DeleteEstateMutationVariables>) {
+        return ApolloReactHooks.useMutation<DeleteEstateMutation, DeleteEstateMutationVariables>(DeleteEstateDocument, baseOptions);
+      }
+export type DeleteEstateMutationHookResult = ReturnType<typeof useDeleteEstateMutation>;
+export type DeleteEstateMutationResult = ApolloReactCommon.MutationResult<DeleteEstateMutation>;
+export type DeleteEstateMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteEstateMutation, DeleteEstateMutationVariables>;
+export const EstateDocument = gql`
+    query Estate($id: String!) {
+  estate(id: $id) {
+    id
+    name
+    longitude
+    latitude
+  }
 }
     `;
 
 /**
- * __useByeQuery__
+ * __useEstateQuery__
  *
- * To run a query within a React component, call `useByeQuery` and pass it any options that fit your needs.
- * When your component renders, `useByeQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * To run a query within a React component, call `useEstateQuery` and pass it any options that fit your needs.
+ * When your component renders, `useEstateQuery` returns an object from Apollo Client that contains loading, error, and data properties
  * you can use to render your UI.
  *
  * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
  *
  * @example
- * const { data, loading, error } = useByeQuery({
+ * const { data, loading, error } = useEstateQuery({
  *   variables: {
+ *      id: // value for 'id'
  *   },
  * });
  */
-export function useByeQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<ByeQuery, ByeQueryVariables>) {
-        return ApolloReactHooks.useQuery<ByeQuery, ByeQueryVariables>(ByeDocument, baseOptions);
+export function useEstateQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<EstateQuery, EstateQueryVariables>) {
+        return ApolloReactHooks.useQuery<EstateQuery, EstateQueryVariables>(EstateDocument, baseOptions);
       }
-export function useByeLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<ByeQuery, ByeQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<ByeQuery, ByeQueryVariables>(ByeDocument, baseOptions);
+export function useEstateLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<EstateQuery, EstateQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<EstateQuery, EstateQueryVariables>(EstateDocument, baseOptions);
         }
-export type ByeQueryHookResult = ReturnType<typeof useByeQuery>;
-export type ByeLazyQueryHookResult = ReturnType<typeof useByeLazyQuery>;
-export type ByeQueryResult = ApolloReactCommon.QueryResult<ByeQuery, ByeQueryVariables>;
+export type EstateQueryHookResult = ReturnType<typeof useEstateQuery>;
+export type EstateLazyQueryHookResult = ReturnType<typeof useEstateLazyQuery>;
+export type EstateQueryResult = ApolloReactCommon.QueryResult<EstateQuery, EstateQueryVariables>;
+export const UpdateEstateDocument = gql`
+    mutation UpdateEstate($id: String!, $estateInput: EstateUpdateInput!) {
+  updateEstate(id: $id, estateInput: $estateInput) {
+    id
+    name
+    longitude
+    latitude
+  }
+}
+    `;
+export type UpdateEstateMutationFn = ApolloReactCommon.MutationFunction<UpdateEstateMutation, UpdateEstateMutationVariables>;
+
+/**
+ * __useUpdateEstateMutation__
+ *
+ * To run a mutation, you first call `useUpdateEstateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateEstateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateEstateMutation, { data, loading, error }] = useUpdateEstateMutation({
+ *   variables: {
+ *      id: // value for 'id'
+ *      estateInput: // value for 'estateInput'
+ *   },
+ * });
+ */
+export function useUpdateEstateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateEstateMutation, UpdateEstateMutationVariables>) {
+        return ApolloReactHooks.useMutation<UpdateEstateMutation, UpdateEstateMutationVariables>(UpdateEstateDocument, baseOptions);
+      }
+export type UpdateEstateMutationHookResult = ReturnType<typeof useUpdateEstateMutation>;
+export type UpdateEstateMutationResult = ApolloReactCommon.MutationResult<UpdateEstateMutation>;
+export type UpdateEstateMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateEstateMutation, UpdateEstateMutationVariables>;
 export const CurrentUserDocument = gql`
     query CurrentUser {
   currentUser {
@@ -310,7 +486,10 @@ export type LogoutMutationResult = ApolloReactCommon.MutationResult<LogoutMutati
 export type LogoutMutationOptions = ApolloReactCommon.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
 export const RegisterDocument = gql`
     mutation Register($email: String!, $usermane: String!, $password: String!) {
-  register(email: $email, username: $usermane, password: $password)
+  register(email: $email, username: $usermane, password: $password) {
+    id
+    createdOn
+  }
 }
     `;
 export type RegisterMutationFn = ApolloReactCommon.MutationFunction<RegisterMutation, RegisterMutationVariables>;

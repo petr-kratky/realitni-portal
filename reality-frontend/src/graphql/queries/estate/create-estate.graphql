@@ -1,0 +1,8 @@
+mutation CreateEstate($estateInput: EstateCreateInput!) {
+  createEstate(estateInput: $estateInput) {
+    id
+    name
+    longitude
+    latitude
+  }
+}

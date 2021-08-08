@@ -1,31 +1,14 @@
 import React, {
   CSSProperties,
   FunctionComponent,
-  useEffect,
-  useRef,
-  useState,
 } from "react";
-import { useQuery } from "@apollo/react-hooks";
 import { createUseStyles } from "react-jss";
 
-import ESTATE_QUERY, {
-  EstateData,
-  EstateVars,
-} from "../../../graphql/queries/estate/estateById";
-import { decodeEstateObject } from "../../../lib/data/codebook";
-import { DecodedEstate } from "../../../types";
+import { useEstateQuery } from "src/graphql/queries/generated/graphql";
+import { Typography } from "@material-ui/core";
 
 type TEstateCardProps = {
-  id: number;
-  style: CSSProperties;
-  onLoad: () => void;
-  setVisibilityDetail: React.Dispatch<React.SetStateAction<boolean>>;
-  setFocusedEstate: React.Dispatch<React.SetStateAction<number | null>>;
-  focusedEstate: number | null;
-  setEditMode: React.Dispatch<React.SetStateAction<boolean>>;
-  updatedId: any;
-  setUpdatedId: any;
-  PlaceholderRender: any;
+  id: string;
 };
 
 const useStyles = createUseStyles({
@@ -93,122 +76,31 @@ const useStyles = createUseStyles({
   },
 });
 
-const EstateCard: FunctionComponent<TEstateCardProps> = ({
-  id,
-  onLoad,
-  style,
-  setVisibilityDetail,
-  setFocusedEstate,
-  focusedEstate,
-  setEditMode,
-  updatedId,
-  setUpdatedId,
-  PlaceholderRender,
-}) => {
+const EstateCard: FunctionComponent<TEstateCardProps> = ({ id }) => {
   const classes = useStyles();
 
-  const { data, loading, refetch } = useQuery<EstateData, EstateVars>(
-    ESTATE_QUERY,
-    { variables: { id } }
-  );
+  const { data, loading, refetch } = useEstateQuery({ variables: { id } })
 
-  const [estate, setEstate] = useState<DecodedEstate | null>(null);
-  const [active, setActive] = useState<boolean>(false);
+  const onCardClick = () => { };
 
-  const estateTab = useRef<Window>();
+  if (data?.estate) {
+    const { id, name, longitude, latitude } = data.estate
 
-  useEffect(() => {
-    if (+updatedId === id) {
-      refetch();
-      setUpdatedId(-1);
-    }
-  }, [updatedId]);
-
-  useEffect(() => {
-    if (focusedEstate) {
-      if (+focusedEstate === id) {
-        setActive(true);
-      } else {
-        setActive(false);
-      }
-    }
-  }, [focusedEstate]);
-
-  useEffect(() => {
-    if (data?.estate) {
-      const decodedEstate: DecodedEstate = decodeEstateObject(data?.estate);
-      setEstate(decodedEstate);
-    }
-  }, [data]);
-
-  const onCardClick = () => {
-    setVisibilityDetail(true);
-    if (estate) setFocusedEstate(estate.id);
-    setEditMode(false);
-    refetch();
-    // if (estate) {
-    //   if (estateTab.current && !estateTab.current.closed) {
-    //     window.open('javascript:;', `estate-${estate.id}`)
-    //   } else {
-    //     estateTab.current = window.open(`/estate/${estate.id}`, `estate-${estate.id}`) as Window
-    //   }
-    // }
-  };
-
-  return estate ? (
-    <div
-      className={active ? classes.containerActive : classes.container}
-      key={estate.id}
-      style={style}
-      onClick={onCardClick}
-      onMouseEnter={() => setActive(true)}
-      onMouseLeave={() => {
-        if (focusedEstate) {
-          if (+focusedEstate !== id) {
-            setActive(false);
-          }
-        }else {
-          setActive(false);
-        }
-      }}
-    >
-      <div className={classes.subContainer} key={`${estate.id}-sub-1`}>
-        <img
-          src={estate.s3Images[0] ?? "/images/sidebar/thumbnail-fallback.png"}
-          className={classes.thumbnail}
-          onLoad={onLoad}
-          onError={onLoad}
-        />
-        <div className={classes.detailsContainer}>
-          <div className={classes.advertFunction}>{estate.advertFunction}</div>
-          <div>
-            <span>{estate.advertType}</span>
-            {estate.advertType && (estate.advertSubtype ?? "") && (
-              <span> | </span>
-            )}
-            <span>{estate.advertSubtype}</span>
-          </div>
-          <div>
-            <span className={classes.addressField}>
-              {estate.fullAddress.replace(/(^ulice )|(^, )|(okres )/g, "")}
-            </span>
-          </div>
-        </div>
+    return (
+      <div
+        className={classes.container}
+        key={id}
+        onClick={onCardClick}
+      >
+        <Typography variant="subtitle1">{name}</Typography>
+        <Typography variant="subtitle2">{id}</Typography>
+        <Typography variant="body1">longitude: {longitude}</Typography>
+        <Typography variant="body1">latitude: {latitude}</Typography>
       </div>
-      <div className={classes.subContainer} key={`${estate.id}-sub-2`}>
-        <div className={active ? classes.advertActive : classes.advert}>
-          {estate.advertPrice?.toString().replace(/(?=(\d{3})+(?!\d))/g, " ") ??
-            PlaceholderRender()}
-          {estate.advertPrice && ` ${estate.advertPriceCurrency}`}
-        </div>
-        <div className={active ? classes.sellActive : classes.sell}>
-          {estate.sellPrice?.toString().replace(/(?=(\d{3})+(?!\d))/g, " ") ??
-            PlaceholderRender()}
-          {estate.sellPrice && ` ${estate.advertPriceCurrency}`}
-        </div>
-      </div>
-    </div>
-  ) : null;
-};
+    )
+  } else {
+    return null
+  }
+}
 
 export default EstateCard;

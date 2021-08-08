@@ -6,14 +6,13 @@ import React, {
 
 import SideBar, { DEFAULT_WIDTH } from "./SideBar";
 import EstatesList from "./EstatesList";
-import EstateCard from "./EstateCard";
 import { createUseStyles } from "react-jss";
 import SearchForm from "./SearchForm";
 import { SwitchTransition, Transition } from "react-transition-group";
 
 type TEstatesSidebarProps = {
   open: boolean;
-  estates: number[];
+  estates: string[];
   toggleOpen: () => void;
 };
 
@@ -75,51 +74,12 @@ const useStyles = createUseStyles({
   },
 });
 
-const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({
-  open,
-  estates,
-  toggleOpen,
-}) => {
-  const PlaceholderRender = () => (
-    <span style={{ color: "#e3e3e3" }}>waiting for fill</span>
-  );
+const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({ open, estates, toggleOpen, }) => {
   const classes = useStyles();
-  // const [estateCreate, { data, loading }] = useMutation(ESTATE_MUTATION_CREATE);
+
   const [activeTab, setActiveTab] = useState<number>(0);
-  const [visibilityDetail, setVisibilityDetail] = useState<boolean>(false);
-  const [focusedEstate, setFocusedEstate] = useState<number | null>(null);
-  const [editMode, setEditMode] = useState<boolean>(false);
-  const [updatedId, setUpdatedId] = useState<any>();
-  const [initialValues, setInitialValues] = useState<any>(null);
 
-  // useEffect(() => {
-  //   if (!loading && data?.create) {
-  //     const values = {
-  //       images: []
-  //     }
-  //     setInitialValues(values)
-  //     setFocusedEstate(data.create);
-  //     setVisibilityDetail(true);
-  //     setEditMode(true);
-  //   }
-  // }, [data]);
-
-  const menuTabsHandler = (tab, index) => (): void => {
-    switch (tab.action) {
-      case "TAB-CHANGE":
-        handleTabChange(index);
-        break;
-      // case "CREATE-ESTATE":
-      //   estateCreate({
-      //     variables: { localityLatitude: 0, localityLongitude: 0, sourceId: 3 },
-      //   }); // sourceId = 3 means source for statikum
-      //   break;
-      default:
-        break;
-    }
-  };
   const handleTabChange = (tabIndex: number) => {
-    console.log("tabIndex", tabIndex);
     if (!open) toggleOpen();
     if (open && activeTab == tabIndex) toggleOpen();
     setActiveTab(tabIndex);
@@ -129,42 +89,17 @@ const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({
     {
       iconSrc: "/images/map/search_icon.svg",
       style: { transform: "scale(-1, 1)" },
-      action: "TAB-CHANGE",
     },
     {
       iconSrc: "/images/sidebar/list-bulleted-24px.svg",
-      action: "TAB-CHANGE",
     },
     {
       iconSrc: "/images/sidebar/time-24px.svg",
-      action: "TAB-CHANGE",
     },
     {
       iconSrc: "/images/sidebar/plus-64.svg",
-      action: "CREATE-ESTATE",
     },
   ];
-
-  const estateCardRender = (id, onChildDidLoad, transitionStyles) => (
-    <EstateCard
-      key={id}
-      id={id}
-      onLoad={onChildDidLoad}
-      setVisibilityDetail={setVisibilityDetail}
-      setFocusedEstate={setFocusedEstate}
-      focusedEstate={focusedEstate}
-      updatedId={updatedId}
-      setUpdatedId={setUpdatedId}
-      setEditMode={setEditMode}
-      style={{
-        transitionDuration: "400ms",
-        transitionProperty: "opacity, transform",
-        transitionTimingFunction: "cubic-bezier(.32,1.08,.49,1.03)",
-        ...transitionStyles,
-      }}
-      PlaceholderRender={PlaceholderRender}
-    />
-  );
 
   return (
     <>
@@ -172,10 +107,8 @@ const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({
         {menuTabs.map((tab, index) => (
           <div
             key={index}
-            onClick={menuTabsHandler(tab, index)}
-            className={`${classes.menuItem} ${
-              activeTab === index ? classes.activeMenuItem : ""
-            }`}
+            onClick={() => handleTabChange(index)}
+            className={`${classes.menuItem} ${activeTab === index ? classes.activeMenuItem : "" }`}
           >
             <img
               className={classes.menuItemIcon}
@@ -223,13 +156,7 @@ const EstatesSidebar: FunctionComponent<TEstatesSidebarProps> = ({
                 >
                   {activeTab === 0 && <SearchForm />}
                   {activeTab === 1 && (
-                    <EstatesList
-                      estates={estates}
-                      estatesPerPage={12}
-                      setVisibilityDetail={setVisibilityDetail}
-                      setFocusedEstate={setFocusedEstate}
-                      estateCardRender={estateCardRender}
-                    />
+                    <EstatesList estates={estates} />
                   )}
                   {activeTab === 2 && <div>recents section</div>}
                 </div>

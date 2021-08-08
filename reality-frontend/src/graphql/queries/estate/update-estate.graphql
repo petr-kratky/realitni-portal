@@ -1,0 +1,8 @@
+mutation UpdateEstate($id: String!, $estateInput: EstateUpdateInput!) {
+  updateEstate(id: $id, estateInput: $estateInput) {
+    id
+    name
+    longitude
+    latitude
+  }
+}

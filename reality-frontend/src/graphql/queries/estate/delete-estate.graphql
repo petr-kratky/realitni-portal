@@ -1,0 +1,3 @@
+mutation DeleteEstate($id: String!) {
+  deleteEstate(id: $id)
+}

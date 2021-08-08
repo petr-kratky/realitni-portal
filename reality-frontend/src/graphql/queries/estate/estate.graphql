@@ -1,0 +1,8 @@
+query Estate($id: String!) {
+  estate(id: $id) {
+    id
+    name
+    longitude
+    latitude
+  }
+}

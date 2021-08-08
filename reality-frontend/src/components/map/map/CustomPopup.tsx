@@ -10,7 +10,7 @@ import useDebounce from '../../../lib/hooks/useDebounce'
 
 
 export interface CustomPopupProps extends PopupProps {
-  markerId: number
+  markerId: string
   longitude: number
   latitude: number
   isVisible: boolean
@@ -92,33 +92,23 @@ const CustomPopup: FunctionComponent<CustomPopupProps> = (props) => {
   const classes = useStyles()
 
   const [activeIndex, setActiveIndex] = useState<number>(0)
-  const [isEstateLoaded, setIsEstateLoaded] = useState<boolean>(false)
-
-  const debouncedActiveIndex = useDebounce(activeIndex, 250)
 
   useEffect(() => setActiveIndex(0), [features])
 
   const getActiveFeatureID = () =>
-    features[debouncedActiveIndex]?.properties?.id ?? features[0].properties.id
+    features[activeIndex]?.properties?.id ?? features[0].properties.id
 
   const onRequestPrevious = () => {
     if (activeIndex > 0) {
-      setIsEstateLoaded(false)
-      setTimeout(() => setActiveIndex(activeIndex - 1))
+      setActiveIndex(activeIndex - 1)
     }
   }
 
   const onRequestNext = () => {
     if (activeIndex < features.length - 1) {
-      setIsEstateLoaded(false)
-      setTimeout(() => setActiveIndex(activeIndex + 1))
+      setActiveIndex(activeIndex + 1)
     }
   }
-
-  const onChildDidLoad = () => {
-    setIsEstateLoaded(true)
-  }
-
 
   return isVisible ? (
     <Popup
@@ -134,26 +124,7 @@ const CustomPopup: FunctionComponent<CustomPopupProps> = (props) => {
             {'<'}
           </Button>
           <div className={classes.estateCardContainer}>
-            <Transition timeout={{ enter: 0, exit: 200 }} in={isEstateLoaded}>
-              {state => {
-                const transitionStyles: { [key: string]: CSSProperties } = {
-                  entering: { opacity: 0 },
-                  entered: { opacity: 1 },
-                  exiting: { opacity: 0 },
-                  exited: { opacity: 0 }
-                }
-
-                return (
-                  <PopupEstateCard id={getActiveFeatureID()} onLoad={onChildDidLoad} style={{
-                    transitionDuration: '200ms',
-                    transitionProperty: 'opacity',
-                    transitionTimingFunction: 'ease',
-                    ...transitionStyles[state]
-                  }}
-                  />
-                )
-              }}
-            </Transition>
+          <PopupEstateCard id={getActiveFeatureID()} />
           </div>
           <Button
             onClick={onRequestNext} className={classes.navButton}
@@ -173,7 +144,7 @@ const CustomPopup: FunctionComponent<CustomPopupProps> = (props) => {
 };
 
 CustomPopup.defaultProps = {
-  markerId: 0,
+  markerId: '',
   longitude: 0,
   latitude: 0,
   isVisible: false,

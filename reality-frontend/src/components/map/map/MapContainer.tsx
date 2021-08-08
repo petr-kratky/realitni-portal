@@ -6,7 +6,7 @@ import ContextMenu, { ContextMenuProps } from './ContextMenu'
 import RSMap from './RSMap'
 
 type TMapContainerProps = {
-  setOnScreenEstates: Dispatch<SetStateAction<number[]>>,
+  setOnScreenEstates: Dispatch<SetStateAction<string[]>>,
 }
 
 

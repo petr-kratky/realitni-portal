@@ -3,11 +3,12 @@ import { useMutation, useQuery } from '@apollo/react-hooks'
 import { useRouter } from 'next/dist/client/router'
 import { GeoJSONSource, LngLatBounds, Map } from 'mapbox-gl'
 import * as d3 from 'd3-ease'
-import React, { FunctionComponent, useEffect, useLayoutEffect, useRef, useState, } from 'react';
+import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 
 import { FILTERS_QUERY, VIEWPORT_QUERY } from '../../../graphql/apollo-client/client-cache/queries'
 import { SET_VIEWPORT } from '../../../graphql/apollo-client/client-cache/mutations'
 import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
+import useDebounce from '../../../lib/hooks/useDebounce'
 import {
   CachedFiltersData,
   CachedViewportData,
@@ -36,81 +37,90 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
   const [mapViewport, setMapViewport] = useState<MapViewport>(cachedViewport)
   const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false)
-  const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false)
 
-
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (mapRef.current !== null && isMapLoaded) {
       const map: Map = mapRef.current.getMap()
 
-      map.addSource('estates', {
-        type: 'geojson',
-        data: getGeojsonSourceUri(),
-        buffer: 0,
-        tolerance: 10,
-        cluster: true,
-        clusterRadius: 50,
-      })
-      map.addLayer({
-        id: "clusters",
-        type: "circle",
-        interactive: true,
-        source: "estates",
-        filter: ["has", "point_count"],
-        paint: {
-          "circle-color": '#c10800',
-          "circle-radius": {
-            property: 'point_count',
-            stops: [[5, 10], [10, 13], [15, 18]]
+      try {
+        map.addSource('estates', {
+          type: 'geojson',
+          data: getGeojsonSourceUri(),
+          buffer: 0,
+          tolerance: 10,
+          cluster: true,
+          clusterRadius: 50,
+        })
+
+        map.addLayer({
+          id: "clusters",
+          type: "circle",
+          interactive: true,
+          source: "estates",
+          filter: ["has", "point_count"],
+          paint: {
+            "circle-color": '#c10800',
+            "circle-radius": {
+              property: 'point_count',
+              stops: [[5, 10], [10, 13], [15, 18]]
+            },
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#fff'
+          }
+        });
+
+        map.addLayer({
+          id: 'cluster-count',
+          type: 'symbol',
+          source: 'estates',
+          filter: ['has', 'point_count'],
+          paint: {
+            'text-color': '#fff'
           },
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#fff'
-        }
-      });
+          layout: {
+            "text-field": "{point_count_abbreviated}",
+            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+            "text-size": 12
+          }
+        })
 
-      map.addLayer({
-        id: 'cluster-count',
-        type: 'symbol',
-        source: 'estates',
-        filter: ['has', 'point_count'],
-        paint: {
-          'text-color': '#fff'
-        },
-        layout: {
-          "text-field": "{point_count_abbreviated}",
-          "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-          "text-size": 12
-        }
-      })
+        map.addLayer({
+          id: 'unclustered-point',
+          type: 'circle',
+          interactive: true,
+          source: 'estates',
+          filter: ['!', ['has', 'point_count']],
+          paint: {
+            'circle-radius': { stops: [[0, 2], [5, 3], [12, 4], [16, 7]] },
+            'circle-color': '#c10800',
+            'circle-stroke-width': 1,
+            'circle-stroke-color': '#fff'
+          }
+        })
 
-      map.addLayer({
-        id: 'unclustered-point',
-        type: 'circle',
-        interactive: true,
-        source: 'estates',
-        filter: ['!', ['has', 'point_count']],
-        paint: {
-          'circle-radius': { stops: [[0, 2], [5, 3], [12, 4], [16, 7]] },
-          'circle-color': '#c10800',
-          'circle-stroke-width': 1,
-          'circle-stroke-color': '#fff'
-        }
-      })
+      } catch (err) {
+        console.error(err)
+      }
+
+      // map.on('sourcedata', (e) => {
+      //   if (e.sourceId === 'estates' && e.isSourceLoaded) {
+      //     console.log(e)
+      //     // console.log('isEasing', map.isEasing())
+      //     // console.log('isZooming', map.isZooming())
+      //     // console.log('isRotating', map.isRotating())
+      //     updateOnScreenEstates()
+      //   }
+      // })
 
       // Get initial viewport 'height' and 'width' to match its container div
       const { clientWidth: width, clientHeight: height } = map.getContainer()
       setCachedViewport({ variables: { cachedViewport: { ...mapViewport, width, height } } })
       //@ts-ignore
       pushViewportToUrl(router, { width, height, ...mapViewport })
-
-      setIsDataLoaded(true)
+      // Initial update of rendered features
+      updateOnScreenEstates()
     }
   }, [isMapLoaded])
-
-
-  useEffect(() => {
-    setTimeout(() => updateOnScreenEstates(), 500)
-  }, [isDataLoaded])
 
 
   useEffect(() => {
@@ -171,8 +181,8 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
     if (!isZooming && !isPanning && !inTransition && !isDragging) {
       setCachedViewport({ variables: { cachedViewport: mapViewport } })
       pushViewportToUrl(router, mapViewport)
-      updateOnScreenEstates()
       updateGeojsonSource(getGeojsonSourceUri())
+      updateOnScreenEstates()
     }
   }
 
@@ -182,7 +192,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
       const { geometry: { coordinates } } = cluster
       const features = await getEstatesFromCluster(cluster)
       setPopupProps({
-        markerId: cluster.id,
+        markerId: cluster.id.toString(10),
         isVisible: true,
         features: features as Array<EstateFeature>,
         longitude: coordinates[0],
@@ -205,12 +215,20 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
 
   const updateOnScreenEstates = async () => {
-    // Clear currently visible estates, otherwise list is not loaded from scratch
-    setOnScreenEstates([])
-
     if (mapRef.current !== null && isMapLoaded) {
       const map = mapRef.current.getMap()
-      const onScreenEstates: Array<number> = []
+
+      // Re-run function every X milliseconds if the source is not finished loading data
+      // TODO: Find better solution
+      if (!map.isSourceLoaded('estates')) {
+        setTimeout(updateOnScreenEstates, 50)
+        return
+      }
+
+      // Clear currently visible estates, otherwise list is not load from scratch
+      setOnScreenEstates([])
+
+      const onScreenEstates: Array<string> = []
 
       const estates = map.queryRenderedFeatures(undefined, { layers: ['unclustered-point'] })
       estates.forEach(estate => onScreenEstates.push(estate.properties?.id))
@@ -221,11 +239,12 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
         try {
           const features = await getEstatesFromCluster(cluster as unknown as EstateCluster)
           features.forEach(estate => onScreenEstates.push(estate.properties.id))
-        } catch (e) {
+        } catch (err) {
+          console.error(err)
         }
 
       }))
-
+      
       setOnScreenEstates(onScreenEstates)
     }
   }

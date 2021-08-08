@@ -61,7 +61,7 @@ const MapPage: NextPage<MapPageProps> = () => {
   const [setCachedViewport] = useMutation<CachedViewportData, CachedViewportInput>(SET_VIEWPORT)
 
   const [sidebarOpen, setSidebarOpen] = useState<boolean>(true)
-  const [onScreenEstates, setOnScreenEstates] = useState<number[]>([])
+  const [onScreenEstates, setOnScreenEstates] = useState<string[]>([])
   const [isMapReady, setIsMapReady] = useState<boolean>(false)
 
   useEffect(() => {
