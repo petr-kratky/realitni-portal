@@ -7,7 +7,7 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-import { ApolloError, AuthenticationError} from 'apollo-server-express'
+import { ApolloError, AuthenticationError } from 'apollo-server-express'
 import { hash, compare } from "bcryptjs";
 import { verify } from "jsonwebtoken";
 
@@ -17,7 +17,6 @@ import { MyContext } from "../typings";
 import { createRefreshToken, createAccessToken } from "../auth";
 import { sendRefreshToken } from "../sendRefreshToken";
 import { RequireAuthentication } from "../decorators/RequireAuthentication";
-
 
 @ObjectType()
 class LoginResponse {
@@ -30,12 +29,6 @@ class LoginResponse {
 
 @Resolver((of) => Account)
 export class AccountResolver {
-  @Query(() => String)
-  @RequireAuthentication()
-  bye(@Ctx() { payload }: MyContext) {
-    return `your user id is: ${payload!.id}`;
-  }
-
 
   @Query(() => Account, { nullable: true })
   currentUser(@Ctx() context: MyContext) {
@@ -50,8 +43,7 @@ export class AccountResolver {
       return Account.findOne(payload.id);
 
     } catch (err) {
-      console.error(err)
-      throw new AuthenticationError(err)
+      throw new AuthenticationError("AUTH_FAILED")
     }
   }
 
@@ -59,9 +51,12 @@ export class AccountResolver {
   @RequireAuthentication()
   @Mutation(() => Boolean)
   async logout(@Ctx() { res }: MyContext) {
-    sendRefreshToken(res, "", process.env.DOMAIN);
-
-    return true;
+    try {
+      sendRefreshToken(res, "", process.env.DOMAIN);
+      return true;
+    } catch (err) {
+      throw new ApolloError("LOGOUT_FAILED", "500", { err })
+    }
   }
 
 
@@ -73,12 +68,12 @@ export class AccountResolver {
   ): Promise<LoginResponse> {
     const account = await Account.findOne({ where: { email } });
     if (!account) {
-      throw new ApolloError('LOGIN_INVALID_ACCOUNT')
+      throw new ApolloError('LOGIN_INVALID_ACCOUNT', "400")
     }
 
     const valid = await compare(password, account.password);
     if (!valid) {
-      throw new ApolloError('LOGIN_INVALID_ACCOUNT')
+      throw new ApolloError('LOGIN_INVALID_PASSWORD', "400")
     }
 
     sendRefreshToken(res, createRefreshToken(account), process.env.DOMAIN);
@@ -90,7 +85,7 @@ export class AccountResolver {
   }
 
 
-  @Mutation(() => Boolean)
+  @Mutation(() => Account)
   @RequireAuthentication()
   async register(
     @Arg("username") username: string,
@@ -98,18 +93,25 @@ export class AccountResolver {
     @Arg("password") password: string
   ) {
     try {
-      await Account.insert({
+      if (await Account.findOne({ where: { email } }))
+        throw new ApolloError("REGISTER_EMAIL_TAKEN")
+
+      if (await Account.findOne({ where: { username } }))
+        throw new ApolloError("REGISTER_USERNAME_TAKEN")
+
+    } catch (err) {
+      throw new ApolloError(err.message, undefined, { err })
+    }
+
+    try {
+      return await Account.merge(new Account(), {
         username,
         email,
         password: await hash(password, 12),
-      });
-    } catch (e) {
-      // console.log('password', await hash(password, 12))
-      console.log(e);
-      return false;
+      }).save()
+    } catch (err) {
+      throw new ApolloError("REGISTER_FAILED", "500", { err })
     }
-
-    return true;
   }
 }
 

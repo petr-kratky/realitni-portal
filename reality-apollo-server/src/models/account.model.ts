@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, Generated } from "typeorm";
 import { Field, ObjectType, ID, Int } from 'type-graphql';
 
 @ObjectType()
@@ -21,11 +21,11 @@ export class Account extends BaseEntity {
   email: string;
 
   @Field(() => Date)
-  @Column("timestamp without time zone", { name: "created_on", nullable: true })
+  @Column("timestamp with time zone", { name: "created_on", default: "now()" })
   createdOn: Date;
 
   @Field(() => Date, { nullable: true })
-  @Column("timestamp without time zone", { name: "last_login", nullable: true })
+  @Column("timestamp with time zone", { name: "last_login", nullable: true })
   lastLogin: Date;
 
   @Field(() => Int)
