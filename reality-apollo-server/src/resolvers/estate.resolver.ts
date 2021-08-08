@@ -1,6 +1,7 @@
 import { Inject } from "typescript-ioc";
 import {
   Arg,
+  ID,
   Mutation,
   Query,
   Resolver,
@@ -35,13 +36,13 @@ export class EstateResolver {
     }
   }
 
-  @Mutation((returns) => Estate)
+  @Mutation((returns) => ID)
   @RequireAuthentication()
-  async deleteEstate(@Arg("id") id: string): Promise<Estate> {
+  async deleteEstate(@Arg("id") id: string): Promise<string> {
     const estate = await this.estateService.getEstateById(id)
     try {
       await estate.remove()
-      return Estate.merge(estate, { id })
+      return id
     } catch (e) {
       console.error(e)
       throw new ApolloError("ESTATE_DELETE_FAILED", "500")

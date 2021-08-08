@@ -1,5 +1,5 @@
 import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, Generated } from "typeorm";
-import { Field, ObjectType, ID, Int } from 'type-graphql';
+import { Field, ObjectType, ID, Int, InputType } from 'type-graphql';
 
 @ObjectType()
 @Entity("users", { schema: "public" })
@@ -35,4 +35,15 @@ export class Account extends BaseEntity {
     default: () => "0",
   })
   tokenVersion: number;
+}
+
+@InputType()
+export class AccountUpdateInput implements Partial<Account> {
+
+  @Field(() => String, { nullable: true })
+  username?: string
+
+  @Field(() => String, { nullable: true })
+  email?: string
+
 }
