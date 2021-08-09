@@ -1,5 +1,5 @@
 import React, { FunctionComponent, useState } from "react";
-import { Formik, FormikHelpers } from "formik";
+import { Formik } from "formik";
 import { Button, TextField, Theme, makeStyles, createStyles, Snackbar, Typography } from '@material-ui/core'
 import Alert from '@material-ui/lab/Alert'
 import * as Yup from "yup";
@@ -7,6 +7,7 @@ import * as Yup from "yup";
 import { useLoginMutation, CurrentUserDocument, CurrentUserQuery } from "src/graphql/queries/generated/graphql";
 import { setAccessToken } from "src/lib/user-management/accessToken";
 import { useRouter } from "next/router";
+import { FormikSubmitFunction } from "../../types";
 
 type TSearchFormProps = {};
 
@@ -14,11 +15,6 @@ type FormValues = {
   email: string;
   password: string;
 };
-
-type TOnSubmitFunction = (
-  values: FormValues,
-  actions: FormikHelpers<FormValues>
-) => void;
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   loginFormContainer: {
@@ -59,7 +55,7 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
     setSnackOpen(false)
   }
 
-  const onFormSubmit: TOnSubmitFunction = async (values, actions) => {
+  const onFormSubmit: FormikSubmitFunction<FormValues> = async (values, actions) => {
     const { email, password } = values;
 
     try {
@@ -91,7 +87,6 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
     }
   }
 
-handleSnackClose
   return (
     <div className={classes.loginFormContainer}>
       <Snackbar open={snackOpen} autoHideDuration={6000} onClose={handleSnackClose}>
