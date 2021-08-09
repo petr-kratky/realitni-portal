@@ -1,26 +1,28 @@
 import React, { FunctionComponent, useState } from "react";
 import { Formik } from "formik";
-import { Button, TextField, Theme, makeStyles, createStyles, Snackbar, Dialog, DialogActions, DialogTitle, DialogContent, DialogContentText } from '@material-ui/core'
+import { Button, TextField, Theme, makeStyles, createStyles, Snackbar, Dialog, DialogActions, DialogTitle, DialogContent, DialogContentText, CircularProgress } from '@material-ui/core'
 import Alert from '@material-ui/lab/Alert'
 import * as Yup from "yup";
 
-import { } from "src/graphql/queries/generated/graphql";
+import { useCreateEstateMutation } from "src/graphql/queries/generated/graphql";
 import { FormikSubmitFunction } from '../../../types'
+
+
+type FormValues = {
+  coordinates: string,
+  name?: string
+}
+
 
 export type CreateEstateModalProps = {
   isVisible: boolean
   handleClose: () => void
 }
 
-type FormValues = {
-  value1: string;
-  value2: string;
-};
-
-
 const useStyles = makeStyles((theme: Theme) => createStyles({
 
 }));
+
 
 const CreateEstateModal: FunctionComponent<CreateEstateModalProps> = ({ isVisible, handleClose }) => {
   const classes = useStyles();
@@ -28,32 +30,56 @@ const CreateEstateModal: FunctionComponent<CreateEstateModalProps> = ({ isVisibl
   const [responseError, setResponseError] = useState('')
   const [snackOpen, setSnackOpen] = useState(false)
 
-  const initialValues: FormValues = {
-    value1: "",
-    value2: "",
-  };
+  const [createEstate] = useCreateEstateMutation()
 
-  const formSchema = Yup.object().shape({
-    value1: Yup.string().required('Toto pole je povinné'),
-    value2: Yup.string().required('Toto pole je povinné')
-  });
+  const initialValues: FormValues = {
+    coordinates: "",
+    name: ""
+  }
+
+  const formSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+    name: Yup.string()
+      .max(128, (max) => `Název nemovitosti nesmí být delší než ${max} znaků`)
+      .trim(),
+    coordinates: Yup.string()
+      .required('Toto pole je povinné')
+  })
 
   const handleSnackClose = () => {
     setSnackOpen(false)
   }
 
-  const onFormSubmit: FormikSubmitFunction<FormValues> = async (values, actions) => {
-    const { value1, value2 } = values;
+  const onFormSubmit: FormikSubmitFunction<FormValues> = async ({ coordinates, name }, actions) => {
+    const coords = coordinates.split(',').map(str => parseFloat(str.trim()))
+
+    if (coords.length !== 2) {
+      actions.setFieldError('coordinates', 'Souřadnice nejsou ve spravném formátu')
+      return
+    }
+
+    const [latitude, longitude] = coords
+
+    if (latitude > 90 || latitude < -90) {
+      actions.setFieldError('coordinates', 'Zeměpisná šířka musí být v rozmezí od -90 až 90')
+      return
+    }
+
+    if (longitude > 180 || longitude < -180) {
+      actions.setFieldError('coordinates', 'Zeměpisná délka musí být v rozmezí od -180 do 180')
+      return
+    }
 
     try {
-      // const response = await login({
-      //   variables: {
-      //     email,
-      //     password,
-      //   },
-      // })
-    } catch (e) {
-      setResponseError(e.message)
+      const response = await createEstate({
+        variables: { estateInput: { latitude, longitude, name } }
+      })
+
+      console.log(response.data?.createEstate)
+
+      handleClose()
+
+    } catch (err) {
+      setResponseError(err.message)
       setSnackOpen(true)
     }
   }
@@ -64,20 +90,22 @@ const CreateEstateModal: FunctionComponent<CreateEstateModalProps> = ({ isVisibl
         initialValues={initialValues}
         onSubmit={onFormSubmit}
         validationSchema={formSchema}
+        validateOnChange
       >
         {(formikProps) => {
           const {
             values,
             errors,
+            touched,
+            isSubmitting,
             handleChange,
             handleSubmit,
-            isSubmitting,
-            submitForm,
+            submitForm
           } = formikProps;
 
           return (
             <>
-              <DialogTitle>Dialog Title</DialogTitle>
+              <DialogTitle>Nová nemovitost</DialogTitle>
               <form onSubmit={handleSubmit}>
                 <DialogContent>
                   <DialogContentText>
@@ -85,41 +113,41 @@ const CreateEstateModal: FunctionComponent<CreateEstateModalProps> = ({ isVisibl
                     occasionally.
                   </DialogContentText>
                   <TextField
-                    id="value1"
+                    id="name"
                     onChange={handleChange}
-                    value={values.value1}
-                    error={!!errors.value1?.length}
-                    helperText={errors.value1 ?? ""}
+                    value={values.name}
+                    error={touched.name && !!errors.name?.length}
+                    helperText={(touched.name && errors.name) ?? ""}
                     margin="dense"
-                    label="Value1"
+                    label="Název nemovitosti"
                     fullWidth={true}
                   />
                   <TextField
-                    id="value2"
+                    id="coordinates"
                     onChange={handleChange}
-                    value={values.value2}
-                    error={!!errors.value2?.length}
-                    helperText={errors.value2 ?? ""}
-                    label="Value2"
+                    value={values.coordinates}
+                    error={touched.coordinates && !!errors.coordinates?.length}
+                    helperText={(touched.coordinates && errors.coordinates) ?? "Zadejte zeměpisné souřadnice oddělené čárkou"}
+                    label="Souřadnice"
+                    placeholder="50.003606517, 14.673597798"
                     margin="dense"
                     fullWidth={true}
                   />
-
                 </DialogContent>
                 <DialogActions>
                   <Button
                     onClick={handleClose}
-                    disabled={isSubmitting}
-                    color='primary'
+                    color='default'
                   >
-                    Cancel
+                    zavřít
                   </Button>
                   <Button
                     onClick={submitForm}
                     disabled={isSubmitting}
                     color='primary'
                   >
-                    Action
+                    vytvořit
+                    {isSubmitting && <>&nbsp;<CircularProgress size={20} color="primary" /> </>}
                   </Button>
                 </DialogActions>
               </form>

@@ -101,6 +101,7 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
           const {
             values,
             errors,
+            touched,
             handleChange,
             handleSubmit,
             isSubmitting,
@@ -113,8 +114,8 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
                 id="email"
                 onChange={handleChange}
                 value={values.email}
-                error={!!errors.email?.length}
-                helperText={errors.email ?? ""}
+                error={touched.email && !!errors.email?.length}
+                helperText={(touched.email && errors.email) ?? ""}
                 label="E-mail"
                 variant="outlined"
               />
@@ -122,8 +123,8 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
                 id="password"
                 onChange={handleChange}
                 value={values.password}
-                error={!!errors.password?.length}
-                helperText={errors.password ?? ""}
+                error={touched.password && !!errors.password?.length}
+                helperText={(touched.password && errors.password) ?? ""}
                 label="Heslo"
                 variant="outlined"
                 type="password"

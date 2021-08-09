@@ -69,6 +69,7 @@ const FormModalTemplate: FunctionComponent<FormModalTemplateProps> = ({ isVisibl
           const {
             values,
             errors,
+            touched,
             handleChange,
             handleSubmit,
             isSubmitting,
@@ -88,8 +89,8 @@ const FormModalTemplate: FunctionComponent<FormModalTemplateProps> = ({ isVisibl
                     id="value1"
                     onChange={handleChange}
                     value={values.value1}
-                    error={!!errors.value1?.length}
-                    helperText={errors.value1 ?? ""}
+                    error={touched.value1 && !!errors.value1?.length}
+                    helperText={(touched.value1 && errors.value1) ?? ""}
                     margin="dense"
                     label="Value1"
                     fullWidth={true}
@@ -98,8 +99,8 @@ const FormModalTemplate: FunctionComponent<FormModalTemplateProps> = ({ isVisibl
                     id="value2"
                     onChange={handleChange}
                     value={values.value2}
-                    error={!!errors.value2?.length}
-                    helperText={errors.value2 ?? ""}
+                    error={touched.value2 && !!errors.value2?.length}
+                    helperText={(touched.value2 && errors.value2) ?? ""}
                     label="Value2"
                     margin="dense"
                     fullWidth={true}
