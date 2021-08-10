@@ -1,10 +1,11 @@
-import React, { ChangeEventHandler, FunctionComponent } from 'react';
+import React, { ChangeEventHandler, FunctionComponent, useLayoutEffect, useState } from 'react';
 import { Formik, FormikHelpers } from 'formik'
 import { useRouter } from 'next/router'
 import { createUseStyles } from 'react-jss'
 import { useApolloClient, useMutation, useQuery } from '@apollo/react-hooks'
 import { Bounds, fitBounds, FittedBounds } from 'viewport-mercator-project'
 import * as Yup from 'yup'
+import * as d3 from 'd3-ease'
 
 import TextInput from '../../forms/TextInput'
 import SelectInput, { ISelectInputProps, TSelectOption } from '../../forms/SelectInput'
@@ -20,6 +21,8 @@ import {
 } from '../../../types'
 import { FILTERS_QUERY, VIEWPORT_QUERY } from '../../../graphql/apollo-client/client-cache/queries'
 import { geocodeLocation, pushViewportToUrl } from '../../../utils/utils'
+import viewportStore, { CachedViewport } from 'src/store/viewport';
+import { FlyToInterpolator } from 'react-map-gl';
 
 
 type TSearchFormProps = {}
@@ -61,9 +64,15 @@ const useStyles = createUseStyles({
 
 const SearchForm: FunctionComponent<TSearchFormProps> = (props) => {
   const [setCachedFilters] = useMutation<CachedFiltersData, CachedFiltersInput>(SET_FILTERS)
-  const [setCachedViewport] = useMutation<CachedViewportData, CachedViewportInput>(SET_VIEWPORT)
 
   const { data: { cachedFilters } } = useQuery(FILTERS_QUERY) as LocalQueryResult<CachedFiltersData>
+
+  const [viewportState, setViewportState] = useState<CachedViewport>(viewportStore.initialState)
+
+  useLayoutEffect(() => {
+    const subs = viewportStore.subscribe(setViewportState)
+    return () => subs.unsubscribe()
+  }, [])
 
   const router = useRouter()
   const client = useApolloClient()
@@ -151,14 +160,20 @@ const SearchForm: FunctionComponent<TSearchFormProps> = (props) => {
       return
     }
 
-    const { data: { cachedViewport: { width, height } } } = await client.query({ query: VIEWPORT_QUERY })
+    const { width, height } = viewportState
 
     const { northeast, southwest } = locationData.results[0].geometry.viewport
     const bounds: Bounds = [[northeast.lng, northeast.lat], [southwest.lng, southwest.lat]]
     const fittedBounds: FittedBounds = fitBounds({ bounds, width, height })
     const newViewport = { width, height, ...fittedBounds }
 
-    await setCachedViewport({ variables: { cachedViewport: newViewport } })
+    viewportStore.setViewport({
+      ...newViewport,
+      transitionDuration: 2000,
+      transitionInterpolator: new FlyToInterpolator(),
+      transitionEasing: d3.easeSin
+    } as any)
+    
     await pushViewportToUrl(router, newViewport)
   }
 

@@ -3,12 +3,13 @@ import { useMutation, useQuery } from '@apollo/react-hooks'
 import { useRouter } from 'next/dist/client/router'
 import { GeoJSONSource, LngLatBounds, Map } from 'mapbox-gl'
 import * as d3 from 'd3-ease'
-import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, useEffect, useRef, useState, useLayoutEffect } from 'react';
 
 import { FILTERS_QUERY, VIEWPORT_QUERY } from '../../../graphql/apollo-client/client-cache/queries'
 import { SET_VIEWPORT } from '../../../graphql/apollo-client/client-cache/mutations'
 import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
 import useDebounce from '../../../lib/hooks/useDebounce'
+import viewportStore, { CachedViewport } from 'src/store/viewport'
 import {
   CachedFiltersData,
   CachedViewportData,
@@ -31,12 +32,14 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   const mapRef = useRef<ReactMapGL>(null)
 
   const { data: { cachedFilters } } = useQuery(FILTERS_QUERY) as LocalQueryResult<CachedFiltersData>
-  const { data: { cachedViewport } } = useQuery(VIEWPORT_QUERY) as LocalQueryResult<CachedViewportData>
 
-  const [setCachedViewport] = useMutation<CachedViewportData, CachedViewportInput>(SET_VIEWPORT)
-
-  const [mapViewport, setMapViewport] = useState<MapViewport>(cachedViewport)
+  const [viewportState, setViewportState] = useState<CachedViewport>(viewportStore.initialState)
   const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false)
+
+  useLayoutEffect(() => {
+    const subs = viewportStore.subscribe(setViewportState)
+    return () => subs.unsubscribe()
+  }, [])
 
   useEffect(() => {
     if (mapRef.current !== null && isMapLoaded) {
@@ -114,24 +117,25 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
       // Get initial viewport 'height' and 'width' to match its container div
       const { clientWidth: width, clientHeight: height } = map.getContainer()
-      setCachedViewport({ variables: { cachedViewport: { ...mapViewport, width, height } } })
+      viewportStore.setViewport({ ...viewportState, width, height })
+      // setCachedViewport({ variables: { cachedViewport: { ...mapViewport, width, height } } })
       //@ts-ignore
-      pushViewportToUrl(router, { width, height, ...mapViewport })
+      pushViewportToUrl(router, { width, height, ...viewportState })
       // Initial update of rendered features
       updateOnScreenEstates()
     }
   }, [isMapLoaded])
 
 
-  useEffect(() => {
-    setMapViewport({
-      ...mapViewport,
-      ...cachedViewport,
-      transitionDuration: 2000,
-      transitionInterpolator: new FlyToInterpolator(),
-      transitionEasing: d3.easeSin
-    } as any)
-  }, [cachedViewport])
+  // useEffect(() => {
+  //   setMapViewport({
+  //     ...mapViewport,
+  //     ...cachedViewport,
+  //     transitionDuration: 2000,
+  //     transitionInterpolator: new FlyToInterpolator(),
+  //     transitionEasing: d3.easeSin
+  //   } as any)
+  // }, [cachedViewport])
 
   useEffect(() => {
     updateGeojsonSource(getGeojsonSourceUri())
@@ -165,12 +169,12 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
 
   const _onLoad = (): void => {
-    setIsMapLoaded(true)
+    setIsMapLoaded(true) 
   }
 
 
   const _onViewPortChange = (viewport: ViewportProps): void => {
-    setMapViewport(viewport)
+    viewportStore.setViewport(viewport)
     setContextMenuProps({ ...contextMenuProps, isVisible: false })
   }
 
@@ -179,8 +183,8 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
     const { isZooming, isPanning, inTransition, isDragging } = interactionState
 
     if (!isZooming && !isPanning && !inTransition && !isDragging) {
-      setCachedViewport({ variables: { cachedViewport: mapViewport } })
-      pushViewportToUrl(router, mapViewport)
+      // setCachedViewport({ variables: { cachedViewport: mapViewport } })
+      pushViewportToUrl(router, viewportState)
       updateGeojsonSource(getGeojsonSourceUri())
       updateOnScreenEstates()
     }
@@ -337,7 +341,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
   return (
     <ReactMapGL
-      {...mapViewport}
+      {...viewportState}
       onLoad={_onLoad}
       onClick={_onClick}
       onContextMenu={_onContextMenu}
