@@ -1,23 +1,30 @@
 import { ApolloError } from "apollo-server-express";
-import { getConnection } from "typeorm";
 import { Singleton } from "typescript-ioc";
 
-import { Estate, EstateCreateInput, EstateUpdateInput } from "../models";
+import { Account, Estate, EstateCreateInput, EstatePrimaryType, EstateSecondaryType } from "../models";
 
 @Singleton
 export class EstateService {
-  public async createEstate(estateInput: EstateCreateInput): Promise<Estate> {
+  public async createEstate(createdBy: string, estateInput: EstateCreateInput): Promise<Estate> {
     const { latitude, longitude } = estateInput
 
     const isLocationValid = EstateService.validateCoordinates(latitude, longitude)
     if (!isLocationValid) throw new ApolloError('ESTATE_INVALID_LOCATION_RANGE')
 
+    const newEstate = Estate.create({
+      ...estateInput,
+      created_by: Account.create({ id: createdBy }),
+      primary_type: EstatePrimaryType.create({ id: estateInput.primary_type_id }),
+      secondary_type: EstateSecondaryType.create({ id: estateInput.secondary_type_id })
+    })
+
     try {
-      const newEstate = await Estate.merge(new Estate(), estateInput).save()
-      return newEstate
-    } catch (e) {
-      console.error(e)
-      throw new ApolloError('ESTATE_CREATION_FAILED')
+      const createdEstate = await newEstate.save()
+      await createdEstate.reload()
+      return createdEstate
+    } catch (err) {
+      console.error(err)
+      throw new ApolloError('ESTATE_CREATION_FAILED', "500", { err })
     }
   }
 

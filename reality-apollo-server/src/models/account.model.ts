@@ -1,5 +1,6 @@
-import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, Generated } from "typeorm";
+import { Column, Entity, PrimaryGeneratedColumn, BaseEntity, Generated, OneToMany } from "typeorm";
 import { Field, ObjectType, ID, Int, InputType } from 'type-graphql';
+import { Estate } from ".";
 
 @ObjectType()
 @Entity("users", { schema: "public" })
@@ -35,7 +36,22 @@ export class Account extends BaseEntity {
     default: () => "0",
   })
   tokenVersion: number;
+
+  @Field(() => [Estate], { nullable: true })
+  @OneToMany(() => Estate, estate => estate.created_by, { nullable: true, lazy: true })
+  estates: Estate[]
 }
+
+
+@ObjectType()
+export class AccountPublicInfo implements Partial<Account> {
+  @Field(() => ID)
+  id: string;
+
+  @Field(() => String)
+  username: string;
+}
+
 
 @InputType()
 export class AccountUpdateInput implements Partial<Account> {

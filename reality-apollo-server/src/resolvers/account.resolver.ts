@@ -19,7 +19,7 @@ import { MyContext } from "../typings";
 import { createRefreshToken, createAccessToken } from "../auth";
 import { sendRefreshToken } from "../sendRefreshToken";
 import { RequireAuthentication } from "../decorators/RequireAuthentication";
-import { AccountService } from "../services/account.service";
+import { AccountService } from "../services";
 
 @ObjectType()
 class LoginResponse {
