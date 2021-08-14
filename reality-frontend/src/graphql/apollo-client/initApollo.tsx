@@ -17,10 +17,6 @@ import {
 } from "src/lib/user-management/accessToken";
 
 import { createUploadLink } from "apollo-upload-client";
-import {
-  uploadLinkXhr,
-  UploadRequestInit,
-} from "../../lib/upload/package/apollo/uploadLinkXhr";
 
 const isServer = () => typeof window === "undefined";
 
@@ -66,19 +62,8 @@ function create(
       return isomorphicFetch(origin + uri, fetchOptions);
     },
   };
-  const uploadOpts = {
-    ...commonOpts,
-    fetch: (uri: string, options: UploadRequestInit) => {
-      const fetchOptions: UploadRequestInit = getRequestOptions(options);
-      return uploadLinkXhr(origin + uri, fetchOptions);
-    },
-  };
-  const httpLink = ApolloLink.split(
-    (operation) => operation.getContext().hasUpload,
-    createUploadLink(uploadOpts),
-    new HttpLink(batchOpts)
-  );
-  // const httpLink = new HttpLink(batchOpts)
+
+  const httpLink = new HttpLink(batchOpts)
 
   const refreshLink = new TokenRefreshLink({
     accessTokenField: "accessToken",

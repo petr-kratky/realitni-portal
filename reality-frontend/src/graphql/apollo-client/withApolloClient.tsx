@@ -136,9 +136,7 @@ export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
       return {
         ...pageProps,
         apolloState,
-        serverAccessToken,
-        lngDict: {},
-        lng: 'cz'
+        serverAccessToken
       };
     };
   }

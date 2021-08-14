@@ -1,11 +1,7 @@
-import React, { CSSProperties, FunctionComponent, useEffect, useState } from 'react';
-import ReactPaginate from 'react-paginate'
+import React, { FunctionComponent } from 'react';
 import { createUseStyles } from 'react-jss'
-import { Transition } from 'react-transition-group'
 
 import EstateCard from './EstateCard'
-import Loading from '../../utils/Loading'
-import useDebounce from '../../../lib/hooks/useDebounce'
 
 
 type TEstatesListProps = {

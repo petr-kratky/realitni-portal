@@ -12,9 +12,7 @@ interface IApolloProps {
 
 export interface IAppRoot extends IApolloProps {
     AppInitialProps: AppInitialProps,
-    AppProps: AppProps,
-    lngDict: any,
-    lng: string
+    AppProps: AppProps
 }
 
 // https://github.com/DefinitelyTyped/DefinitelyTyped/issues/31125#issuecomment-445304740

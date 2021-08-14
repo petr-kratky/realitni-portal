@@ -15,9 +15,6 @@ import { IAppRoot } from "../types";
 
 import { theme } from '../lib/styles/mui-theme'
 import LoginForm from "src/components/forms/LoginForm";
-import I18n from "../lib/localization/i18n";
-import useI18n from "../lib/hooks/use-i18n";
-import CZ from '../locales/cz.json'
 import SnackBar from "src/components/utils/SnackBar";
 import { useRouter } from "next/router";
 
@@ -60,7 +57,7 @@ const useStyles = makeStyles((theme: Theme) =>
 );
 
 
-function MyComponent({ children, pageProps }) {
+function Layout({ children, pageProps }) {
   const classes = useStyles()
   const router = useRouter()
 
@@ -136,7 +133,7 @@ function MyComponent({ children, pageProps }) {
 }
 
 // https://github.com/mui-org/material-ui/blob/master/examples/nextjs/pages/_app.js
-function Application({ Component, apolloClient, pageProps, lngDict, lng }: AppProps & IAppRoot) {
+function Application({ Component, apolloClient, pageProps }: AppProps & IAppRoot) {
 
   useEffect(() => {
     const jssStyles = document.querySelector('#jss-server-side');
@@ -148,9 +145,9 @@ function Application({ Component, apolloClient, pageProps, lngDict, lng }: AppPr
   return (
     <ThemeProvider theme={theme}>
       <ApolloProvider client={apolloClient}>
-        <MyComponent pageProps={pageProps}>
+        <Layout pageProps={pageProps}>
           <Component {...pageProps} />
-        </MyComponent>
+        </Layout>
       </ApolloProvider>
       <CssBaseline />
     </ThemeProvider>
