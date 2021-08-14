@@ -1,11 +1,11 @@
-import React, { Dispatch, FunctionComponent, SetStateAction, useState } from 'react';
+import React, { Dispatch, FunctionComponent, SetStateAction, useState, useEffect } from 'react';
 import { createStyles, Fab, makeStyles, Theme } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add'
-import { createUseStyles } from 'react-jss'
 
+import createEstateModalStore, { CreateEstateModalState } from '../../../store/create-estate-modal.store'
 import CustomPopup, { CustomPopupProps } from './CustomPopup'
 import ContextMenu, { ContextMenuProps } from './ContextMenu'
-import CreateEstateModal, { CreateEstateModalProps } from './CreateEstateModal';
+import CreateEstateModal from './CreateEstateModal';
 import RSMap from './RSMap'
 
 type TMapContainerProps = {
@@ -33,13 +33,19 @@ const MapContainer: FunctionComponent<TMapContainerProps> = (props) => {
 
   const [contextMenuProps, setContextMenuProps] = useState<ContextMenuProps>(ContextMenu.defaultProps as ContextMenuProps)
   const [popupProps, setPopupProps] = useState<CustomPopupProps>(CustomPopup.defaultProps as CustomPopupProps)
-  const [createEstateModalProps, setCreateEstateModalProps] = useState<CreateEstateModalProps>(CreateEstateModal.defaultProps as CreateEstateModalProps)
+
+  const [_, setCreateEstateModalState] = useState<CreateEstateModalState>(createEstateModalStore.initialState)
+
+  useEffect(() => {
+    const subs = createEstateModalStore.subscribe(setCreateEstateModalState)
+    return () => subs.unsubscribe()
+  }, [])
 
   const _handleContextMenuClose = (): void => setContextMenuProps({ ...contextMenuProps, isVisible: false })
 
   const _handlePopupClose = (): void => setPopupProps({ ...popupProps, isVisible: false })
 
-  const toggleCreateEstateModal = (isVisible: boolean): void => setCreateEstateModalProps({ ...createEstateModalProps, isVisible })
+  // console.log('createEstateModalState', createEstateModalState)
 
   return process.browser ? (
     <div className={classes.mapContainer}>
@@ -50,13 +56,24 @@ const MapContainer: FunctionComponent<TMapContainerProps> = (props) => {
         setPopupProps={setPopupProps}
         setOnScreenEstates={setOnScreenEstates}
       >
-        {popupProps.features && <CustomPopup {...popupProps} handleClose={_handlePopupClose} />}
-        {contextMenuProps.isVisible && <ContextMenu {...contextMenuProps} handleClose={_handleContextMenuClose} />}
+        {popupProps.features &&
+          <CustomPopup {...popupProps}
+            handleClose={_handlePopupClose}
+          />
+        }
+        {contextMenuProps.isVisible &&
+          <ContextMenu
+            {...contextMenuProps}
+            handleClose={_handleContextMenuClose}
+          />
+        }
       </RSMap>
-      {createEstateModalProps.isVisible &&
-        <CreateEstateModal {...createEstateModalProps} handleClose={() => toggleCreateEstateModal(false)} />
-      }
-      <Fab color="primary" onClick={() => toggleCreateEstateModal(true)} classes={{ root: classes.fabRoot }}>
+      <CreateEstateModal />
+      <Fab
+        color="primary"
+        onClick={createEstateModalStore.open}
+        classes={{ root: classes.fabRoot }}
+      >
         <AddIcon />
       </Fab>
     </div>

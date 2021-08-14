@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, FunctionComponent, useLayoutEffect, useState } from 'react';
+import React, { ChangeEventHandler, FunctionComponent, useEffect, useLayoutEffect, useState } from 'react';
 import { Formik, FormikHelpers } from 'formik'
 import { useRouter } from 'next/router'
 import { createUseStyles } from 'react-jss'
@@ -21,7 +21,7 @@ import {
 } from '../../../types'
 import { FILTERS_QUERY, VIEWPORT_QUERY } from '../../../graphql/apollo-client/client-cache/queries'
 import { geocodeLocation, pushViewportToUrl } from '../../../utils/utils'
-import viewportStore, { CachedViewport } from 'src/store/viewport';
+import viewportStore, { CachedViewport } from 'src/store/viewport.store';
 import { FlyToInterpolator } from 'react-map-gl';
 
 
@@ -69,7 +69,7 @@ const SearchForm: FunctionComponent<TSearchFormProps> = (props) => {
 
   const [viewportState, setViewportState] = useState<CachedViewport>(viewportStore.initialState)
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const subs = viewportStore.subscribe(setViewportState)
     return () => subs.unsubscribe()
   }, [])

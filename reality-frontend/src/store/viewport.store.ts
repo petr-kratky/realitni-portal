@@ -22,11 +22,17 @@ let state = initialState
 
 const viewportStore = {
   subscribe: (setState: React.Dispatch<React.SetStateAction<CachedViewport>>) => subject.subscribe(setState),
-  setViewport: (viewport: CachedViewport) => subject.next({
-    ...state,
-    ...viewport
-  }),
-  clearViewport: () => subject.next(initialState),
+  setViewport: (viewport: CachedViewport) => {
+    state = {
+      ...state,
+      ...viewport
+    }
+    subject.next(state)
+  },
+  clearViewport: () => {
+    state = initialState
+    subject.next(state)
+  },
   initialState
 }
 

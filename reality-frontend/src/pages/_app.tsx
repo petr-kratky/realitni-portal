@@ -13,6 +13,7 @@ import LoginForm from "src/components/forms/LoginForm";
 import I18n from "../lib/localization/i18n";
 import useI18n from "../lib/hooks/use-i18n";
 import CZ from '../locales/cz.json'
+import SnackBar from "src/components/utils/SnackBar";
 
 function MyComponent({ children, pageProps }) {
   const i18n = useI18n();
@@ -25,6 +26,7 @@ function MyComponent({ children, pageProps }) {
   return (
     <>
       {!loading && (data?.currentUser?.id ? children : <LoginForm {...pageProps} />)}
+      <SnackBar />
     </>
   );
 }

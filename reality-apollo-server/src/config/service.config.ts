@@ -31,7 +31,7 @@ export class ServiceConfig {
       schema: getEnv('DB_SCHEMA', 'public'),
       dropSchema: false,
       synchronize: false,
-      logging: true,
+      logging: false,
       // entities: [...Object.values(DatabaseModels)],
       entities: [Estate, EstatePrimaryType, EstateSecondaryType, Account],
       ssl: {

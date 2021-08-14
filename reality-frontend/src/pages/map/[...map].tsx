@@ -1,5 +1,4 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
-import { useMutation, useQuery } from '@apollo/react-hooks'
 import { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -7,11 +6,8 @@ import { createUseStyles } from 'react-jss'
 
 import EstatesSidebar from '../../components/map/sidebar/EstatesSidebar'
 import MapContainer from '../../components/map/map/MapContainer'
-import { CachedViewportData, CachedViewportInput, LocalQueryResult } from '../../types'
-import { SET_VIEWPORT } from '../../graphql/apollo-client/client-cache/mutations'
-import { VIEWPORT_QUERY } from '../../graphql/apollo-client/client-cache/queries'
 import { filterObject, isUndef, pushViewportToUrl } from '../../utils/utils'
-import viewportStore, { CachedViewport } from 'src/store/viewport'
+import viewportStore, { CachedViewport } from 'src/store/viewport.store'
 
 
 
@@ -65,7 +61,7 @@ const MapPage: NextPage<MapPageProps> = () => {
   
   const [viewportState, setViewportState] = useState<CachedViewport>(viewportStore.initialState)
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const subs = viewportStore.subscribe(setViewportState)
     return () => subs.unsubscribe()
   }, [])

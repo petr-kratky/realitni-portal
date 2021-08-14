@@ -1,22 +1,18 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useState, useEffect } from "react";
 import { Formik } from "formik";
 import { Button, TextField, Theme, makeStyles, createStyles, Snackbar, Dialog, DialogActions, DialogTitle, DialogContent, DialogContentText, CircularProgress } from '@material-ui/core'
 import Alert from '@material-ui/lab/Alert'
 import * as Yup from "yup";
 
+import createEstateModalStore, { CreateEstateModalState } from '../../../store/create-estate-modal.store'
 import { useCreateEstateMutation } from "src/graphql/queries/generated/graphql";
+import snackStore, { SnackState } from 'src/store/snack.store'
 import { FormikSubmitFunction } from '../../../types'
 
 
-type FormValues = {
+export type CreateEstateFormValues = {
   coordinates: string,
   name?: string
-}
-
-
-export type CreateEstateModalProps = {
-  isVisible: boolean
-  handleClose: () => void
 }
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
@@ -24,20 +20,25 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 }));
 
 
-const CreateEstateModal: FunctionComponent<CreateEstateModalProps> = ({ isVisible, handleClose }) => {
+const CreateEstateModal: FunctionComponent = () => {
   const classes = useStyles();
-
-  const [responseError, setResponseError] = useState('')
-  const [snackOpen, setSnackOpen] = useState(false)
 
   const [createEstate] = useCreateEstateMutation()
 
-  const initialValues: FormValues = {
-    coordinates: "",
-    name: ""
-  }
+  const [createEstateModalState, setCreateEstateModalState] = useState<CreateEstateModalState>(createEstateModalStore.initialState)
+  const [_, setSnackState] = useState<SnackState>(snackStore.initialState)
 
-  const formSchema: Yup.SchemaOf<FormValues> = Yup.object().shape({
+  useEffect(() => {
+    const createEstateModalStoreSub = createEstateModalStore.subscribe(setCreateEstateModalState)
+    const snackStoreSub = snackStore.subscribe(setSnackState)
+    return () => { 
+      createEstateModalStoreSub.unsubscribe()
+      snackStoreSub.unsubscribe()
+    }
+  }, [])
+
+  
+  const formSchema: Yup.SchemaOf<CreateEstateFormValues> = Yup.object().shape({
     name: Yup.string()
       .max(128, (max) => `Název nemovitosti nesmí být delší než ${max} znaků`)
       .trim(),
@@ -45,11 +46,7 @@ const CreateEstateModal: FunctionComponent<CreateEstateModalProps> = ({ isVisibl
       .required('Toto pole je povinné')
   })
 
-  const handleSnackClose = () => {
-    setSnackOpen(false)
-  }
-
-  const onFormSubmit: FormikSubmitFunction<FormValues> = async ({ coordinates, name }, actions) => {
+  const onFormSubmit: FormikSubmitFunction<CreateEstateFormValues> = async ({ coordinates, name }, actions) => {
     const coords = coordinates.split(',').map(str => parseFloat(str.trim()))
 
     if (coords.length !== 2) {
@@ -73,21 +70,18 @@ const CreateEstateModal: FunctionComponent<CreateEstateModalProps> = ({ isVisibl
       const response = await createEstate({
         variables: { estateInput: { latitude, longitude, name } }
       })
-
       console.log(response.data?.createEstate)
-
-      handleClose()
-
+      createEstateModalStore.close()
+      snackStore.toggle('success', 'Nemovitost vytvořena')
     } catch (err) {
-      setResponseError(err.message)
-      setSnackOpen(true)
+      snackStore.toggle('error', err.message)
     }
   }
 
   return (
-    <Dialog open={isVisible} onClose={handleClose}>
+    <Dialog open={createEstateModalState.isOpen} onClose={createEstateModalStore.close}>
       <Formik
-        initialValues={initialValues}
+        initialValues={createEstateModalState.formValues}
         onSubmit={onFormSubmit}
         validationSchema={formSchema}
         validateOnChange
@@ -136,7 +130,7 @@ const CreateEstateModal: FunctionComponent<CreateEstateModalProps> = ({ isVisibl
                 </DialogContent>
                 <DialogActions>
                   <Button
-                    onClick={handleClose}
+                    onClick={createEstateModalStore.close}
                     color='default'
                   >
                     zavřít
@@ -155,15 +149,16 @@ const CreateEstateModal: FunctionComponent<CreateEstateModalProps> = ({ isVisibl
           );
         }}
       </Formik>
-      <Snackbar open={snackOpen} autoHideDuration={6000} onClose={handleSnackClose}>
-        <Alert variant="filled" severity="error" elevation={6} onClose={handleSnackClose}>{responseError}</Alert>
-      </Snackbar>
     </Dialog>
   );
 };
 
 CreateEstateModal.defaultProps = {
-  isVisible: false
+  isVisible: false,
+  initialValues: {
+    coordinates: "",
+    name: ""
+  }
 }
 
 export default CreateEstateModal;

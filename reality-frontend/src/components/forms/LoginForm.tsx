@@ -1,11 +1,11 @@
-import React, { FunctionComponent, useState } from "react";
+import React, { FunctionComponent, useEffect, useState } from "react";
 import { Formik } from "formik";
-import { Button, TextField, Theme, makeStyles, createStyles, Snackbar, Typography } from '@material-ui/core'
-import Alert from '@material-ui/lab/Alert'
+import { Button, TextField, Theme, makeStyles, createStyles } from '@material-ui/core'
 import * as Yup from "yup";
 
 import { useLoginMutation, CurrentUserDocument, CurrentUserQuery } from "src/graphql/queries/generated/graphql";
 import { setAccessToken } from "src/lib/user-management/accessToken";
+import snackStore, { SnackState } from '../../store/snack.store'
 import { useRouter } from "next/router";
 import { FormikSubmitFunction } from "../../types";
 
@@ -38,8 +38,12 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
 
   const [login] = useLoginMutation();
 
-  const [loginError, setLoginError] = useState('')
-  const [snackOpen, setSnackOpen] = useState(false)
+  const [snackState, setSnackState] = useState<SnackState>(snackStore.initialState)
+
+  useEffect(() => {
+    const subs = snackStore.subscribe(setSnackState)
+    return () => subs.unsubscribe()
+  }, [])
 
   const initialValues: FormValues = {
     email: "",
@@ -50,10 +54,6 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
     email: Yup.string().required('Toto pole je povinné'),
     password: Yup.string().required('Toto pole je povinné')
   });
-
-  const handleSnackClose = () => {
-    setSnackOpen(false)
-  }
 
   const onFormSubmit: FormikSubmitFunction<FormValues> = async (values, actions) => {
     const { email, password } = values;
@@ -81,17 +81,13 @@ const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
         setAccessToken(response.data.login.accessToken);
         router.push('/map');
       }
-    } catch (e) {
-      setLoginError(e.message)
-      setSnackOpen(true)
+    } catch (err) {
+      snackStore.toggle('error', err.message)
     }
   }
 
   return (
     <div className={classes.loginFormContainer}>
-      <Snackbar open={snackOpen} autoHideDuration={6000} onClose={handleSnackClose}>
-        <Alert variant="filled" severity="error" elevation={6} onClose={handleSnackClose}>{loginError}</Alert>
-      </Snackbar>
       <Formik
         initialValues={initialValues}
         onSubmit={onFormSubmit}

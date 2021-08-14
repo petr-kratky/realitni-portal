@@ -11,11 +11,19 @@ export class EstateService {
     const isLocationValid = EstateService.validateCoordinates(latitude, longitude)
     if (!isLocationValid) throw new ApolloError('ESTATE_INVALID_LOCATION_RANGE')
 
+    const estatePrimaryType = typeof estateInput.primary_type_id !== 'undefined'
+      ? EstatePrimaryType.create({ id: estateInput.primary_type_id })
+      : null
+
+    const estateSecondaryType = typeof estateInput.secondary_type_id !== 'undefined'
+      ? EstateSecondaryType.create({ id: estateInput.secondary_type_id })
+      : null
+
     const newEstate = Estate.create({
       ...estateInput,
       created_by: Account.create({ id: createdBy }),
-      primary_type: EstatePrimaryType.create({ id: estateInput.primary_type_id }),
-      secondary_type: EstateSecondaryType.create({ id: estateInput.secondary_type_id })
+      primary_type: estatePrimaryType,
+      secondary_type: estateSecondaryType
     })
 
     try {

@@ -9,7 +9,7 @@ import { FILTERS_QUERY, VIEWPORT_QUERY } from '../../../graphql/apollo-client/cl
 import { SET_VIEWPORT } from '../../../graphql/apollo-client/client-cache/mutations'
 import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
 import useDebounce from '../../../lib/hooks/useDebounce'
-import viewportStore, { CachedViewport } from 'src/store/viewport'
+import viewportStore, { CachedViewport } from 'src/store/viewport.store'
 import {
   CachedFiltersData,
   CachedViewportData,
@@ -105,37 +105,15 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
         console.error(err)
       }
 
-      // map.on('sourcedata', (e) => {
-      //   if (e.sourceId === 'estates' && e.isSourceLoaded) {
-      //     console.log(e)
-      //     // console.log('isEasing', map.isEasing())
-      //     // console.log('isZooming', map.isZooming())
-      //     // console.log('isRotating', map.isRotating())
-      //     updateOnScreenEstates()
-      //   }
-      // })
-
       // Get initial viewport 'height' and 'width' to match its container div
       const { clientWidth: width, clientHeight: height } = map.getContainer()
       viewportStore.setViewport({ ...viewportState, width, height })
-      // setCachedViewport({ variables: { cachedViewport: { ...mapViewport, width, height } } })
-      //@ts-ignore
-      pushViewportToUrl(router, { width, height, ...viewportState })
+      // @ts-ignore
+      pushViewportToUrl(router, {  ...viewportState, width, height })
       // Initial update of rendered features
       updateOnScreenEstates()
     }
   }, [isMapLoaded])
-
-
-  // useEffect(() => {
-  //   setMapViewport({
-  //     ...mapViewport,
-  //     ...cachedViewport,
-  //     transitionDuration: 2000,
-  //     transitionInterpolator: new FlyToInterpolator(),
-  //     transitionEasing: d3.easeSin
-  //   } as any)
-  // }, [cachedViewport])
 
   useEffect(() => {
     updateGeojsonSource(getGeojsonSourceUri())
@@ -146,7 +124,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
     const [longitude, latitude] = e.lngLat
     const srcEvent: MouseEvent = e.srcEvent
     srcEvent.preventDefault()
-    setContextMenuProps({ longitude, latitude, isVisible: true })
+    setContextMenuProps({ ...contextMenuProps, longitude, latitude, isVisible: true })
   }
 
 
@@ -357,9 +335,6 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
       maxZoom={18}
       minZoom={6.5}
     >
-      <div style={{ position: 'absolute', right: 0, top: 0, margin: 5, transform: 'scale(.7)' }}>
-        <FullscreenControl container={document.querySelector('body')} />
-      </div>
       {children}
     </ReactMapGL>
   )
