@@ -15,7 +15,7 @@ type TMapContainerProps = {
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   mapContainer: {
-    height: '100vh',
+    height: 'calc(100vh - 48px)',
     width: '100%'
   },
   fabRoot: {

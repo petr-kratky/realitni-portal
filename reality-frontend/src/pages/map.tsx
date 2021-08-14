@@ -1,12 +1,13 @@
 import React, { useEffect, useLayoutEffect, useState } from 'react';
+import { ParsedUrlQuery } from 'querystring';
 import { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { createUseStyles } from 'react-jss'
 
-import EstatesSidebar from '../../components/map/sidebar/EstatesSidebar'
-import MapContainer from '../../components/map/map/MapContainer'
-import { filterObject, isUndef, pushViewportToUrl } from '../../utils/utils'
+import EstatesSidebar from '../components/map/sidebar/EstatesSidebar'
+import MapContainer from '../components/map/map/MapContainer'
+import { filterObject, isUndef, pushViewportToUrl } from '../utils/utils'
 import viewportStore, { CachedViewport } from 'src/store/viewport.store'
 
 
@@ -30,17 +31,11 @@ const useStyles = createUseStyles({
 })
 
 
-function getQueryViewport(query: string | undefined): QueryViewport {
-  const viewportRegex = /@([+-]?([0-9]*[.])?[0-9]+,){2}\dz/g
+function getQueryViewport(query: ParsedUrlQuery): QueryViewport {
+  const { latitude: qLatitude, longitude: qLongitude, zoom: qZoom } = query
 
-  if ((typeof query === 'undefined' || !(viewportRegex.test(query)))) return {}
 
-  const [latStr, lngStr, zStr]: string[] = query
-    .match(viewportRegex)?.[0]
-    .slice(1)
-    .split(',') as string[]
-
-  const [latitude, longitude, zoom]: Array<number | undefined> = [latStr, lngStr, zStr[0]]
+  const [latitude, longitude, zoom]: Array<number | undefined> = [qLatitude, qLongitude, qZoom]
     .map(value => isUndef(value) ? NaN : Number(value))
     .map(value => isNaN(value) ? undefined : value)
 
@@ -55,10 +50,8 @@ const MapPage: NextPage<MapPageProps> = () => {
   const classes = useStyles()
   const router = useRouter()
 
-  
-  const [sidebarOpen, setSidebarOpen] = useState<boolean>(true)
   const [onScreenEstates, setOnScreenEstates] = useState<string[]>([])
-  
+
   const [viewportState, setViewportState] = useState<CachedViewport>(viewportStore.initialState)
 
   useEffect(() => {
@@ -67,21 +60,17 @@ const MapPage: NextPage<MapPageProps> = () => {
   }, [])
 
   useEffect(() => {
-    const queryViewport: QueryViewport = getQueryViewport(router.query.map?.[0])
-    const initViewport = { ...viewportState, ...queryViewport }
+    const initViewport = { ...viewportState, ...getQueryViewport(router.query) }
     viewportStore.setViewport(initViewport)
-    pushViewportToUrl(router, { ...initViewport })
+    pushViewportToUrl(router, initViewport)
   }, [])
-
-  const _handleSidebarToggle = (): void => setSidebarOpen(!sidebarOpen)
 
   return (
     <div className={classes.contentContainer}>
       <Head>
-        <title>Realitní Portál</title>
+        <title>Realitní Portál | Mapa</title>
         <link href="https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.css" rel="stylesheet" />
       </Head>
-      <EstatesSidebar open={sidebarOpen} estates={onScreenEstates} toggleOpen={_handleSidebarToggle} />
       <MapContainer setOnScreenEstates={setOnScreenEstates} />
     </div>
   )

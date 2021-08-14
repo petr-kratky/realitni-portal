@@ -2,23 +2,17 @@ import ReactMapGL, { ExtraState, FlyToInterpolator, FullscreenControl, PointerEv
 import { useMutation, useQuery } from '@apollo/react-hooks'
 import { useRouter } from 'next/dist/client/router'
 import { GeoJSONSource, LngLatBounds, Map } from 'mapbox-gl'
-import * as d3 from 'd3-ease'
 import React, { FunctionComponent, useEffect, useRef, useState, useLayoutEffect } from 'react';
 
 import { FILTERS_QUERY, VIEWPORT_QUERY } from '../../../graphql/apollo-client/client-cache/queries'
-import { SET_VIEWPORT } from '../../../graphql/apollo-client/client-cache/mutations'
 import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
-import useDebounce from '../../../lib/hooks/useDebounce'
 import viewportStore, { CachedViewport } from 'src/store/viewport.store'
 import {
   CachedFiltersData,
-  CachedViewportData,
-  CachedViewportInput,
   EstateCluster,
   EstateFeature,
   LocalQueryResult,
   MapComponentProps,
-  MapViewport
 } from '../../../types'
 
 

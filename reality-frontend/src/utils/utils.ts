@@ -3,9 +3,13 @@ import { ViewportUrlOptions } from '../types'
 
 
 export async function pushViewportToUrl(router: NextRouter, urlOptions: ViewportUrlOptions): Promise<void> {
-  const { longitude: lng, latitude: lat, zoom: z } = urlOptions
-  const href = `/map/@${lat.toFixed(5)},${lng.toFixed(5)},${z.toFixed(0)}z`
-  await router.replace('/map/[...map]', href, { shallow: true })
+  const longitude = urlOptions.longitude.toFixed(5)
+  const latitude = urlOptions.latitude.toFixed(5)
+  const zoom = urlOptions.zoom.toFixed(0)
+  await router.replace({
+    pathname: router.pathname,
+    query: { ...router.query, longitude, latitude, zoom }
+  })
 }
 
 export function camelToSnake(string: string): string {
