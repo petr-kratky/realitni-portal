@@ -11,8 +11,6 @@ export type Scalars = {
   Float: number;
   /** The javascript `Date` as string. Type represents date and time as the ISO Date string. */
   DateTime: any;
-  /** The `Upload` scalar type represents a file upload. */
-  Upload: any;
 };
 
 export type Account = {
@@ -24,6 +22,13 @@ export type Account = {
   createdOn: Scalars['DateTime'];
   lastLogin?: Maybe<Scalars['DateTime']>;
   tokenVersion: Scalars['Int'];
+  estates?: Maybe<Array<Estate>>;
+};
+
+export type AccountPublicInfo = {
+   __typename?: 'AccountPublicInfo';
+  id: Scalars['ID'];
+  username: Scalars['String'];
 };
 
 export type AccountUpdateInput = {
@@ -36,28 +41,68 @@ export type Estate = {
    __typename?: 'Estate';
   id: Scalars['ID'];
   geom: Scalars['String'];
-  name: Scalars['String'];
+  name?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
   longitude: Scalars['Float'];
   latitude: Scalars['Float'];
+  advert_price?: Maybe<Scalars['Int']>;
+  estimated_price?: Maybe<Scalars['Int']>;
+  street_address?: Maybe<Scalars['String']>;
+  city_address?: Maybe<Scalars['String']>;
+  postal_code?: Maybe<Scalars['String']>;
+  usable_area?: Maybe<Scalars['Int']>;
+  land_area?: Maybe<Scalars['Int']>;
+  primary_type?: Maybe<EstatePrimaryType>;
+  secondary_type?: Maybe<EstateSecondaryType>;
+  created_by: AccountPublicInfo;
 };
 
 export type EstateCreateInput = {
   name?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
   longitude: Scalars['Float'];
   latitude: Scalars['Float'];
+  advert_price?: Maybe<Scalars['Int']>;
+  estimated_price?: Maybe<Scalars['Int']>;
+  street_address?: Maybe<Scalars['String']>;
+  city_address?: Maybe<Scalars['String']>;
+  postal_code?: Maybe<Scalars['String']>;
+  usable_area?: Maybe<Scalars['Int']>;
+  land_area?: Maybe<Scalars['Int']>;
+  primary_type_id?: Maybe<Scalars['Int']>;
+  secondary_type_id?: Maybe<Scalars['Int']>;
+};
+
+export type EstatePrimaryType = {
+   __typename?: 'EstatePrimaryType';
+  id: Scalars['ID'];
+  desc_cz: Scalars['String'];
+  estates?: Maybe<Array<Estate>>;
+  secondary_types: Array<EstateSecondaryType>;
+};
+
+export type EstateSecondaryType = {
+   __typename?: 'EstateSecondaryType';
+  id: Scalars['ID'];
+  desc_cz: Scalars['String'];
+  primary_type: EstatePrimaryType;
+  estates?: Maybe<Array<Estate>>;
 };
 
 export type EstateUpdateInput = {
   name?: Maybe<Scalars['String']>;
+  description?: Maybe<Scalars['String']>;
   longitude?: Maybe<Scalars['Float']>;
   latitude?: Maybe<Scalars['Float']>;
-};
-
-export type File = {
-   __typename?: 'File';
-  filename: Scalars['String'];
-  mimetype: Scalars['String'];
-  encoding: Scalars['String'];
+  advert_price?: Maybe<Scalars['Int']>;
+  estimated_price?: Maybe<Scalars['Int']>;
+  street_address?: Maybe<Scalars['String']>;
+  city_address?: Maybe<Scalars['String']>;
+  postal_code?: Maybe<Scalars['String']>;
+  usable_area?: Maybe<Scalars['Int']>;
+  land_area?: Maybe<Scalars['Int']>;
+  primary_type_id?: Maybe<Scalars['Int']>;
+  secondary_type_id?: Maybe<Scalars['Int']>;
 };
 
 export type LoginResponse = {
@@ -76,7 +121,6 @@ export type Mutation = {
   updateAccount: Account;
   deleteAccount: Scalars['ID'];
   register: Account;
-  fileUpload: UploadResult;
 };
 
 
@@ -113,16 +157,11 @@ export type MutationRegisterArgs = {
   username: Scalars['String'];
 };
 
-
-export type MutationFileUploadArgs = {
-  fileInput: Array<Scalars['Upload']>;
-  id: Scalars['Float'];
-};
-
 export type Query = {
    __typename?: 'Query';
   estate?: Maybe<Estate>;
   estates: Array<Estate>;
+  estatePrimaryTypes: Array<EstatePrimaryType>;
   currentUser?: Maybe<Account>;
 };
 
@@ -135,12 +174,6 @@ export type QueryEstateArgs = {
 export type QueryEstatesArgs = {
   take: Scalars['Float'];
   skip: Scalars['Float'];
-};
-
-
-export type UploadResult = {
-   __typename?: 'UploadResult';
-  uploaded: Scalars['Boolean'];
 };
 
 export type CreateEstateMutationVariables = {
@@ -164,6 +197,21 @@ export type DeleteEstateMutationVariables = {
 export type DeleteEstateMutation = (
   { __typename?: 'Mutation' }
   & Pick<Mutation, 'deleteEstate'>
+);
+
+export type EstateTypesQueryVariables = {};
+
+
+export type EstateTypesQuery = (
+  { __typename?: 'Query' }
+  & { estatePrimaryTypes: Array<(
+    { __typename?: 'EstatePrimaryType' }
+    & Pick<EstatePrimaryType, 'id' | 'desc_cz'>
+    & { secondary_types: Array<(
+      { __typename?: 'EstateSecondaryType' }
+      & Pick<EstateSecondaryType, 'id' | 'desc_cz'>
+    )> }
+  )> }
 );
 
 export type EstateQueryVariables = {
@@ -311,6 +359,43 @@ export function useDeleteEstateMutation(baseOptions?: ApolloReactHooks.MutationH
 export type DeleteEstateMutationHookResult = ReturnType<typeof useDeleteEstateMutation>;
 export type DeleteEstateMutationResult = ApolloReactCommon.MutationResult<DeleteEstateMutation>;
 export type DeleteEstateMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteEstateMutation, DeleteEstateMutationVariables>;
+export const EstateTypesDocument = gql`
+    query EstateTypes {
+  estatePrimaryTypes {
+    id
+    desc_cz
+    secondary_types {
+      id
+      desc_cz
+    }
+  }
+}
+    `;
+
+/**
+ * __useEstateTypesQuery__
+ *
+ * To run a query within a React component, call `useEstateTypesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useEstateTypesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useEstateTypesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useEstateTypesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<EstateTypesQuery, EstateTypesQueryVariables>) {
+        return ApolloReactHooks.useQuery<EstateTypesQuery, EstateTypesQueryVariables>(EstateTypesDocument, baseOptions);
+      }
+export function useEstateTypesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<EstateTypesQuery, EstateTypesQueryVariables>) {
+          return ApolloReactHooks.useLazyQuery<EstateTypesQuery, EstateTypesQueryVariables>(EstateTypesDocument, baseOptions);
+        }
+export type EstateTypesQueryHookResult = ReturnType<typeof useEstateTypesQuery>;
+export type EstateTypesLazyQueryHookResult = ReturnType<typeof useEstateTypesLazyQuery>;
+export type EstateTypesQueryResult = ApolloReactCommon.QueryResult<EstateTypesQuery, EstateTypesQueryVariables>;
 export const EstateDocument = gql`
     query Estate($id: String!) {
   estate(id: $id) {

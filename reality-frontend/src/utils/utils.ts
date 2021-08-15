@@ -63,6 +63,23 @@ export async function geocodeLocation(address: string): Promise<any> {
   }
 }
 
+export const parseIntParam = (param: string | undefined | null): number | undefined => {
+  if (param === "" || typeof param === "undefined" || param === null) {
+    return undefined
+  } else {
+    return parseInt(param)
+  }
+}
+
+export const removeEmptyStrings = <T> (object: T): Partial<T> => {
+  let newObject: Partial<T> = {};
+  Object.keys(object).forEach((prop) => {
+    if (object[prop] !== "") { newObject[prop] = object[prop]; }
+  });
+  return newObject;
+};
+
+
 export const copyToClipboard = (string: string) => {
   const el = document.createElement('textarea');
   el.value = string;

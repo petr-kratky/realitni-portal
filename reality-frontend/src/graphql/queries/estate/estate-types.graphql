@@ -1,0 +1,10 @@
+query EstateTypes {
+  estatePrimaryTypes {
+    id
+    desc_cz
+    secondary_types {
+      id
+      desc_cz
+    }
+  }
+}

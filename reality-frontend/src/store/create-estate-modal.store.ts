@@ -12,7 +12,17 @@ const subject = new Subject<CreateEstateModalState>()
 const initialState: CreateEstateModalState = {
   formValues: {
     coordinates: "",
-    name: ""
+    name: "",
+    advert_price: "" as unknown as number,
+    estimated_price: "" as unknown as number,
+    city_address: "",
+    street_address: "",
+    land_area: "" as unknown as number,
+    usable_area: "" as unknown as number,
+    postal_code: "",
+    description: "",
+    primary_type_id: "",
+    secondary_type_id: ""
   },
   isOpen: false
 }

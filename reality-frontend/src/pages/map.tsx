@@ -5,7 +5,6 @@ import Head from 'next/head'
 import { useRouter } from 'next/router'
 import { createUseStyles } from 'react-jss'
 
-import EstatesSidebar from '../components/map/sidebar/EstatesSidebar'
 import MapContainer from '../components/map/map/MapContainer'
 import { filterObject, isUndef, pushViewportToUrl } from '../utils/utils'
 import viewportStore, { CachedViewport } from 'src/store/viewport.store'

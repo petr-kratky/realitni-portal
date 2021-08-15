@@ -33,9 +33,21 @@ export class EstateResolver {
     try {
       return await this.estateService.getEstates(skip, take)
     } catch (e) {
-      throw new ApolloError(e, "500")
+      throw new ApolloError(e.message, "500", e)
     }
   }
+  
+  
+  @Query((returns) => [EstatePrimaryType])
+  @RequireAuthentication()
+  async estatePrimaryTypes(): Promise<EstatePrimaryType[]> {
+    try {
+      return await EstatePrimaryType.find()
+    } catch (e) {
+      throw new ApolloError(e.message, "500", e)
+    }
+  }
+
 
   @Mutation((returns) => ID)
   @RequireAuthentication()

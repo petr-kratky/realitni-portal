@@ -68,7 +68,7 @@ export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
       let serverAccessToken = "";
 
       if (isServer()) {
-        const cookies = cookie.parse(req.headers.cookie?? "");
+        const cookies = cookie.parse(req.headers.cookie ?? "");
         if (cookies.jid) {
           const response = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/refresh_token`, {
             method: "POST",
@@ -97,7 +97,7 @@ export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
         : {};
 
       // Only on the server
-      if (typeof window === "undefined") {
+      if (isServer()) {
         // When redirecting, the response is finished.
         // No point in continuing to render
         if (res && res.finished) {

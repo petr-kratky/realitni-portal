@@ -8,8 +8,11 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
   const dev: boolean = process.env.NODE_ENV == 'development'
 
   const server: Express = express()
-  const app = next({ dev: dev })
-  await app.prepare()
+
+  const nextApp = next({ dev: dev })
+  await nextApp.prepare()
+
+  const nextMiddleware = nextApp.getRequestHandler()
 
   // Env vars can only be loaded after app.prepare() to allow NextJS to first load the values from .env.*
   const apiServerUrl: string = process.env.API_SERVER || ''
@@ -19,7 +22,21 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
   // @ts-ignore
   const port: number = +process.env.PORT || 3000
 
-  const nextMiddleware = app.getRequestHandler()
+  // const validateJwt: OnProxyReqCallback = (proxyReq, req, res) => {
+  //   const authHeader = req.headers.authorization;
+  //   if ((!authHeader)) {
+  //     console.log('AUTH_HEADER_MISSING')
+  //     req.destroy(new Error('AUTH_HEADER_MISSING'))
+  //   } else {
+  //     try {
+  //       const token = authHeader.split(" ")[1];
+  //       verify(token, process.env.ACCESS_TOKEN_SECRET!);
+  //     } catch (err) {
+  //       console.log(err);
+  //       req.destroy(new Error("AUTH_TOKEN_INVALID"))
+  //     }
+  //   }
+  // }
 
   const refreshProxy: RequestHandler = createProxyMiddleware('/api/refresh_token', {
     target: apiServerUrl,
@@ -41,11 +58,8 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
 
   server.use(helmet())
   server.use(cookieParser())
-  server.use(graphqlProxy)
-  server.use(postgisProxy)
-  server.use(refreshProxy)
+  server.use(graphqlProxy, postgisProxy, refreshProxy)
 
-  server.get('/health', (req, res) => res.send('UP!'))
   server.get('*', (req, res) => nextMiddleware(req, res))
 
   server.listen(port, host)
