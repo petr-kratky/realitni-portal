@@ -70,7 +70,7 @@ const CreateEstateModal: FunctionComponent = () => {
   const classes = useStyles()
   const theme = useTheme()
 
-  const isXs = useMediaQuery(theme.breakpoints.down('xs'))
+  const isXs = useMediaQuery(theme.breakpoints.down("xs"))
 
   const {
     data: estateTypesData,
@@ -158,7 +158,12 @@ const CreateEstateModal: FunctionComponent = () => {
   }
 
   return (
-    <Dialog scroll="paper" open={createEstateModalState.isOpen} onClose={createEstateModalStore.close} fullScreen={isXs}>
+    <Dialog
+      scroll='paper'
+      open={createEstateModalState.isOpen}
+      onClose={createEstateModalStore.close}
+      fullScreen={isXs}
+    >
       <Formik
         initialValues={createEstateModalState.formValues}
         onSubmit={onFormSubmit}
