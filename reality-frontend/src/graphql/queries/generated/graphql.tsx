@@ -223,7 +223,17 @@ export type EstateQuery = (
   { __typename?: 'Query' }
   & { estate?: Maybe<(
     { __typename?: 'Estate' }
-    & Pick<Estate, 'id' | 'name' | 'longitude' | 'latitude'>
+    & Pick<Estate, 'id' | 'name' | 'description' | 'longitude' | 'latitude' | 'advert_price' | 'estimated_price' | 'land_area' | 'usable_area' | 'street_address' | 'city_address' | 'postal_code'>
+    & { created_by: (
+      { __typename?: 'AccountPublicInfo' }
+      & Pick<AccountPublicInfo, 'id' | 'username'>
+    ), primary_type?: Maybe<(
+      { __typename?: 'EstatePrimaryType' }
+      & Pick<EstatePrimaryType, 'id' | 'desc_cz'>
+    )>, secondary_type?: Maybe<(
+      { __typename?: 'EstateSecondaryType' }
+      & Pick<EstateSecondaryType, 'id' | 'desc_cz'>
+    )> }
   )> }
 );
 
@@ -400,9 +410,31 @@ export const EstateDocument = gql`
     query Estate($id: String!) {
   estate(id: $id) {
     id
+    created_by {
+      id
+      username
+    }
     name
+    description
     longitude
     latitude
+    advert_price
+    estimated_price
+    land_area
+    usable_area
+    primary_type {
+      id
+      desc_cz
+    }
+    secondary_type {
+      id
+      desc_cz
+    }
+    usable_area
+    land_area
+    street_address
+    city_address
+    postal_code
   }
 }
     `;

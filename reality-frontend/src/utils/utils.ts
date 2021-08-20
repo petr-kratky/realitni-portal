@@ -1,5 +1,6 @@
 import { NextRouter } from 'next/router'
 import { ViewportUrlOptions } from '../types'
+import { GeocodeResults } from '../types/geocode-result'
 
 
 export async function pushViewportToUrl(router: NextRouter, urlOptions: ViewportUrlOptions): Promise<void> {
@@ -40,12 +41,14 @@ export function getDeviceLocation(): Promise<Position> {
   })
 }
 
-export async function geocodeLocation(address: string): Promise<any> {
+export async function geocodeLocation(searchStr: string, reverse?: boolean): Promise<GeocodeResults | undefined> {
   const googleApiKey: string | undefined = process.env.NEXT_PUBLIC_GOOGLE_API_KEY
   const googleGeocodeUrl: string | undefined = process.env.NEXT_PUBLIC_GOOGLE_GEOCODE_URL
 
+  const searchParam = reverse ? 'latlng' : 'address'
+
   if (googleGeocodeUrl && googleApiKey) {
-    const params = { address, language: 'cs', region: 'cz', key: googleApiKey }
+    const params = { language: 'cs', region: 'cz', key: googleApiKey, [searchParam]: searchStr }
     const requestUrl: URL = new URL(googleGeocodeUrl)
 
     Object.entries(params)
@@ -71,7 +74,7 @@ export const parseIntParam = (param: string | undefined | null): number | undefi
   }
 }
 
-export const removeEmptyStrings = <T> (object: T): Partial<T> => {
+export const removeEmptyStrings = <T>(object: T): Partial<T> => {
   let newObject: Partial<T> = {};
   Object.keys(object).forEach((prop) => {
     if (object[prop] !== "") { newObject[prop] = object[prop]; }

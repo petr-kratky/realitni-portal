@@ -29,7 +29,7 @@ import createEstateModalStore, { CreateEstateModalState } from "../../../store/c
 import { useCreateEstateMutation, useEstateTypesQuery } from "src/graphql/queries/generated/graphql"
 import snackStore, { SnackState } from "src/store/snack.store"
 import { FormikSubmitFunction } from "../../../types"
-import { parseIntParam, removeEmptyStrings } from "src/utils/utils"
+import { geocodeLocation, parseIntParam, removeEmptyStrings } from "src/utils/utils"
 
 export type CreateEstateFormValues = {
   coordinates: string
@@ -120,6 +120,11 @@ const CreateEstateModal: FunctionComponent = () => {
     secondary_type_id: Yup.string()
   })
 
+  const handleClose = (): void => {
+    createEstateModalStore.close()
+    createEstateModalStore.resetFormValues()
+  }
+
   const onFormSubmit: FormikSubmitFunction<CreateEstateFormValues> = async ({ coordinates, ...args }, actions) => {
     const coords = coordinates.split(",").map(str => parseFloat(str.trim()))
     if (coords.length !== 2) {
@@ -149,7 +154,7 @@ const CreateEstateModal: FunctionComponent = () => {
         }
       })
       console.log(response.data?.createEstate)
-      createEstateModalStore.close()
+      handleClose()
       snackStore.toggle("success", "Nemovitost vytvořena!")
     } catch (err) {
       // @ts-ignore
@@ -161,7 +166,7 @@ const CreateEstateModal: FunctionComponent = () => {
     <Dialog
       scroll='paper'
       open={createEstateModalState.isOpen}
-      onClose={createEstateModalStore.close}
+      onClose={handleClose}
       fullScreen={isXs}
     >
       <Formik
@@ -176,6 +181,19 @@ const CreateEstateModal: FunctionComponent = () => {
 
           if (values.primary_type_id === "" && values.secondary_type_id !== "") {
             setFieldValue("secondary_type_id", "")
+          }
+
+          const onAddressGeocode = async (): Promise<void> => {
+            const composedAddress = `${values.street_address} ${values.city_address} ${values.postal_code}`
+            const geocodeResults = await geocodeLocation(composedAddress)
+
+            if (!geocodeResults?.results.length) {
+              snackStore.toggle("error", `Pro zadanou adresu nebyly nalezeny žádné souřadnice`)
+              setFieldValue("coordinates", "")
+            } else {
+              const { lat, lng } = geocodeResults.results[0].geometry.location
+              setFieldValue("coordinates", `${lat}, ${lng}`)
+            }
           }
 
           return (
@@ -268,6 +286,11 @@ const CreateEstateModal: FunctionComponent = () => {
                         autoComplete='off'
                         fullWidth={true}
                       />
+                    </Grid>
+                    <Grid item xs={12}>
+                      <Button onClick={onAddressGeocode} color='default' size='small'>
+                        Doplnit souřadnice
+                      </Button>
                     </Grid>
                   </Grid>
 
@@ -440,7 +463,7 @@ const CreateEstateModal: FunctionComponent = () => {
                   </Grid>
                 </DialogContent>
                 <DialogActions>
-                  <Button onClick={createEstateModalStore.close} color='default'>
+                  <Button onClick={handleClose} color='default'>
                     zavřít
                   </Button>
                   <Button onClick={submitForm} disabled={isSubmitting} color='primary'>
