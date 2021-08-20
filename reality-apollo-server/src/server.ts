@@ -11,7 +11,7 @@ import { buildGraphqlSchema } from './schema';
 import { LoggerApi } from './logger';
 import { ServiceConfig } from './config'
 import { ConnectionOptions, createConnection } from 'typeorm'
-import { RefreshTokenReguestHandler } from './auth'
+import { RefreshTokenRequestHandler } from './auth'
 import express = require('express')
 import http = require('http')
 import cookieParser = require('cookie-parser')
@@ -62,8 +62,8 @@ export class ApiServer {
       expressServer.use(cookieParser());
       // this.logger.apply(expressServer);
       expressServer.use(apiRouter);
-      expressServer.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
-      expressServer.post("/refresh_token", RefreshTokenReguestHandler);
+      // expressServer.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
+      expressServer.post("/refresh_token", RefreshTokenRequestHandler);
       graphqlServer.applyMiddleware({ app: expressServer })
       // const swaggerPath = join(process.cwd(), 'dist/swagger.json');
       // if (existsSync(swaggerPath)) {

@@ -1,12 +1,12 @@
-import { ApolloClient } from "apollo-client";
-import { HttpLink } from "apollo-link-http";
 import { InMemoryCache, NormalizedCacheObject } from "apollo-cache-inmemory";
-import { NextPageContext } from "next";
 import { ApolloLink } from "apollo-link";
+import { TokenRefreshLink } from "apollo-link-token-refresh";
 import { onError } from "apollo-link-error";
 import { setContext } from "apollo-link-context";
+import { ApolloClient } from "apollo-client";
+import { HttpLink } from "apollo-link-http";
+
 import jwtDecode from "jwt-decode";
-import { TokenRefreshLink } from "apollo-link-token-refresh";
 import isomorphicFetch from "isomorphic-fetch";
 
 import { resolvers } from "./client-cache/resolvers";
@@ -14,64 +14,39 @@ import { typeDefs } from "./client-cache/local-schema";
 import {
   getAccessToken,
   setAccessToken,
-} from "src/lib/user-management/accessToken";
+} from "src/lib/auth/accessToken";
 
-import { createUploadLink } from "apollo-upload-client";
+// import { createUploadLink } from "apollo-upload-client";
 
 const isServer = () => typeof window === "undefined";
 
 let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
 
-function create(
-  initialState: NormalizedCacheObject,
-  context?: NextPageContext,
-  serverAccessToken?: string
-) {
+/**
+ * Creates and configures the ApolloClient
+ * @param  {Object} [initialState={}]
+ * @param  {Object} config
+ */
+ function createApolloClient(initialState = {}, serverAccessToken?: string) {
   const origin = isServer() ? `http://${process.env.HOST}:${process.env.PORT}` : ''
-  // We want to get fresh csrf token for each request, csrf based on cookie secret
-  // csrf token is provided by _app.js
-  const getRequestOptions = <T extends RequestInit>(options: T): T => {
-    // let csrfToken = '';
-    // if (process.browser) {
-    //   // @ts-ignore
-    //   ({ csrfToken } = window.__NEXT_DATA__.props);
-    // } else {
-    //   csrfToken = req && req.csrfToken ? req.csrfToken() : '';
-    // }
-    // return {
-    //   ...options,
-    //   headers: {
-    //     ...(options && options.headers ? options.headers : {}),
-    //     'x-csrf-token': csrfToken,
-    //     accept: 'application/json',
-    //   },
-    // };
-    return options;
-  };
 
-  const commonOpts = {
+  const httpLink = new HttpLink({
     credentials: "include",
     uri: "/api/graphql",
-    headers: context?.req?.headers ?? {},
-  };
-  const batchOpts = {
-    ...commonOpts,
-    batchMax: 20,
     fetch: (uri: string, options: RequestInit) => {
-      const fetchOptions: RequestInit = getRequestOptions(options);
-      return isomorphicFetch(origin + uri, fetchOptions);
+      return isomorphicFetch(origin + uri, options);
     },
-  };
-
-  const httpLink = new HttpLink(batchOpts)
+  })
 
   const refreshLink = new TokenRefreshLink({
     accessTokenField: "accessToken",
     isTokenValidOrUndefined: () => {
       const token = getAccessToken();
+
       if (!token) {
         return true;
       }
+
       try {
         const { exp } = jwtDecode(token);
         if (Date.now() >= exp * 1000) {
@@ -86,15 +61,14 @@ function create(
     fetchAccessToken: () => {
       return fetch(`${origin}/api/refresh_token`, {
         method: "POST",
-        credentials: "include",
-        body:"{}"
+        credentials: "include"
       });
     },
     handleFetch: (accessToken) => {
       setAccessToken(accessToken);
     },
     handleError: (err) => {
-      console.warn("Your refresh token is invalid. Try to relogin");
+      console.warn("Your refresh token is invalid. Try to re-login.");
       console.error(err);
     },
   });
@@ -123,20 +97,23 @@ function create(
   });
 }
 
+/**
+ * Always creates a new apollo client on the server
+ * Creates or reuses apollo client in the browser.
+ */
 function initApollo(
   initialState: NormalizedCacheObject,
-  ctx?: NextPageContext,
   serverAccessToken?: string
 ): ApolloClient<NormalizedCacheObject> {
   // Make sure to create a new client for every server-side request so that data
   // isn't shared between connections (which would be bad)
-  if (!process.browser) {
-    apolloClient = create(initialState, ctx, serverAccessToken);
+  if (isServer()) {
+    apolloClient = createApolloClient(initialState, serverAccessToken);
   }
 
   // Reuse client on the client-side
   if (!apolloClient) {
-    apolloClient = create(initialState, ctx);
+    apolloClient = createApolloClient(initialState);
   }
 
   return apolloClient;

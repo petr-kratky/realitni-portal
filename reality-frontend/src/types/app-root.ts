@@ -4,13 +4,13 @@ import { AppInitialProps, AppProps } from 'next/app';
 import { Request, Response } from 'express'
 import { NextPageContext } from 'next'
 
-interface IApolloProps {
+interface ApolloProps {
     apolloState: NormalizedCacheObject;
     apolloClient: ApolloClient<NormalizedCacheObject>;
     serverAccessToken: string;
 }
 
-export interface IAppRoot extends IApolloProps {
+export interface AppRoot extends ApolloProps {
     AppInitialProps: AppInitialProps,
     AppProps: AppProps
 }

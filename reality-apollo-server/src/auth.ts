@@ -18,25 +18,33 @@ export const createRefreshToken = (account: Account) => {
   );
 };
 
-export const RefreshTokenReguestHandler = async (req, res) => {
+export const RefreshTokenRequestHandler = async (req, res) => {
   const token = req.cookies.jid;
+
   if (!token) {
     return res.send({ ok: false, accessToken: "" });
   }
+
   let payload: any = null;
+
   try {
     payload = verify(token, process.env.REFRESH_TOKEN_SECRET!);
   } catch (err) {
     console.log(err);
     return res.send({ ok: false, accessToken: "" });
   }
+
   const user = await Account.findOne({ id: payload.id });
+
   if (!user) {
     return res.send({ ok: false, accessToken: "" });
   }
+
   if (user.tokenVersion !== payload.tokenVersion) {
     return res.send({ ok: false, accessToken: "" });
   }
+
   sendRefreshToken(res, createRefreshToken(user), process.env.DOMAIN);
+  
   return res.send({ ok: true, accessToken: createAccessToken(user) });
 }

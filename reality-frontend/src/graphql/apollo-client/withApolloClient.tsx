@@ -1,26 +1,28 @@
-import { ApolloClient } from 'apollo-client'
-import { NormalizedCacheObject, InMemoryCache } from 'apollo-cache-inmemory'
-import { getDataFromTree } from 'react-apollo';
-import App, { AppContext } from 'next/app';
-import Head from 'next/head';
-import React from 'react';
-import cookie from "cookie";
-import { HttpLink } from "apollo-link-http";
-import { setContext } from "apollo-link-context";
-import fetch from "isomorphic-unfetch";
-import { TokenRefreshLink } from "apollo-link-token-refresh";
-import jwtDecode from "jwt-decode";
-import { onError } from "apollo-link-error";
-import { ApolloLink } from "apollo-link";
-import isomorphicFetch from 'isomorphic-fetch';
+import React, { ReactNode } from "react"
 
+import { ApolloClient } from "apollo-client"
+import { NormalizedCacheObject } from "apollo-cache-inmemory"
 
-import { getAccessToken, setAccessToken } from "../../lib/user-management/accessToken"; 
-import { IAppRoot } from "../../types/app-root";
-import initialState from './client-cache/initialState'
-import { initApollo } from './initApollo';
+import { NextPageContext } from "next"
+import { AppContext } from "next/app"
+import Head from "next/head"
 
-const isServer = () => typeof window === "undefined";
+import cookie from "cookie"
+import fetch from "isomorphic-unfetch"
+
+import { getAccessToken, setAccessToken } from "../../lib/auth/accessToken"
+import initialState from "./client-cache/initialState"
+import { initApollo } from "./initApollo"
+
+interface NextPageContextWithApollo extends NextPageContext {
+  apolloClient: ApolloClient<NormalizedCacheObject> | null
+  apolloState: NormalizedCacheObject
+  ctx: NextPageContextApp
+}
+
+type NextPageContextApp = NextPageContextWithApollo & AppContext
+
+const isServer = () => typeof window === "undefined"
 
 /**
  * Creates and provides the apolloContext
@@ -30,45 +32,49 @@ const isServer = () => typeof window === "undefined";
  * @param {Object} [config]
  * @param {Boolean} [config.ssr=true]
  */
-export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
-  const WithApolloClient = ({
+export function withApollo(PageComponent: any, { ssr = true } = {}): ReactNode {
+  const WithApollo = ({
     apolloClient,
-    serverAccessToken,
     apolloState,
+    serverAccessToken,
     ...pageProps
-  }: any) => {
+  }: {
+    apolloClient: ApolloClient<NormalizedCacheObject>
+    apolloState: NormalizedCacheObject
+    serverAccessToken: string
+  }): ReactNode => {
     if (!isServer() && !getAccessToken()) {
-      setAccessToken(serverAccessToken);
+      setAccessToken(serverAccessToken)
     }
-    const client = apolloClient || initApollo(apolloState);
-    return <PageComponent {...pageProps} apolloClient={client} />;
-  };
+    const client = apolloClient || initApollo(apolloState)
+    return <PageComponent {...pageProps} apolloClient={client} />
+  }
 
   if (process.env.NODE_ENV !== "production") {
     // Find correct display name
-    const displayName =
-      PageComponent.displayName || PageComponent.name || "Component";
+    const displayName = PageComponent.displayName || PageComponent.name || "Component"
 
     // Warn if old way of installing apollo is used
     if (displayName === "App") {
-      console.warn("This withApollo HOC only works with PageComponents.");
+      console.warn("This withApollo HOC only works with PageComponents.")
     }
 
     // Set correct display name for devtools
-    WithApolloClient.displayName = `withApollo(${displayName})`;
+    WithApollo.displayName = `withApollo(${displayName})`
   }
 
   if (ssr || PageComponent.getInitialProps) {
-    WithApolloClient.getInitialProps = async (ctx: any) => {
+    WithApollo.getInitialProps = async (ctx: NextPageContextApp) => {
       const {
         AppTree,
         ctx: { req, res }
-      } = ctx;
+      } = ctx
 
-      let serverAccessToken = "";
+      let serverAccessToken = ""
 
       if (isServer()) {
-        const cookies = cookie.parse(req.headers.cookie ?? "");
+        const cookies = cookie.parse(req?.headers.cookie ?? "")
+
         if (cookies.jid) {
           const response = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/refresh_token`, {
             method: "POST",
@@ -76,38 +82,33 @@ export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
             headers: {
               cookie: "jid=" + cookies.jid
             }
-          });
-          const data = await response.json();
-          serverAccessToken = data.accessToken;
+          })
+          const data = await response.json()
+          serverAccessToken = data.accessToken
         }
       }
 
       // Run all GraphQL queries in the component tree
       // and extract the resulting data
-      const apolloClient = (ctx.ctx.apolloClient = initApollo(
-        {},
-        undefined,
-        serverAccessToken
-      ));
+      const apolloClient = (ctx.ctx.apolloClient = initApollo({}, serverAccessToken))
+
       apolloClient.cache.writeData({ data: initialState })
       apolloClient.onResetStore(async () => apolloClient.cache.writeData({ data: initialState }))
 
-      const pageProps = PageComponent.getInitialProps
-        ? await PageComponent.getInitialProps(ctx)
-        : {};
+      const pageProps = PageComponent.getInitialProps ? await PageComponent.getInitialProps(ctx) : {}
 
       // Only on the server
       if (isServer()) {
         // When redirecting, the response is finished.
         // No point in continuing to render
         if (res && res.finished) {
-          return {};
+          return {}
         }
 
         if (ssr) {
           try {
             // Run all GraphQL queries
-            const { getDataFromTree } = await import("@apollo/react-ssr");
+            const { getDataFromTree } = await import("@apollo/react-ssr")
             await getDataFromTree(
               <AppTree
                 pageProps={{
@@ -116,7 +117,7 @@ export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
                 }}
                 apolloClient={apolloClient}
               />
-            );
+            )
           } catch (error) {
             // Prevent Apollo Client GraphQL errors from crashing SSR.
             // Handle them in components via the data.error prop:
@@ -127,19 +128,31 @@ export function withApolloClient(PageComponent: any, { ssr = true } = {}) {
 
         // getDataFromTree does not call componentWillUnmount
         // head side effect therefore need to be cleared manually
-        Head.rewind();
+        Head.rewind()
       }
 
       // Extract query data from the Apollo store
-      const apolloState = apolloClient.cache.extract();
+      const apolloState = apolloClient.cache.extract()
 
       return {
         ...pageProps,
         apolloState,
         serverAccessToken
-      };
-    };
+      }
+    }
   }
 
-  return WithApolloClient;
+  return WithApollo
+}
+
+const redirect = (ctx: NextPageContextApp, target: string) => {
+  if (ctx.ctx.res) {
+    // server
+    // 303: "See other"
+    ctx.ctx.res.writeHead(303, { Location: target })
+    ctx.ctx.res.end()
+  } else {
+    // In the browser, we just pretend like this never even happened ;)
+    ctx.router.replace(target)
+  }
 }

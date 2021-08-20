@@ -22,7 +22,7 @@ import { useCurrentUserQuery, useLogoutMutation } from "../graphql/queries/gener
 
 import LoginForm from "src/components/forms/LoginForm"
 import SnackBar from "src/components/utils/SnackBar"
-import { useRouter } from "next/router"
+import { setAccessToken } from "src/lib/auth/accessToken"
 
 const DRAWER_WIDTH = 240
 
@@ -64,10 +64,9 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function Layout({ children, pageProps }) {
   const classes = useStyles()
-  const router = useRouter()
 
   const { data: currentUserData, loading: currentUserLoading } = useCurrentUserQuery({ fetchPolicy: "network-only" })
-  const [logout] = useLogoutMutation()
+  const [logout, { client }] = useLogoutMutation()
 
   const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false)
 
@@ -87,8 +86,9 @@ function Layout({ children, pageProps }) {
   const handleLogout = async () => {
     try {
       await logout()
-      router.reload()
+      setAccessToken("")
       setDrawerOpen(false)
+      await client!.resetStore()
     } catch (err) {
       console.log(err)
     }

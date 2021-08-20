@@ -4,7 +4,7 @@ import { Button, TextField, Theme, makeStyles, createStyles } from '@material-ui
 import * as Yup from "yup";
 
 import { useLoginMutation, CurrentUserDocument, CurrentUserQuery } from "src/graphql/queries/generated/graphql";
-import { setAccessToken } from "src/lib/user-management/accessToken";
+import { setAccessToken } from "src/lib/auth/accessToken";
 import snackStore, { SnackState } from '../../store/snack.store'
 import { useRouter } from "next/router";
 import { FormikSubmitFunction } from "../../types";
@@ -32,7 +32,7 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
   }
 }));
 
-const LoginForm: FunctionComponent<TSearchFormProps> = (props) => {
+const LoginForm: FunctionComponent<TSearchFormProps> = () => {
   const classes = useStyles();
   const router = useRouter();
 
