@@ -29,6 +29,8 @@ export interface CustomPopupProps extends PopupProps {
   latitude: number
   isVisible: boolean
   features: Array<EstateFeature>
+  popupProps?: CustomPopupProps
+  setPopupProps?: React.Dispatch<React.SetStateAction<CustomPopupProps>>
   handleClose?: () => void
 }
 
@@ -70,7 +72,7 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 const CustomPopup: FunctionComponent<CustomPopupProps> = props => {
-  const { isVisible, longitude, latitude, handleClose, features } = props
+  const { isVisible, longitude, latitude, handleClose, features, setPopupProps, popupProps } = props
 
   const classes = useStyles()
 
@@ -90,7 +92,7 @@ const CustomPopup: FunctionComponent<CustomPopupProps> = props => {
         <List>
           {features.map(({ properties: { id } }, index, array) => (
             <React.Fragment key={id}>
-              <PopupEstateCard id={id} />
+              <PopupEstateCard id={id} popupProps={popupProps!} setPopupProps={setPopupProps!} features={array} />
               {index !== array.length - 1 && <Divider />}
             </React.Fragment>
           ))}

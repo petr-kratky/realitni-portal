@@ -59,6 +59,8 @@ const MapContainer: FunctionComponent<TMapContainerProps> = (props) => {
         {popupProps.features &&
           <CustomPopup {...popupProps}
             handleClose={_handlePopupClose}
+            popupProps={popupProps}
+            setPopupProps={setPopupProps}
           />
         }
         {contextMenuProps.isVisible &&

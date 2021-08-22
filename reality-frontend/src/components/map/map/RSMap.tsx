@@ -1,16 +1,18 @@
-import ReactMapGL, { ExtraState, FlyToInterpolator, FullscreenControl, PointerEvent, ViewportProps } from 'react-map-gl'
-import { useMutation, useQuery } from '@apollo/react-hooks'
-import { useRouter } from 'next/dist/client/router'
-import { GeoJSONSource, LngLatBounds, Map } from 'mapbox-gl'
 import React, { FunctionComponent, useEffect, useRef, useState, useLayoutEffect } from 'react';
+import { GeoJSONSource, LngLatBounds, Map } from 'mapbox-gl'
+import ReactMapGL, { ExtraState, PointerEvent, ViewportProps } from 'react-map-gl'
+import { FeatureCollection, Point } from 'geojson'
+import { useQuery } from '@apollo/react-hooks'
+import { useRouter } from 'next/router'
 
-import { FILTERS_QUERY, VIEWPORT_QUERY } from '../../../graphql/apollo-client/client-cache/queries'
+import { FILTERS_QUERY } from '../../../graphql/apollo-client/client-cache/queries'
 import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
 import viewportStore, { CachedViewport } from 'src/store/viewport.store'
 import {
   CachedFiltersData,
   EstateCluster,
   EstateFeature,
+  EstateFeatureProperties,
   LocalQueryResult,
   MapComponentProps,
 } from '../../../types'
@@ -111,7 +113,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
   useEffect(() => {
     updateGeojsonSource(getGeojsonSourceUri())
-  }, [cachedFilters])
+  }, [cachedFilters, popupProps.features])
 
 
   const _onContextMenu = (e: PointerEvent): void => {
@@ -145,20 +147,19 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   }
 
 
-  const _onViewPortChange = (viewport: ViewportProps): void => {
+  const _onViewPortChange = (viewport: ViewportProps) => {
     viewportStore.setViewport(viewport)
     setContextMenuProps({ ...contextMenuProps, isVisible: false })
   }
 
 
-  const _onInteractionStateChange = (interactionState: ExtraState): void => {
+  const _onInteractionStateChange = async (interactionState: ExtraState) => {
     const { isZooming, isPanning, inTransition, isDragging } = interactionState
 
     if (!isZooming && !isPanning && !inTransition && !isDragging) {
-      // setCachedViewport({ variables: { cachedViewport: mapViewport } })
-      pushViewportToUrl(router, viewportState)
-      updateGeojsonSource(getGeojsonSourceUri())
-      updateOnScreenEstates()
+      await pushViewportToUrl(router, viewportState)
+      await updateGeojsonSource(getGeojsonSourceUri())
+      await updateOnScreenEstates()
     }
   }
 
@@ -226,11 +227,13 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   }
 
 
-  const updateGeojsonSource = (geojsonEndpointUri: string) => {
+  const updateGeojsonSource = async (geojsonEndpointUri: string) => {
     if (mapRef.current !== null && isMapLoaded) {
       const map: Map = mapRef.current.getMap()
+      const geojsonResponse = await fetch(geojsonEndpointUri, { cache: 'no-cache' })
+      const geojsonData: FeatureCollection<Point, EstateFeatureProperties> = await geojsonResponse.json()
       const geojsonSource = map.getSource('estates') as GeoJSONSource
-      geojsonSource.setData(geojsonEndpointUri)
+      geojsonSource.setData(geojsonData)
     }
   }
 
