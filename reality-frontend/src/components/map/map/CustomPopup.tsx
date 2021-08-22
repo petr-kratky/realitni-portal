@@ -89,10 +89,10 @@ const CustomPopup: FunctionComponent<CustomPopupProps> = props => {
       <Grid container direction='column' alignItems='center' classes={{ root: classes.containerRoot }}>
         <List>
           {features.map(({ properties: { id } }, index, array) => (
-            <>
-              <PopupEstateCard key={id} id={id} />
+            <React.Fragment key={id}>
+              <PopupEstateCard id={id} />
               {index !== array.length - 1 && <Divider />}
-            </>
+            </React.Fragment>
           ))}
         </List>
       </Grid>

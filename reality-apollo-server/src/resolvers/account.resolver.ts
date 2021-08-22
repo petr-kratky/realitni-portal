@@ -16,8 +16,8 @@ import { verify } from "jsonwebtoken";
 import { Account, AccountUpdateInput } from "../models";
 import { resolverManager } from "./_resolver-manager";
 import { MyContext } from "../typings";
-import { createRefreshToken, createAccessToken } from "../auth";
-import { sendRefreshToken } from "../sendRefreshToken";
+import { createRefreshToken, createAccessToken } from "../lib/auth/auth";
+import { sendRefreshToken } from "../lib/auth/sendRefreshToken";
 import { RequireAuthentication } from "../decorators/RequireAuthentication";
 import { AccountService } from "../services";
 

@@ -1,4 +1,4 @@
-import { Account } from "./models/account.model";
+import { Account } from "../../models/account.model";
 import { sign, verify } from "jsonwebtoken";
 import { sendRefreshToken } from "./sendRefreshToken"
 

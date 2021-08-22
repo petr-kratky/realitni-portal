@@ -73,7 +73,7 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id }) => {
     } = data.estate
 
     return (
-      <ListItem style={{ width: 350 }} button>
+      <ListItem key={id} style={{ width: 350 }} button>
         <ListItemText
           style={{ textTransform: "capitalize" }}
           primary={`${primary_type?.desc_cz} | ${secondary_type?.desc_cz}`}

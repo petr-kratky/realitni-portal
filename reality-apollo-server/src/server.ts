@@ -11,7 +11,7 @@ import { buildGraphqlSchema } from './schema';
 import { LoggerApi } from './logger';
 import { ServiceConfig } from './config'
 import { ConnectionOptions, createConnection } from 'typeorm'
-import { RefreshTokenRequestHandler } from './auth'
+import { RefreshTokenRequestHandler } from './lib/auth/auth'
 import express = require('express')
 import http = require('http')
 import cookieParser = require('cookie-parser')

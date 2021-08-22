@@ -62,6 +62,9 @@ const useStyles = makeStyles((theme: Theme) =>
       marginTop: theme.spacing(2),
       marginBottom: -theme.spacing(1),
       display: "block"
+    },
+    errorLabel: {
+      color: theme.palette.secondary.main
     }
   })
 )
@@ -106,18 +109,21 @@ const CreateEstateModal: FunctionComponent = () => {
       .max(128, max => `Název nemovitosti nesmí být delší než ${max} znaků`)
       .trim(),
     coordinates: Yup.string().required("Toto pole je povinné"),
-    description: Yup.string().max(4096).trim(),
+    description: Yup.string()
+      .max(4096, max => `Popis nemovitosti nesmí být delší než ${max} znaků`)
+      .trim(),
     advert_price: Yup.number().positive(),
     estimated_price: Yup.number().positive(),
-    street_address: Yup.string(),
-    city_address: Yup.string(),
+    street_address: Yup.string().required("Toto pole je povinné"),
+    city_address: Yup.string().required("Toto pole je povinné"),
     postal_code: Yup.string()
-      .length(5)
-      .matches(/(\d{5})/g),
+      .length(6, "Zadejte platné PSČ ve formátu s mezerou za prvními třemi číslicemi")
+      .matches(/(\d{3} \d{2})/g, "Zadejte platné PSČ ve formátu s mezerou za prvními třemi číslicemi")
+      .required("Toto pole je povinné"),
     land_area: Yup.number().positive(),
     usable_area: Yup.number().positive(),
-    primary_type_id: Yup.string(),
-    secondary_type_id: Yup.string()
+    primary_type_id: Yup.string().required("Toto pole je povinné"),
+    secondary_type_id: Yup.string().required("Toto pole je povinné")
   })
 
   const handleClose = (): void => {
@@ -163,12 +169,7 @@ const CreateEstateModal: FunctionComponent = () => {
   }
 
   return (
-    <Dialog
-      scroll='paper'
-      open={createEstateModalState.isOpen}
-      onClose={handleClose}
-      fullScreen={isXs}
-    >
+    <Dialog scroll='paper' open={createEstateModalState.isOpen} onClose={handleClose} fullScreen={isXs}>
       <Formik
         initialValues={createEstateModalState.formValues}
         onSubmit={onFormSubmit}
@@ -312,16 +313,15 @@ const CreateEstateModal: FunctionComponent = () => {
                           classes={{ root: classes.menuItemRoot }}
                           margin='none'
                         >
-                          <MenuItem classes={{ root: classes.menuItemRoot }} value={""}>
-                            &nbsp;
-                          </MenuItem>
                           {estateTypesData?.estatePrimaryTypes.map(({ id, desc_cz }) => (
                             <MenuItem key={id} classes={{ root: classes.menuItemRoot }} value={id}>
                               {desc_cz}
                             </MenuItem>
                           ))}
                         </Select>
-                        <FormHelperText>{(touched.primary_type_id && errors.primary_type_id) ?? ""}</FormHelperText>
+                        <FormHelperText error={!!touched.primary_type_id && !!errors.primary_type_id}>
+                          {(touched.primary_type_id && errors.primary_type_id) ?? ""}
+                        </FormHelperText>
                       </FormControl>
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -337,9 +337,6 @@ const CreateEstateModal: FunctionComponent = () => {
                           disabled={!values.primary_type_id}
                           margin='none'
                         >
-                          <MenuItem classes={{ root: classes.menuItemRoot }} value={""}>
-                            &nbsp;
-                          </MenuItem>
                           {values.primary_type_id
                             ? estateTypesData?.estatePrimaryTypes
                                 .find(pType => pType.id === values.primary_type_id)
@@ -350,9 +347,8 @@ const CreateEstateModal: FunctionComponent = () => {
                                 ))
                             : null}
                         </Select>
-                        <FormHelperText>
-                          <span>Zvolte nejprve typ nemovitosti</span>
-                          <span>{(touched.secondary_type_id && errors.secondary_type_id) ?? ""}</span>
+                        <FormHelperText error={!!touched.secondary_type_id && !!errors.secondary_type_id}>
+                          {(touched.secondary_type_id && errors.secondary_type_id) ?? "Zvolte nejprve typ nemovitosti"}
                         </FormHelperText>
                       </FormControl>
                     </Grid>

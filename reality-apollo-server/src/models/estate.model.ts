@@ -59,16 +59,16 @@ export class Estate extends BaseEntity {
   @Column("integer", { nullable: true })
   estimated_price: number;
 
-  @Field(() => String, { nullable: true })
-  @Column("character varying", { nullable: true, length: 64 })
+  @Field(() => String)
+  @Column("character varying", { length: 64 })
   street_address: string
 
-  @Field(() => String, { nullable: true })
-  @Column("character varying", { nullable: true, length: 64 })
+  @Field(() => String)
+  @Column("character varying", { length: 64 })
   city_address: string
 
-  @Field(() => String, { nullable: true })
-  @Column("character", { nullable: true, length: 5 })
+  @Field(() => String)
+  @Column("character", { length: 6 })
   postal_code: string
 
   @Field(() => Int, { nullable: true })
@@ -79,17 +79,17 @@ export class Estate extends BaseEntity {
   @Column("integer", { nullable: true })
   land_area: number
 
-  @Field(() => EstatePrimaryType, { nullable: true })
-  @ManyToOne(() => EstatePrimaryType, primaryType => primaryType.estates, { nullable: true, lazy: true, eager: true })
+  @Field(() => EstatePrimaryType)
+  @ManyToOne(() => EstatePrimaryType, primaryType => primaryType.estates, { nullable: false, lazy: true, eager: true })
   @JoinColumn({ name: 'primary_type', referencedColumnName: 'id' })
   primary_type: EstatePrimaryType
 
-  @Field(() => EstateSecondaryType, { nullable: true })
-  @ManyToOne(() => EstateSecondaryType, secondaryType => secondaryType.estates, { nullable: true, lazy: true, eager: true })
+  @Field(() => EstateSecondaryType)
+  @ManyToOne(() => EstateSecondaryType, secondaryType => secondaryType.estates, { nullable: false, lazy: true, eager: true })
   @JoinColumn({ name: 'secondary_type', referencedColumnName: 'id' })
   secondary_type: EstateSecondaryType
 
-  @Field(() => AccountPublicInfo, { nullable: false })
+  @Field(() => AccountPublicInfo)
   @ManyToOne(() => Account, account => account.estates, { nullable: false, lazy: true, eager: true })
   @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
   created_by: Account
@@ -146,4 +146,19 @@ export class EstateCreateInput extends EstateUpdateInput {
 
   @Field(() => Float)
   latitude: number;
+
+  @Field(() => String)
+  street_address: string
+
+  @Field(() => String)
+  city_address: string
+
+  @Field(() => String)
+  postal_code: string
+
+  @Field(() => Int)
+  primary_type_id: number
+
+  @Field(() => Int)
+  secondary_type_id: number
 }
