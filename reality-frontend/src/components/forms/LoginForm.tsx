@@ -68,6 +68,9 @@ const LoginForm: FunctionComponent<TSearchFormProps> = () => {
           if (!data) {
             return null;
           }
+          // Access token must be set before store update
+          // to make it available before the original component renders
+          setAccessToken(data.login.accessToken)
           store.writeQuery<CurrentUserQuery>({
             query: CurrentUserDocument,
             data: {
@@ -76,11 +79,6 @@ const LoginForm: FunctionComponent<TSearchFormProps> = () => {
           });
         },
       });
-
-      if (response?.data) {
-        setAccessToken(response.data.login.accessToken);
-        router.push('/map');
-      }
     } catch (err) {
       snackStore.toggle('error', err.message)
     }
