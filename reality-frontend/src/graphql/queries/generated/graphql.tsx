@@ -47,13 +47,13 @@ export type Estate = {
   latitude: Scalars['Float'];
   advert_price?: Maybe<Scalars['Int']>;
   estimated_price?: Maybe<Scalars['Int']>;
-  street_address?: Maybe<Scalars['String']>;
-  city_address?: Maybe<Scalars['String']>;
-  postal_code?: Maybe<Scalars['String']>;
+  street_address: Scalars['String'];
+  city_address: Scalars['String'];
+  postal_code: Scalars['String'];
   usable_area?: Maybe<Scalars['Int']>;
   land_area?: Maybe<Scalars['Int']>;
-  primary_type?: Maybe<EstatePrimaryType>;
-  secondary_type?: Maybe<EstateSecondaryType>;
+  primary_type: EstatePrimaryType;
+  secondary_type: EstateSecondaryType;
   created_by: AccountPublicInfo;
 };
 
@@ -64,13 +64,13 @@ export type EstateCreateInput = {
   latitude: Scalars['Float'];
   advert_price?: Maybe<Scalars['Int']>;
   estimated_price?: Maybe<Scalars['Int']>;
-  street_address?: Maybe<Scalars['String']>;
-  city_address?: Maybe<Scalars['String']>;
-  postal_code?: Maybe<Scalars['String']>;
+  street_address: Scalars['String'];
+  city_address: Scalars['String'];
+  postal_code: Scalars['String'];
   usable_area?: Maybe<Scalars['Int']>;
   land_area?: Maybe<Scalars['Int']>;
-  primary_type_id?: Maybe<Scalars['Int']>;
-  secondary_type_id?: Maybe<Scalars['Int']>;
+  primary_type_id: Scalars['Int'];
+  secondary_type_id: Scalars['Int'];
 };
 
 export type EstatePrimaryType = {
@@ -227,13 +227,13 @@ export type EstateQuery = (
     & { created_by: (
       { __typename?: 'AccountPublicInfo' }
       & Pick<AccountPublicInfo, 'id' | 'username'>
-    ), primary_type?: Maybe<(
+    ), primary_type: (
       { __typename?: 'EstatePrimaryType' }
       & Pick<EstatePrimaryType, 'id' | 'desc_cz'>
-    )>, secondary_type?: Maybe<(
+    ), secondary_type: (
       { __typename?: 'EstateSecondaryType' }
       & Pick<EstateSecondaryType, 'id' | 'desc_cz'>
-    )> }
+    ) }
   )> }
 );
 
