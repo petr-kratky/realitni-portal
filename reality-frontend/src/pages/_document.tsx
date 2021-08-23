@@ -17,6 +17,11 @@ export default class JssDocument extends Document {
               body {
                 font-family: 'Roboto', sans-serif;
                 margin: 0;
+              }
+
+              .mapboxgl-ctrl-attrib-button {
+                display: none !important;
+              }
             `}
           </style>
         </Head>

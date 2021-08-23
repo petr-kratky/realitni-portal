@@ -1,11 +1,8 @@
 import React, { FunctionComponent } from "react"
+import Link from "next/link"
 
 import {
   Button,
-  Card,
-  CardActions,
-  CardContent,
-  CardHeader,
   CircularProgress,
   createStyles,
   Dialog,
@@ -13,8 +10,6 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Divider,
-  Icon,
   IconButton,
   ListItem,
   ListItemIcon,
@@ -23,8 +18,7 @@ import {
   makeStyles,
   Menu,
   MenuItem,
-  Theme,
-  Typography
+  Theme
 } from "@material-ui/core"
 import MoreVertIcon from "@material-ui/icons/MoreVert"
 import EditIcon from "@material-ui/icons/Edit"
@@ -34,7 +28,6 @@ import { useDeleteEstateMutation, useEstateQuery } from "../../../graphql/querie
 import snackStore, { SnackState } from "src/store/snack.store"
 import { CustomPopupProps } from "./CustomPopup"
 import { EstateFeature } from "src/types"
-import { features } from "process"
 
 type PopupEstateCardProps = {
   id: string
@@ -110,39 +103,41 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
 
     return (
       <>
-        <ListItem key={id} style={{ width: 350 }} button>
-          <ListItemText
-            style={{ textTransform: "capitalize" }}
-            primary={`${primary_type?.desc_cz} | ${secondary_type?.desc_cz}`}
-            secondary={fullAddress}
-          />
-          <ListItemSecondaryAction>
-            <IconButton size='small' onClick={handleMenuOpen}>
-              <MoreVertIcon />
-            </IconButton>
-            <Menu
-              anchorEl={menuAnchor}
-              keepMounted
-              elevation={2}
-              open={isMenuOpen}
-              onClose={handleMenuClose}
-              transformOrigin={{ vertical: "top", horizontal: "left" }}
-            >
-              <MenuItem>
-                <ListItemIcon>
-                  <EditIcon />
-                </ListItemIcon>
-                <ListItemText primary='Upravit' />
-              </MenuItem>
-              <MenuItem onClick={handleDeleteDialogOpen}>
-                <ListItemIcon>
-                  <DeleteIcon />
-                </ListItemIcon>
-                <ListItemText primary='Smazat' />
-              </MenuItem>
-            </Menu>
-          </ListItemSecondaryAction>
-        </ListItem>
+        <Link href={`/estates/${id}`}>
+          <ListItem style={{ width: 350 }} button>
+            <ListItemText
+              style={{ textTransform: "capitalize" }}
+              primary={`${primary_type?.desc_cz} | ${secondary_type?.desc_cz}`}
+              secondary={fullAddress}
+            />
+            <ListItemSecondaryAction>
+              <IconButton size='small' onClick={handleMenuOpen}>
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                anchorEl={menuAnchor}
+                keepMounted
+                elevation={2}
+                open={isMenuOpen}
+                onClose={handleMenuClose}
+                transformOrigin={{ vertical: "top", horizontal: "left" }}
+              >
+                <MenuItem>
+                  <ListItemIcon>
+                    <EditIcon />
+                  </ListItemIcon>
+                  <ListItemText primary='Upravit' />
+                </MenuItem>
+                <MenuItem onClick={handleDeleteDialogOpen}>
+                  <ListItemIcon>
+                    <DeleteIcon />
+                  </ListItemIcon>
+                  <ListItemText primary='Smazat' />
+                </MenuItem>
+              </Menu>
+            </ListItemSecondaryAction>
+          </ListItem>
+        </Link>
         <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
           <DialogTitle>Smazat nemovitost</DialogTitle>
           <DialogContent>
