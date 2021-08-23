@@ -1,5 +1,5 @@
 import React, { FunctionComponent } from "react"
-import Link from "next/link"
+import NextLink from "next/link"
 
 import {
   Button,
@@ -18,7 +18,8 @@ import {
   makeStyles,
   Menu,
   MenuItem,
-  Theme
+  Theme,
+  Link
 } from "@material-ui/core"
 import MoreVertIcon from "@material-ui/icons/MoreVert"
 import EditIcon from "@material-ui/icons/Edit"
@@ -40,6 +41,10 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     cardHeaderTitle: {
       textTransform: "capitalize"
+    },
+    link: {
+      color: "inherit"
+      // textDecoration: "inherit"
     }
   })
 )
@@ -53,6 +58,7 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
   const [snackState, setSnackState] = React.useState<SnackState>(snackStore.initialState)
 
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null)
+  const [estateTab, setEstateTab] = React.useState<null | Window>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
 
   const isMenuOpen = Boolean(menuAnchor)
@@ -96,6 +102,15 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
     setDeleteDialogOpen(false)
   }
 
+  const handleItemClick = () => {
+    if (estateTab && !estateTab.closed) {
+      estateTab.focus()
+    } else {
+      const estateWindow = window.open(`/estates/${id}`)
+      setEstateTab(estateWindow)
+    }
+  }
+
   if (estateData?.estate) {
     const { id, primary_type, secondary_type, city_address, street_address } = estateData.estate
 
@@ -103,41 +118,39 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
 
     return (
       <>
-        <Link href={`/estates/${id}`}>
-          <ListItem style={{ width: 350 }} button>
-            <ListItemText
-              style={{ textTransform: "capitalize" }}
-              primary={`${primary_type?.desc_cz} | ${secondary_type?.desc_cz}`}
-              secondary={fullAddress}
-            />
-            <ListItemSecondaryAction>
-              <IconButton size='small' onClick={handleMenuOpen}>
-                <MoreVertIcon />
-              </IconButton>
-              <Menu
-                anchorEl={menuAnchor}
-                keepMounted
-                elevation={2}
-                open={isMenuOpen}
-                onClose={handleMenuClose}
-                transformOrigin={{ vertical: "top", horizontal: "left" }}
-              >
-                <MenuItem>
-                  <ListItemIcon>
-                    <EditIcon />
-                  </ListItemIcon>
-                  <ListItemText primary='Upravit' />
-                </MenuItem>
-                <MenuItem onClick={handleDeleteDialogOpen}>
-                  <ListItemIcon>
-                    <DeleteIcon />
-                  </ListItemIcon>
-                  <ListItemText primary='Smazat' />
-                </MenuItem>
-              </Menu>
-            </ListItemSecondaryAction>
-          </ListItem>
-        </Link>
+        <ListItem style={{ width: 350 }} button onClick={handleItemClick}>
+          <ListItemText
+            style={{ textTransform: "capitalize" }}
+            primary={`${primary_type?.desc_cz} | ${secondary_type?.desc_cz}`}
+            secondary={fullAddress}
+          />
+          <ListItemSecondaryAction>
+            <IconButton size='small' onClick={handleMenuOpen}>
+              <MoreVertIcon />
+            </IconButton>
+            <Menu
+              anchorEl={menuAnchor}
+              keepMounted
+              elevation={2}
+              open={isMenuOpen}
+              onClose={handleMenuClose}
+              transformOrigin={{ vertical: "top", horizontal: "left" }}
+            >
+              <MenuItem>
+                <ListItemIcon>
+                  <EditIcon />
+                </ListItemIcon>
+                <ListItemText primary='Upravit' />
+              </MenuItem>
+              <MenuItem onClick={handleDeleteDialogOpen}>
+                <ListItemIcon>
+                  <DeleteIcon />
+                </ListItemIcon>
+                <ListItemText primary='Smazat' />
+              </MenuItem>
+            </Menu>
+          </ListItemSecondaryAction>
+        </ListItem>
         <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
           <DialogTitle>Smazat nemovitost</DialogTitle>
           <DialogContent>

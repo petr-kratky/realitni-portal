@@ -54,7 +54,7 @@ const useStyles = makeStyles((theme: Theme) =>
         animationName: "$content",
         padding: 0,
         overflowY: "scroll",
-        maxHeight: 300,
+        maxHeight: 280,
         cursor: "default",
         borderRadius: 5
         // paddingLeft: 10
