@@ -22,6 +22,10 @@ export default class JssDocument extends Document {
               .mapboxgl-ctrl-attrib-button {
                 display: none !important;
               }
+              
+              button.thumbnail-button {
+                border-color: transparent; 
+              }
             `}
           </style>
         </Head>
