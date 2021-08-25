@@ -20,7 +20,7 @@ import ExitIcon from "@material-ui/icons/ExitToApp"
 
 import { useCurrentUserQuery, useLogoutMutation } from "../graphql/queries/generated/graphql"
 
-import LoginForm from "src/components/forms/LoginForm"
+import LoginForm from "src/components/login/LoginForm"
 import SnackBar from "src/components/utils/SnackBar"
 import { setAccessToken } from "src/lib/auth/accessToken"
 
