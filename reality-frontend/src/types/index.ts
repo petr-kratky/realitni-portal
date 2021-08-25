@@ -1,4 +1,4 @@
-export * from './app-root'
+export * from './app'
 export * from './viewport-url-options'
 export * from './map-component'
 export * from './with-optional'

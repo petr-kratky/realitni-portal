@@ -126,6 +126,11 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerRe
     }
   }
 
+  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
+    if (event.key === 'ArrowLeft') onPrevImage()
+    if (event.key === 'ArrowRight') onNextImage()
+  }
+
   return (
     <>
       <ReactBnbGallery {...galleryProps} />
@@ -137,6 +142,8 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerRe
         alignItems='center'
         id='carousel-container'
         className={classes.carouselContainer}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
       >
         <Button
           size='small'

@@ -25,25 +25,31 @@ import {
 } from "@material-ui/core"
 import * as Yup from "yup"
 
-import createEstateModalStore, { CreateEstateModalState } from "../../../store/create-estate-modal.store"
-import { useCreateEstateMutation, useEstateTypesQuery } from "src/graphql/queries/generated/graphql"
-import snackStore, { SnackState } from "src/store/snack.store"
-import { FormikSubmitFunction } from "../../../types"
-import { geocodeLocation, parseIntParam, removeEmptyStrings } from "src/utils/utils"
+import estateModalStore from "../../../store/estate-modal.store"
+import snackStore from "src/store/snack.store"
+import {
+  CreateEstateMutationVariables,
+  EstateDocument,
+  useCreateEstateMutation,
+  useEstateTypesQuery,
+  useUpdateEstateMutation
+} from "src/graphql/queries/generated/graphql"
+import { AppState, FormikSubmitFunction } from "../../../types"
+import { geocodeLocation, removeEmptyStrings } from "src/utils/utils"
 
-export type CreateEstateFormValues = {
+export type EstateFormValues = {
   coordinates: string
   name?: string
   description?: string
   advert_price?: number
   estimated_price?: number
-  street_address?: string
-  city_address?: string
-  postal_code?: string
+  street_address: string
+  city_address: string
+  postal_code: string
   usable_area?: number
   land_area?: number
-  primary_type_id?: string
-  secondary_type_id?: string
+  primary_type_id: string
+  secondary_type_id: string
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -69,7 +75,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const CreateEstateModal: FunctionComponent = () => {
+const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
   const classes = useStyles()
   const theme = useTheme()
 
@@ -83,28 +89,15 @@ const CreateEstateModal: FunctionComponent = () => {
   } = useEstateTypesQuery()
 
   const [createEstate] = useCreateEstateMutation()
-
-  const [createEstateModalState, setCreateEstateModalState] = useState<CreateEstateModalState>(
-    createEstateModalStore.initialState
-  )
-  const [_, setSnackState] = useState<SnackState>(snackStore.initialState)
+  const [updateEstate] = useUpdateEstateMutation()
 
   useEffect(() => {
-    const createEstateModalStoreSub = createEstateModalStore.subscribe(setCreateEstateModalState)
-    const snackStoreSub = snackStore.subscribe(setSnackState)
-    return () => {
-      createEstateModalStoreSub.unsubscribe()
-      snackStoreSub.unsubscribe()
-    }
-  }, [])
-
-  useEffect(() => {
-    if (createEstateModalState.isOpen && estateTypesError) {
+    if (appState.estateModal.isOpen && estateTypesError) {
       estateTypesRefetch()
     }
-  }, [createEstateModalState.isOpen])
+  }, [appState.estateModal.isOpen])
 
-  const formSchema: Yup.SchemaOf<CreateEstateFormValues> = Yup.object().shape({
+  const formSchema: Yup.SchemaOf<EstateFormValues> = Yup.object().shape({
     name: Yup.string()
       .max(128, max => `Název nemovitosti nesmí být delší než ${max} znaků`)
       .trim(),
@@ -127,11 +120,10 @@ const CreateEstateModal: FunctionComponent = () => {
   })
 
   const handleClose = (): void => {
-    createEstateModalStore.close()
-    createEstateModalStore.resetFormValues()
+    estateModalStore.resetState()
   }
 
-  const onFormSubmit: FormikSubmitFunction<CreateEstateFormValues> = async ({ coordinates, ...args }, actions) => {
+  const onFormSubmit: FormikSubmitFunction<EstateFormValues> = async ({ coordinates, ...args }, actions) => {
     const coords = coordinates.split(",").map(str => parseFloat(str.trim()))
     if (coords.length !== 2) {
       actions.setFieldError("coordinates", "Souřadnice nejsou ve spravném formátu")
@@ -147,21 +139,32 @@ const CreateEstateModal: FunctionComponent = () => {
       return
     }
     const { primary_type_id, secondary_type_id, ...cleanArgs } = removeEmptyStrings(args)
+
+    const variables: CreateEstateMutationVariables = {
+      // @ts-ignore
+      estateInput: {
+        primary_type_id: parseInt(primary_type_id!),
+        secondary_type_id: parseInt(secondary_type_id!),
+        latitude,
+        longitude,
+        ...cleanArgs
+      }
+    }
+
     try {
-      const response = await createEstate({
-        variables: {
-          estateInput: {
-            primary_type_id: parseIntParam(primary_type_id),
-            secondary_type_id: parseIntParam(secondary_type_id),
-            latitude,
-            longitude,
-            ...cleanArgs
-          }
-        }
-      })
-      console.log(response.data?.createEstate)
+      if (appState.estateModal.editMode.estateId) {
+        const updateEstateResponse = await updateEstate({
+          variables: { id: appState.estateModal.editMode.estateId, estateInput: variables.estateInput },
+          refetchQueries: [{ query: EstateDocument, variables: { id: appState.estateModal.editMode.estateId } }]
+        })
+        snackStore.toggle("success", "Nemovitost uložena")
+        console.log(updateEstateResponse.data?.updateEstate)
+      } else {
+        const createEstateResponse = await createEstate({ variables })
+        snackStore.toggle("success", "Nemovitost vytvořena")
+        console.log(createEstateResponse.data?.createEstate)
+      }
       handleClose()
-      snackStore.toggle("success", "Nemovitost vytvořena!")
     } catch (err) {
       // @ts-ignore
       snackStore.toggle("error", err.message)
@@ -169,9 +172,9 @@ const CreateEstateModal: FunctionComponent = () => {
   }
 
   return (
-    <Dialog scroll='paper' open={createEstateModalState.isOpen} onClose={handleClose} fullScreen={isXs}>
+    <Dialog scroll='paper' open={appState.estateModal.isOpen} onClose={handleClose} fullScreen={isXs}>
       <Formik
-        initialValues={createEstateModalState.formValues}
+        initialValues={appState.estateModal.formValues}
         onSubmit={onFormSubmit}
         validationSchema={formSchema}
         validateOnChange
@@ -199,7 +202,9 @@ const CreateEstateModal: FunctionComponent = () => {
 
           return (
             <>
-              <DialogTitle>Nová nemovitost</DialogTitle>
+              <DialogTitle>
+                {appState.estateModal.editMode.estateId ? "Upravit nemovitost" : "Nová nemovitost"}
+              </DialogTitle>
               <form onSubmit={handleSubmit}>
                 <DialogContent dividers>
                   <DialogContentText>
@@ -463,7 +468,7 @@ const CreateEstateModal: FunctionComponent = () => {
                     zavřít
                   </Button>
                   <Button onClick={submitForm} disabled={isSubmitting} color='primary'>
-                    vytvořit
+                    {appState.estateModal.editMode.estateId ? "uložit změny" : "vytvořit"}
                     {isSubmitting && (
                       <>
                         &nbsp;
@@ -481,4 +486,4 @@ const CreateEstateModal: FunctionComponent = () => {
   )
 }
 
-export default CreateEstateModal
+export default EstateModal

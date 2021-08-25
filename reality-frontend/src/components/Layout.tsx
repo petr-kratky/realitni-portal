@@ -23,6 +23,7 @@ import { useCurrentUserQuery, useLogoutMutation } from "../graphql/queries/gener
 import LoginForm from "src/components/login/LoginForm"
 import SnackBar from "src/components/utils/SnackBar"
 import { setAccessToken } from "src/lib/auth/accessToken"
+import EstateModal from "./map/map/CreateEstateModal"
 
 const DRAWER_WIDTH = 240
 
@@ -62,7 +63,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-function Layout({ children, pageProps }) {
+function Layout({ children, pageProps, appState }) {
   const classes = useStyles()
 
   const { data: currentUserData, loading: currentUserLoading } = useCurrentUserQuery({ fetchPolicy: "network-only" })
@@ -131,7 +132,9 @@ function Layout({ children, pageProps }) {
       </Drawer>
       <main className={`${classes.content} ${isDrawerOpen ? classes.contentShift : ""}`}>
         <Toolbar variant='dense' />
-        {!currentUserLoading && (currentUserData?.currentUser?.id ? children : <LoginForm {...pageProps} />)}
+        <EstateModal appState={appState} />
+        {!currentUserLoading &&
+          (currentUserData?.currentUser?.id ? children : <LoginForm {...pageProps} appState={appState} />)}
         <SnackBar />
       </main>
     </div>

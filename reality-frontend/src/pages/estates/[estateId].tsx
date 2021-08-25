@@ -8,6 +8,7 @@ import {
   CircularProgress,
   createStyles,
   Grid,
+  IconButton,
   List,
   ListItem,
   ListItemAvatar,
@@ -23,6 +24,7 @@ import HomeIcon from "@material-ui/icons/Home"
 import MapIcon from "@material-ui/icons/Map"
 import MoneyIcon from "@material-ui/icons/AttachMoney"
 import BankIcon from "@material-ui/icons/AccountBalance"
+import EditIcon from "@material-ui/icons/Edit"
 
 import { Photo } from "react-bnb-gallery"
 
@@ -30,7 +32,8 @@ import { useEstateQuery } from "src/graphql/queries/generated/graphql"
 import { capitalize } from "src/utils/capitalize"
 import { formatNumber } from "src/utils/number-formatter"
 import ImageCarousel from "src/components/estate/ImageCarousel"
-
+import { AppState } from "src/types"
+import estateModalStore from "src/store/estate-modal.store"
 
 type ParameterListItemProps = {
   icon: React.ReactNode
@@ -50,7 +53,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const EstatePage: NextPage = () => {
+const EstatePage: NextPage<AppState> = ({ appState }) => {
   const classes = useStyles()
   const router = useRouter()
   const theme = useTheme()
@@ -93,6 +96,23 @@ const EstatePage: NextPage = () => {
       primary_type,
       secondary_type
     } = estateData.estate
+
+    const onEstateEditButton = () => {
+      estateModalStore.openEditMode(id, {
+        primary_type_id: primary_type.id,
+        secondary_type_id: secondary_type.id,
+        coordinates: `${latitude}, ${longitude}`,
+        advert_price: advert_price!,
+        description: description!,
+        estimated_price: estimated_price!,
+        land_area: land_area!,
+        usable_area: usable_area!,
+        name: name!,
+        city_address,
+        postal_code,
+        street_address,
+      })
+    }
 
     const images: Photo[] = [
       {
@@ -151,13 +171,19 @@ const EstatePage: NextPage = () => {
           <Grid item xs={12} sm={9} lg={7} xl={6}>
             <Paper style={{ padding: theme.spacing(2) }} variant='outlined'>
               <Grid container direction='row'>
-                <Grid item xs={12}>
+                <Grid item xs={10}>
                   <Typography variant='h4'>
                     {capitalize(primary_type.desc_cz)}, {secondary_type.desc_cz}
                   </Typography>
                   <Typography variant='h6' color='textSecondary'>
                     {street_address}, {city_address}, {postal_code}
                   </Typography>
+                </Grid>
+
+                <Grid item xs={2}>
+                  <IconButton onClick={onEstateEditButton}>
+                    <EditIcon />
+                  </IconButton>
                 </Grid>
 
                 <ImageCarousel images={images} registerResizeListenerTrigger={estateData} />

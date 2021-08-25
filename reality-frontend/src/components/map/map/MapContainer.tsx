@@ -2,16 +2,15 @@ import React, { Dispatch, FunctionComponent, SetStateAction, useState, useEffect
 import { createStyles, Fab, makeStyles, Theme } from '@material-ui/core'
 import AddIcon from '@material-ui/icons/Add'
 
-import createEstateModalStore, { CreateEstateModalState } from '../../../store/create-estate-modal.store'
+import estateModalStore from '../../../store/estate-modal.store'
 import CustomPopup, { CustomPopupProps } from './CustomPopup'
 import ContextMenu, { ContextMenuProps } from './ContextMenu'
-import CreateEstateModal from './CreateEstateModal';
 import RSMap from './RSMap'
+import { AppState } from 'src/types';
 
-type TMapContainerProps = {
+type MapContainerProps = {
   setOnScreenEstates: Dispatch<SetStateAction<string[]>>,
 }
-
 
 const useStyles = makeStyles((theme: Theme) => createStyles({
   mapContainer: {
@@ -26,20 +25,11 @@ const useStyles = makeStyles((theme: Theme) => createStyles({
 }));
 
 
-const MapContainer: FunctionComponent<TMapContainerProps> = (props) => {
-  const { setOnScreenEstates } = props
-
+const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnScreenEstates, appState } ) => {
   const classes = useStyles()
 
   const [contextMenuProps, setContextMenuProps] = useState<ContextMenuProps>(ContextMenu.defaultProps as ContextMenuProps)
   const [popupProps, setPopupProps] = useState<CustomPopupProps>(CustomPopup.defaultProps as CustomPopupProps)
-
-  const [_, setCreateEstateModalState] = useState<CreateEstateModalState>(createEstateModalStore.initialState)
-
-  useEffect(() => {
-    const subs = createEstateModalStore.subscribe(setCreateEstateModalState)
-    return () => subs.unsubscribe()
-  }, [])
 
   const _handleContextMenuClose = (): void => setContextMenuProps({ ...contextMenuProps, isVisible: false })
 
@@ -66,14 +56,14 @@ const MapContainer: FunctionComponent<TMapContainerProps> = (props) => {
         {contextMenuProps.isVisible &&
           <ContextMenu
             {...contextMenuProps}
+            appState={appState}
             handleClose={_handleContextMenuClose}
           />
         }
       </RSMap>
-      <CreateEstateModal />
       <Fab
         color="primary"
-        onClick={createEstateModalStore.open}
+        onClick={estateModalStore.openCreateMode}
         classes={{ root: classes.fabRoot }}
       >
         <AddIcon />
