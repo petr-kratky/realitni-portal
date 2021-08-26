@@ -55,6 +55,7 @@ export type Estate = {
   primary_type: EstatePrimaryType;
   secondary_type: EstateSecondaryType;
   created_by: AccountPublicInfo;
+  images: Array<Image>;
 };
 
 export type EstateCreateInput = {
@@ -103,6 +104,15 @@ export type EstateUpdateInput = {
   land_area?: Maybe<Scalars['Int']>;
   primary_type_id?: Maybe<Scalars['Int']>;
   secondary_type_id?: Maybe<Scalars['Int']>;
+};
+
+export type Image = {
+   __typename?: 'Image';
+  _id: Scalars['String'];
+  original: Scalars['String'];
+  large: Scalars['String'];
+  mid: Scalars['String'];
+  small: Scalars['String'];
 };
 
 export type LoginResponse = {
@@ -227,7 +237,10 @@ export type EstateQuery = (
     & { created_by: (
       { __typename?: 'AccountPublicInfo' }
       & Pick<AccountPublicInfo, 'id' | 'username'>
-    ), primary_type: (
+    ), images: Array<(
+      { __typename?: 'Image' }
+      & Pick<Image, '_id' | 'large' | 'mid' | 'small'>
+    )>, primary_type: (
       { __typename?: 'EstatePrimaryType' }
       & Pick<EstatePrimaryType, 'id' | 'desc_cz'>
     ), secondary_type: (
@@ -420,6 +433,12 @@ export const EstateDocument = gql`
     latitude
     advert_price
     estimated_price
+    images {
+      _id
+      large
+      mid
+      small
+    }
     land_area
     usable_area
     primary_type {

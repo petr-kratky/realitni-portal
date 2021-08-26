@@ -4,9 +4,26 @@ import { Point } from 'geojson'
 
 import { EstatePrimaryType } from "./estate-primary-type.model";
 import { EstateSecondaryType } from "./estate-secondary-type.model";
-import { ApolloError } from "apollo-server-express";
 import { Account } from "./account.model";
 import { AccountPublicInfo } from ".";
+
+@ObjectType()
+export class Image {
+  @Field(() => String)
+  _id: string
+
+  @Field(() => String)
+  original: string
+
+  @Field(() => String)
+  large: string
+
+  @Field(() => String)
+  mid: string
+
+  @Field(() => String)
+  small: string
+}
 
 @ObjectType()
 @Entity("estates", { schema: "public" })
@@ -93,6 +110,9 @@ export class Estate extends BaseEntity {
   @ManyToOne(() => Account, account => account.estates, { nullable: false, lazy: true, eager: true })
   @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
   created_by: Account
+
+  @Field(() => [Image])
+  images: Image[]
 }
 
 @InputType()

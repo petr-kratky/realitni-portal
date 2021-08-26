@@ -98,7 +98,7 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerRe
     }
   }
 
-  const galleryProps: Props = {
+  const reactBnbGalleryProps: Props = {
     photos: images,
     show: galleryOpen,
     activePhotoIndex: currentImage,
@@ -133,7 +133,7 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerRe
 
   return (
     <>
-      <ReactBnbGallery {...galleryProps} />
+      <ReactBnbGallery {...reactBnbGalleryProps} />
       <Grid
         item
         container

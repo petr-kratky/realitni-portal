@@ -11,6 +11,13 @@ query Estate($id: String!) {
     latitude
     advert_price
     estimated_price
+    images {
+      _id
+      original
+      large
+      mid
+      small
+    }
     land_area
     usable_area
     primary_type {

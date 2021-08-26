@@ -114,56 +114,10 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
       })
     }
 
-    const images: Photo[] = [
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1591105299-tfzdwhhniv.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1591105304-iecdowkfvc.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1591105325-bolkotaqbc.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1580065102-gelfqddtqm.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1580065103-zlgxvsjzdt.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1580065108-urqhdtofkq.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1580065067-pdlugqlazo.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1591105325-bolkotaqbc.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1580065102-gelfqddtqm.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1580065103-zlgxvsjzdt.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1580065108-urqhdtofkq.jpg"
-      },
-      {
-        photo:
-          "https://www.bezrealitky.cz/media/cache/record_main/data/record/images/591k/591897/1580065067-pdlugqlazo.jpg"
-      }
-    ]
+    const images: Photo[] = estateData.estate.images.map(img => ({
+      photo: img.large,
+      thumbnail: img.small,
+    }))
 
     return (
       <Grid container justifyContent='center'>

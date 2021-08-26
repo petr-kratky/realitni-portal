@@ -22,31 +22,9 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
   // @ts-ignore
   const port: number = +process.env.PORT || 3000
 
-  // const validateJwt: OnProxyReqCallback = (proxyReq, req, res) => {
-  //   const authHeader = req.headers.authorization;
-  //   if ((!authHeader)) {
-  //     console.log('AUTH_HEADER_MISSING')
-  //     req.destroy(new Error('AUTH_HEADER_MISSING'))
-  //   } else {
-  //     try {
-  //       const token = authHeader.split(" ")[1];
-  //       verify(token, process.env.ACCESS_TOKEN_SECRET!);
-  //     } catch (err) {
-  //       console.log(err);
-  //       req.destroy(new Error("AUTH_TOKEN_INVALID"))
-  //     }
-  //   }
-  // }
-
-  const refreshProxy: RequestHandler = createProxyMiddleware('/api/refresh_token', {
+  const apiProxy: RequestHandler = createProxyMiddleware('/api', {
     target: apiServerUrl,
-    pathRewrite: { '^/api/refresh_token': '/refresh_token' },
-    onError: err => console.error(err)
-  })
-
-  const graphqlProxy: RequestHandler = createProxyMiddleware('/api/graphql', {
-    target: apiServerUrl,
-    pathRewrite: { '/api/graphql': 'graphql' },
+    pathRewrite: { '^/api': '' },
     onError: err => console.error(err)
   })
 
@@ -56,9 +34,10 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
     onError: err => console.error(err)
   })
 
+
   server.use(helmet())
   server.use(cookieParser())
-  server.use(graphqlProxy, postgisProxy, refreshProxy)
+  server.use(postgisProxy, apiProxy)
 
   server.get('*', (req, res) => nextMiddleware(req, res))
 

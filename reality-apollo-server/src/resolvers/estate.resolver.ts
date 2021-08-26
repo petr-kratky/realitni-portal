@@ -1,33 +1,36 @@
-import { ApolloError } from "apollo-server-express";
-import { Inject } from "typescript-ioc";
-import {
-  Arg,
-  Ctx,
-  ID,
-  Mutation,
-  Query,
-  Resolver,
-} from "type-graphql";
+import { ApolloError } from "apollo-server-express"
+import { Inject } from "typescript-ioc"
+import { Arg, Ctx, FieldResolver, ID, Mutation, Query, Resolver, ResolverInterface, Root } from "type-graphql"
 
-import { Estate, EstateCreateInput, EstatePrimaryType, EstateSecondaryType, EstateUpdateInput } from "../models";
-import { RequireAuthentication } from "../decorators/RequireAuthentication";
-import { resolverManager } from "./_resolver-manager";
-import { EstateService } from "../services";
-import { MyContext } from "../typings";
+import { Estate, EstateCreateInput, EstatePrimaryType, EstateSecondaryType, EstateUpdateInput, Image } from "../models"
+import { RequireAuthentication } from "../decorators/RequireAuthentication"
+import { resolverManager } from "./_resolver-manager"
+import { EstateService, MediaService } from "../services"
+import { MyContext } from "../typings"
 
-@Resolver((of) => Estate)
-export class EstateResolver {
+@Resolver(of => Estate)
+export class EstateResolver implements ResolverInterface<Estate> {
   @Inject
-  estateService: EstateService;
+  estateService: EstateService
+  @Inject
+  mediaService: MediaService
 
-  @Query((returns) => Estate, { nullable: true })
+  @Query(returns => Estate, { nullable: true })
   @RequireAuthentication()
   async estate(@Arg("id") id: string): Promise<Estate> {
-    return await this.estateService.getEstateById(id);
+    return await this.estateService.getEstateById(id)
   }
 
+  @FieldResolver()
+  async images(@Root() estate: Estate): Promise<Image[]> {
+    try {
+      return await this.mediaService.listImages(estate.id)
+    } catch (e) {
+      throw new ApolloError(e.message, "500", e)
+    }
+  }
 
-  @Query((returns) => [Estate])
+  @Query(returns => [Estate])
   @RequireAuthentication()
   async estates(@Arg("skip") skip: number, @Arg("take") take: number) {
     try {
@@ -36,9 +39,8 @@ export class EstateResolver {
       throw new ApolloError(e.message, "500", e)
     }
   }
-  
-  
-  @Query((returns) => [EstatePrimaryType])
+
+  @Query(returns => [EstatePrimaryType])
   @RequireAuthentication()
   async estatePrimaryTypes(): Promise<EstatePrimaryType[]> {
     try {
@@ -48,8 +50,7 @@ export class EstateResolver {
     }
   }
 
-
-  @Mutation((returns) => ID)
+  @Mutation(returns => ID)
   @RequireAuthentication()
   async deleteEstate(@Arg("id") id: string): Promise<string> {
     const estate = await this.estateService.getEstateById(id)
@@ -62,13 +63,16 @@ export class EstateResolver {
     }
   }
 
-  @Mutation((returns) => Estate)
+  @Mutation(returns => Estate)
   @RequireAuthentication()
-  async createEstate(@Ctx() { payload }: MyContext, @Arg("estateInput") estateInput: EstateCreateInput): Promise<Estate> {
-    return await this.estateService.createEstate(payload.id, estateInput);
+  async createEstate(
+    @Ctx() { payload }: MyContext,
+    @Arg("estateInput") estateInput: EstateCreateInput
+  ): Promise<Estate> {
+    return await this.estateService.createEstate(payload.id, estateInput)
   }
 
-  @Mutation((returns) => Estate)
+  @Mutation(returns => Estate)
   @RequireAuthentication()
   async updateEstate(@Arg("id") id: string, @Arg("estateInput") estateInput: EstateUpdateInput): Promise<Estate> {
     const existingEstate = await this.estateService.getEstateById(id)
@@ -90,4 +94,4 @@ export class EstateResolver {
   }
 }
 
-resolverManager.registerResolver(EstateResolver);
+resolverManager.registerResolver(EstateResolver)

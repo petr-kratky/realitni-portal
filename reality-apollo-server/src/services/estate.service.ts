@@ -57,27 +57,4 @@ export class EstateService {
       return true
     }
   }
-
-  // public async saveEstate(estateInput: EstateInput): Promise<RespUpdate> {
-  //   estateInput.id = +estateInput.id
-  //   const connection = getConnection();
-  //   const estateNew = new Estate();
-  //   Object.assign(estateNew, estateInput);
-  //   let newSavedEstate = undefined;
-  //   const estateRepository = connection.getRepository(Estate);
-  //   try {
-  //     await estateRepository.save(estateNew);
-  //     return {
-  //       status: true,
-  //       error: ''
-  //     };
-  //   } catch (err) {
-  //     console.log(`!! ${estateInput.id} !! SAVE FAIL\n\n ${err}`);
-  //     return {
-  //       status: false,
-  //       error: err
-  //     };
-  //   }
-
-  // }
 }

@@ -1,4 +1,4 @@
-import { DatabaseConfig, ServerConfig } from '../typings'
+import { DatabaseConfig, S3Config, ServerConfig } from '../typings'
 import { Estate, Account, EstatePrimaryType, EstateSecondaryType } from '../models/'
 import { Singleton } from 'typescript-ioc'
 import { getEnv } from '../util/get-env'
@@ -8,12 +8,14 @@ import { getEnv } from '../util/get-env'
 export class ServiceConfig {
   database: DatabaseConfig
   server: ServerConfig
+  s3: S3Config
   dev: boolean
 
   constructor() {
     this.dev = getEnv('NODE_ENV', 'development') !== 'production'
     this.database = this.getDatabaseConfig()
     this.server = this.getServerConfig()
+    this.s3 = this.getS3Config()
   }
 
   private getServerConfig(): ServerConfig {
@@ -37,6 +39,15 @@ export class ServiceConfig {
       ssl: {
         rejectUnauthorized: false
       },
+    }
+  }
+
+  private getS3Config(): S3Config {
+    return {
+      accessKeyId: getEnv('AWS_KEY_ID'),
+      secretAccessKey: getEnv('AWS_SECRET_KEY'),
+      region: getEnv('AWS_REGION'),
+      bucket: getEnv('AWS_S3_BUCKET_NAME'),
     }
   }
 }
