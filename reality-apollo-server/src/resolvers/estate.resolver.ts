@@ -2,7 +2,7 @@ import { ApolloError } from "apollo-server-express"
 import { Inject } from "typescript-ioc"
 import { Arg, Ctx, FieldResolver, ID, Mutation, Query, Resolver, ResolverInterface, Root } from "type-graphql"
 
-import { Estate, EstateCreateInput, EstatePrimaryType, EstateSecondaryType, EstateUpdateInput, Image } from "../models"
+import { Estate, EstateCreateInput, EstatePrimaryType, EstateSecondaryType, EstateUpdateInput, Image, File } from "../models"
 import { RequireAuthentication } from "../decorators/RequireAuthentication"
 import { resolverManager } from "./_resolver-manager"
 import { EstateService, MediaService } from "../services"
@@ -15,12 +15,6 @@ export class EstateResolver implements ResolverInterface<Estate> {
   @Inject
   mediaService: MediaService
 
-  @Query(returns => Estate, { nullable: true })
-  @RequireAuthentication()
-  async estate(@Arg("id") id: string): Promise<Estate> {
-    return await this.estateService.getEstateById(id)
-  }
-
   @FieldResolver()
   async images(@Root() estate: Estate): Promise<Image[]> {
     try {
@@ -28,6 +22,21 @@ export class EstateResolver implements ResolverInterface<Estate> {
     } catch (e) {
       throw new ApolloError(e.message, "500", e)
     }
+  }
+
+  @FieldResolver()
+  async files(@Root() estate: Estate): Promise<File[]> {
+    try {
+      return await this.mediaService.listFiles(estate.id)
+    } catch (e) {
+      throw new ApolloError(e.message, "500", e)
+    }
+  }
+
+  @Query(returns => Estate, { nullable: true })
+  @RequireAuthentication()
+  async estate(@Arg("id") id: string): Promise<Estate> {
+    return await this.estateService.getEstateById(id)
   }
 
   @Query(returns => [Estate])

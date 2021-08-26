@@ -1,11 +1,23 @@
-import { Column, Entity, Index, BaseEntity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Check, BeforeInsert, BeforeUpdate } from "typeorm";
-import { Field, ObjectType, ID, Float, InputType, Int } from 'type-graphql';
-import { Point } from 'geojson'
+import { Column, Entity, Index, BaseEntity, PrimaryGeneratedColumn, ManyToOne, JoinColumn, Check } from "typeorm"
+import { Field, ObjectType, ID, Float, InputType, Int } from "type-graphql"
+import { Point } from "geojson"
 
-import { EstatePrimaryType } from "./estate-primary-type.model";
-import { EstateSecondaryType } from "./estate-secondary-type.model";
-import { Account } from "./account.model";
-import { AccountPublicInfo } from ".";
+import { EstatePrimaryType } from "./estate-primary-type.model"
+import { EstateSecondaryType } from "./estate-secondary-type.model"
+import { Account } from "./account.model"
+import { AccountPublicInfo } from "."
+
+@ObjectType()
+export class File {
+  @Field(() => String)
+  _id: string
+
+  @Field(() => Int)
+  size: number
+
+  @Field(() => String)
+  url: string
+}
 
 @ObjectType()
 export class Image {
@@ -35,46 +47,46 @@ export class Image {
 export class Estate extends BaseEntity {
   @Field(() => ID)
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id: string
 
   @Field(() => String)
   @Index({ spatial: true })
   @Column({ type: "geometry", spatialFeatureType: "Point", srid: 4326, nullable: false })
-  geom: Point;
+  geom: Point
 
   @Field(() => String, { nullable: true })
   @Column("character varying", { nullable: true, length: 128 })
-  name: string;
+  name: string
 
   @Field(() => String, { nullable: true })
   @Column("character varying", { nullable: true, length: 4096 })
-  description: string;
+  description: string
 
   @Field(() => Float)
   @Column("numeric", {
     name: "longitude",
     nullable: true,
     precision: 20,
-    scale: 10,
+    scale: 10
   })
-  longitude: number;
+  longitude: number
 
   @Field(() => Float)
   @Column("numeric", {
     name: "latitude",
     nullable: true,
     precision: 20,
-    scale: 10,
+    scale: 10
   })
-  latitude: number;
+  latitude: number
 
   @Field(() => Int, { nullable: true })
   @Column("integer", { nullable: true })
-  advert_price: number;
+  advert_price: number
 
   @Field(() => Int, { nullable: true })
   @Column("integer", { nullable: true })
-  estimated_price: number;
+  estimated_price: number
 
   @Field(() => String)
   @Column("character varying", { length: 64 })
@@ -98,21 +110,28 @@ export class Estate extends BaseEntity {
 
   @Field(() => EstatePrimaryType)
   @ManyToOne(() => EstatePrimaryType, primaryType => primaryType.estates, { nullable: false, lazy: true, eager: true })
-  @JoinColumn({ name: 'primary_type', referencedColumnName: 'id' })
+  @JoinColumn({ name: "primary_type", referencedColumnName: "id" })
   primary_type: EstatePrimaryType
 
   @Field(() => EstateSecondaryType)
-  @ManyToOne(() => EstateSecondaryType, secondaryType => secondaryType.estates, { nullable: false, lazy: true, eager: true })
-  @JoinColumn({ name: 'secondary_type', referencedColumnName: 'id' })
+  @ManyToOne(() => EstateSecondaryType, secondaryType => secondaryType.estates, {
+    nullable: false,
+    lazy: true,
+    eager: true
+  })
+  @JoinColumn({ name: "secondary_type", referencedColumnName: "id" })
   secondary_type: EstateSecondaryType
 
   @Field(() => AccountPublicInfo)
   @ManyToOne(() => Account, account => account.estates, { nullable: false, lazy: true, eager: true })
-  @JoinColumn({ name: 'created_by', referencedColumnName: 'id' })
+  @JoinColumn({ name: "created_by", referencedColumnName: "id" })
   created_by: Account
 
   @Field(() => [Image])
   images: Image[]
+
+  @Field(() => [File])
+  files: File[]
 }
 
 @InputType()
@@ -130,10 +149,10 @@ export class EstateUpdateInput implements Partial<Estate> {
   latitude?: number
 
   @Field(() => Int, { nullable: true })
-  advert_price: number;
+  advert_price: number
 
   @Field(() => Int, { nullable: true })
-  estimated_price: number;
+  estimated_price: number
 
   @Field(() => String, { nullable: true })
   street_address: string
@@ -155,17 +174,15 @@ export class EstateUpdateInput implements Partial<Estate> {
 
   @Field(() => Int, { nullable: true })
   secondary_type_id: number
-
 }
-
 
 @InputType()
 export class EstateCreateInput extends EstateUpdateInput {
   @Field(() => Float)
-  longitude: number;
+  longitude: number
 
   @Field(() => Float)
-  latitude: number;
+  latitude: number
 
   @Field(() => String)
   street_address: string

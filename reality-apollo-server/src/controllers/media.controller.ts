@@ -2,7 +2,7 @@ import { Inject } from "typescript-ioc"
 import { POST, Path, PathParam, FilesParam, GET, Return, Errors, DELETE } from "typescript-rest"
 
 import { MediaService } from "../services/media.service"
-import { Image } from "../models"
+import { Image, File } from "../models"
 
 @Path("/media")
 export class MediaController {
@@ -112,7 +112,7 @@ export class MediaController {
 
   @GET
   @Path("/files/estates/:estateId")
-  async listFiles(@PathParam("estateId") estateId: string): Promise<string[]> {
+  async listFiles(@PathParam("estateId") estateId: string): Promise<File[]> {
     try {
       return await this.mediaService.listFiles(estateId)
     } catch (err) {

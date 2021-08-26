@@ -18,6 +18,11 @@ query Estate($id: String!) {
       mid
       small
     }
+    files {
+      _id
+      url
+      size
+    }
     land_area
     usable_area
     primary_type {

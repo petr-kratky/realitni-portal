@@ -56,6 +56,7 @@ export type Estate = {
   secondary_type: EstateSecondaryType;
   created_by: AccountPublicInfo;
   images: Array<Image>;
+  files: Array<File>;
 };
 
 export type EstateCreateInput = {
@@ -104,6 +105,13 @@ export type EstateUpdateInput = {
   land_area?: Maybe<Scalars['Int']>;
   primary_type_id?: Maybe<Scalars['Int']>;
   secondary_type_id?: Maybe<Scalars['Int']>;
+};
+
+export type File = {
+   __typename?: 'File';
+  _id: Scalars['String'];
+  size: Scalars['Int'];
+  url: Scalars['String'];
 };
 
 export type Image = {
@@ -239,7 +247,10 @@ export type EstateQuery = (
       & Pick<AccountPublicInfo, 'id' | 'username'>
     ), images: Array<(
       { __typename?: 'Image' }
-      & Pick<Image, '_id' | 'large' | 'mid' | 'small'>
+      & Pick<Image, '_id' | 'original' | 'large' | 'mid' | 'small'>
+    )>, files: Array<(
+      { __typename?: 'File' }
+      & Pick<File, '_id' | 'url' | 'size'>
     )>, primary_type: (
       { __typename?: 'EstatePrimaryType' }
       & Pick<EstatePrimaryType, 'id' | 'desc_cz'>
@@ -435,9 +446,15 @@ export const EstateDocument = gql`
     estimated_price
     images {
       _id
+      original
       large
       mid
       small
+    }
+    files {
+      _id
+      url
+      size
     }
     land_area
     usable_area

@@ -4,7 +4,7 @@ import * as sharp from "sharp"
 import * as crypto from "crypto"
 
 import { ServiceConfig } from "../config"
-import { Image } from "../models"
+import { Image, File } from "../models"
 
 @Singleton
 export class MediaService {
@@ -24,7 +24,7 @@ export class MediaService {
     return this.s3.getSignedUrl("getObject", {
       Bucket: this.config.s3.bucket,
       Key: objectKey,
-      Expires: 7200 // in seconds
+      Expires: 3600 * 12 // in seconds
     })
   }
 
@@ -126,16 +126,20 @@ export class MediaService {
     })
   }
 
-  public async listFiles(estateId: string): Promise<string[]> {
+  public async listFiles(estateId: string): Promise<File[]> {
     const params: S3.ListObjectsV2Request = {
       Bucket: this.config.s3.bucket,
       Prefix: `media/estates/${estateId}/files/`
     }
-    return new Promise<string[]>((resolve, reject) => {
+    return new Promise<File[]>((resolve, reject) => {
       this.s3.listObjectsV2(params, (err, data) => {
         if (err) reject(err)
-        const fileList = data.Contents.map(object => object.Key.split(params.Prefix)[1])
-        resolve(fileList)
+        const files: File[] = data.Contents.map(object => ({
+          _id: object.Key.split(params.Prefix)[1],
+          url: this.getSignedUrl(object.Key),
+          size: object.Size
+        }))
+        resolve(files)
       })
     })
   }
