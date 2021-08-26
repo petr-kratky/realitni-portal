@@ -15,7 +15,7 @@ export class EstateResolver implements ResolverInterface<Estate> {
   @Inject
   mediaService: MediaService
 
-  @FieldResolver()
+  @FieldResolver(returns => [Image])
   async images(@Root() estate: Estate): Promise<Image[]> {
     try {
       return await this.mediaService.listImages(estate.id)
@@ -24,7 +24,7 @@ export class EstateResolver implements ResolverInterface<Estate> {
     }
   }
 
-  @FieldResolver()
+  @FieldResolver(returns => [File])
   async files(@Root() estate: Estate): Promise<File[]> {
     try {
       return await this.mediaService.listFiles(estate.id)
