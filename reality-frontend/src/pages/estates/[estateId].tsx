@@ -102,21 +102,21 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
         primary_type_id: primary_type.id,
         secondary_type_id: secondary_type.id,
         coordinates: `${latitude}, ${longitude}`,
-        advert_price: advert_price!,
-        description: description!,
-        estimated_price: estimated_price!,
-        land_area: land_area!,
-        usable_area: usable_area!,
-        name: name!,
+        name: name ?? '',
+        description: description ?? '',
+        advert_price: advert_price ?? ("" as unknown as number),
+        estimated_price: estimated_price ?? ("" as unknown as number),
+        land_area: land_area ?? ("" as unknown as number),
+        usable_area: usable_area ?? ("" as unknown as number),
         city_address,
         postal_code,
-        street_address,
+        street_address
       })
     }
 
     const images: Photo[] = estateData.estate.images.map(img => ({
       photo: img.large,
-      thumbnail: img.small,
+      thumbnail: img.small
     }))
 
     return (
@@ -140,14 +140,16 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                   </IconButton>
                 </Grid>
 
-                <ImageCarousel images={images} registerResizeListenerTrigger={estateData} />
+                {!!images.length && <ImageCarousel images={images} registerResizeListenerTrigger={estateData} />}
 
-                <Grid item md={6}>
-                  <Typography variant='h6'>Popis</Typography>
-                  <Typography variant='body1' paragraph style={{ whiteSpace: "pre-line" }}>
-                    {description}
-                  </Typography>
-                </Grid>
+                {!!description && (
+                  <Grid item md={6}>
+                    <Typography variant='h6'>Popis</Typography>
+                    <Typography variant='body1' paragraph style={{ whiteSpace: "pre-line" }}>
+                      {description}
+                    </Typography>
+                  </Grid>
+                )}
 
                 <Grid item md={6}>
                   <Typography variant='h6'>Parametry</Typography>

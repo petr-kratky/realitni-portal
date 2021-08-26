@@ -1,5 +1,4 @@
 import React, { FunctionComponent } from "react"
-import NextLink from "next/link"
 
 import {
   Button,
@@ -18,17 +17,17 @@ import {
   makeStyles,
   Menu,
   MenuItem,
-  Theme,
-  Link
+  Theme
 } from "@material-ui/core"
 import MoreVertIcon from "@material-ui/icons/MoreVert"
 import EditIcon from "@material-ui/icons/Edit"
 import DeleteIcon from "@material-ui/icons/Delete"
 
 import { useDeleteEstateMutation, useEstateQuery } from "../../../graphql/queries/generated/graphql"
-import snackStore, { SnackState } from "src/store/snack.store"
+import snackStore from "src/store/snack.store"
 import { CustomPopupProps } from "./CustomPopup"
 import { EstateFeature } from "src/types"
+import estateModalStore from "src/store/estate-modal.store"
 
 type PopupEstateCardProps = {
   id: string
@@ -44,7 +43,6 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     link: {
       color: "inherit"
-      // textDecoration: "inherit"
     }
   })
 )
@@ -55,18 +53,11 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
   const { data: estateData, loading: estateLoading } = useEstateQuery({ variables: { id } })
   const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
 
-  const [snackState, setSnackState] = React.useState<SnackState>(snackStore.initialState)
-
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null)
   const [estateTab, setEstateTab] = React.useState<null | Window>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
 
   const isMenuOpen = Boolean(menuAnchor)
-
-  React.useEffect(() => {
-    const snackStoreSub = snackStore.subscribe(setSnackState)
-    return snackStoreSub.unsubscribe()
-  }, [])
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchor(event.currentTarget)
@@ -88,6 +79,7 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
         const updatedFeatures = features.filter(f => f.properties.id !== id)
         setPopupProps({ ...popupProps, features: updatedFeatures })
       }
+      snackStore.toggle("success", "Nemovitost odstraněna")
     } catch (err) {
       console.error(`Could not delete estate id ${id}`, err)
       snackStore.toggle("error", "Nemovitost se nepodařilo smazat")
@@ -112,9 +104,41 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
   }
 
   if (estateData?.estate) {
-    const { id, primary_type, secondary_type, city_address, street_address } = estateData.estate
-
+    const {
+      id,
+      name,
+      description,
+      created_by,
+      latitude,
+      longitude,
+      land_area,
+      usable_area,
+      advert_price,
+      estimated_price,
+      street_address,
+      city_address,
+      postal_code,
+      primary_type,
+      secondary_type
+    } = estateData.estate
     const fullAddress: string = `${street_address}, ${city_address}`
+
+    const onEditButton = () => {
+      estateModalStore.openEditMode(id, {
+        primary_type_id: primary_type.id,
+        secondary_type_id: secondary_type.id,
+        coordinates: `${latitude}, ${longitude}`,
+        name: name ?? "",
+        description: description ?? "",
+        advert_price: advert_price ?? ("" as unknown as number),
+        estimated_price: estimated_price ?? ("" as unknown as number),
+        land_area: land_area ?? ("" as unknown as number),
+        usable_area: usable_area ?? ("" as unknown as number),
+        city_address,
+        postal_code,
+        street_address
+      })
+    }
 
     return (
       <>
@@ -136,7 +160,7 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
               onClose={handleMenuClose}
               transformOrigin={{ vertical: "top", horizontal: "left" }}
             >
-              <MenuItem>
+              <MenuItem onClick={onEditButton}>
                 <ListItemIcon>
                   <EditIcon />
                 </ListItemIcon>
@@ -176,9 +200,9 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
         </Dialog>
       </>
     )
+  } else {
+    return null
   }
-
-  return null
 }
 
 export default PopupEstateCard
