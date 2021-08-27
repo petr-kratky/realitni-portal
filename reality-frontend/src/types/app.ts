@@ -1,8 +1,11 @@
-import { ApolloClient } from "apollo-client"
-import { NormalizedCacheObject } from "apollo-cache-inmemory"
-import { AppInitialProps, AppProps } from "next/app"
-import { Request, Response } from "express"
+import { ApolloClient } from "@apollo/client"
+import { NormalizedCacheObject } from "@apollo/client/cache"
+
 import { NextPageContext } from "next"
+import { AppInitialProps, AppProps } from "next/app"
+
+import { Request, Response } from "express"
+
 import { SnackState } from "src/store/snack.store"
 import { EstateModalState } from "src/store/estate-modal.store"
 

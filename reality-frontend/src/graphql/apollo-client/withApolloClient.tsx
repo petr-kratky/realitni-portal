@@ -1,17 +1,16 @@
 import React, { ReactNode } from "react"
 
-import { ApolloClient } from "apollo-client"
-import { NormalizedCacheObject } from "apollo-cache-inmemory"
+import { ApolloClient } from "@apollo/client"
+import { NormalizedCacheObject } from "@apollo/client/cache"
 
 import { NextPageContext } from "next"
 import { AppContext } from "next/app"
 import Head from "next/head"
 
 import cookie from "cookie"
-import fetch from "isomorphic-unfetch"
+import fetch from "isomorphic-fetch"
 
 import { getAccessToken, setAccessToken } from "../../lib/auth/accessToken"
-import initialState from "./client-cache/initialState"
 import { initApollo } from "./initApollo"
 
 interface NextPageContextWithApollo extends NextPageContext {
@@ -92,9 +91,6 @@ export function withApollo(PageComponent: any, { ssr = true } = {}): ReactNode {
       // and extract the resulting data
       const apolloClient = (ctx.ctx.apolloClient = initApollo({}, serverAccessToken))
 
-      apolloClient.cache.writeData({ data: initialState })
-      apolloClient.onResetStore(async () => apolloClient.cache.writeData({ data: initialState }))
-
       const pageProps = PageComponent.getInitialProps ? await PageComponent.getInitialProps(ctx) : {}
 
       // Only on the server
@@ -108,7 +104,7 @@ export function withApollo(PageComponent: any, { ssr = true } = {}): ReactNode {
         if (ssr) {
           try {
             // Run all GraphQL queries
-            const { getDataFromTree } = await import("@apollo/react-ssr")
+            const { getDataFromTree } = await import("@apollo/client/react/ssr")
             await getDataFromTree(
               <AppTree
                 pageProps={{

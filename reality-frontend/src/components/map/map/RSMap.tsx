@@ -1,33 +1,27 @@
 import React, { FunctionComponent, useEffect, useRef, useState, useLayoutEffect } from 'react';
+
 import { GeoJSONSource, LngLatBounds, Map } from 'mapbox-gl'
 import ReactMapGL, { ExtraState, PointerEvent, ViewportProps } from 'react-map-gl'
 import { FeatureCollection, Point } from 'geojson'
-import { useQuery } from '@apollo/react-hooks'
+
 import { useRouter } from 'next/router'
 
-import { FILTERS_QUERY } from '../../../graphql/apollo-client/client-cache/queries'
 import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
 import viewportStore, { CachedViewport } from 'src/store/viewport.store'
 import {
-  CachedFiltersData,
   EstateCluster,
   EstateFeature,
   EstateFeatureProperties,
-  LocalQueryResult,
   MapComponentProps,
 } from '../../../types'
 
-
 const MAPBOX_MAP_STYLE_URL = 'mapbox://styles/pkratky/ck2dpu35v14ox1co4654rrb9n?optimize=true'
-
 
 const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   const { children, contextMenuProps, setContextMenuProps, setOnScreenEstates, popupProps, setPopupProps } = props
 
   const router = useRouter()
   const mapRef = useRef<ReactMapGL>(null)
-
-  const { data: { cachedFilters } } = useQuery(FILTERS_QUERY) as LocalQueryResult<CachedFiltersData>
 
   const [viewportState, setViewportState] = useState<CachedViewport>(viewportStore.initialState)
   const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false)
@@ -113,7 +107,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
   useEffect(() => {
     updateGeojsonSource(getGeojsonSourceUri())
-  }, [cachedFilters, popupProps.features])
+  }, [popupProps.features])
 
 
   const _onContextMenu = (e: PointerEvent): void => {
@@ -265,7 +259,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
         geom_column: 'geom',
         columns: ['id'].join(','),
         bounds: `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`,
-        filter: getGeojsonSourceFilter()
+        // filter: getGeojsonSourceFilter()
       }
 
       const geojsonEndpointUri: URL = new URL(window.location.origin + `/api/postgis/v1/geojson/estates`)
@@ -289,30 +283,30 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   }
 
 
-  const getGeojsonSourceFilter = (): string => {
-    const { __typename, price_from, price_to, ...selectFilters } = cachedFilters
-    // Generate price filters
-    const parsedPriceFilter = generatePriceFilters(price_from, price_to)
-    // Generate filters from select fields
-    const parsedSelectFilters =
-      Object.entries(selectFilters)
-        .filter(entry => !!entry[1])
-        .map(entry => {
-          const key = entry[0]
-          const value = entry[1]
-          return `(${key}=${value})`
-        })
-    //TODO adhoc pridani source_id:
-    // parsedSelectFilters.push('(source_id=3)')
-    // Consolidate filters and join with all with 'AND' operator
-    const parsedFinalFilters =
-      parsedSelectFilters
-        .concat(parsedPriceFilter)
-        .filter(value => value.length)
-        .join(' AND ')
+  // const getGeojsonSourceFilter = (): string => {
+  //   const { __typename, price_from, price_to, ...selectFilters } = cachedFilters
+  //   // Generate price filters
+  //   const parsedPriceFilter = generatePriceFilters(price_from, price_to)
+  //   // Generate filters from select fields
+  //   const parsedSelectFilters =
+  //     Object.entries(selectFilters)
+  //       .filter(entry => !!entry[1])
+  //       .map(entry => {
+  //         const key = entry[0]
+  //         const value = entry[1]
+  //         return `(${key}=${value})`
+  //       })
+  //   //TODO adhoc pridani source_id:
+  //   // parsedSelectFilters.push('(source_id=3)')
+  //   // Consolidate filters and join with all with 'AND' operator
+  //   const parsedFinalFilters =
+  //     parsedSelectFilters
+  //       .concat(parsedPriceFilter)
+  //       .filter(value => value.length)
+  //       .join(' AND ')
 
-    return parsedFinalFilters
-  }
+  //   return parsedFinalFilters
+  // }
 
   return (
     <ReactMapGL

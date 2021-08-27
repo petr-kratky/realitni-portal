@@ -1,5 +1,5 @@
 import React, { useEffect } from "react"
-import { ApolloProvider } from "@apollo/react-common"
+import { ApolloProvider } from "@apollo/client"
 import { AppProps } from "next/app"
 
 import { createStyles, ThemeProvider } from "@material-ui/styles"

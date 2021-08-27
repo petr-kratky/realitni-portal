@@ -1,0 +1,3 @@
+mutation DeleteImage($estateId: String!, $imageId: String!) {
+  deleteImage(estateId: $estateId, imageId: $imageId)
+}

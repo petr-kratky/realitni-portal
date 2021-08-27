@@ -2,7 +2,7 @@ import React, { ChangeEventHandler, FunctionComponent, useEffect, useLayoutEffec
 import { Formik, FormikHelpers } from 'formik'
 import { useRouter } from 'next/router'
 import { createUseStyles } from 'react-jss'
-import { useApolloClient, useMutation, useQuery } from '@apollo/react-hooks'
+import { useApolloClient, useMutation, useQuery } from '@apollo/client'
 import { Bounds, fitBounds, FittedBounds } from 'viewport-mercator-project'
 import * as Yup from 'yup'
 import * as d3 from 'd3-ease'

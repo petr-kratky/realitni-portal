@@ -1,19 +1,18 @@
-import { InMemoryCache, NormalizedCacheObject } from "apollo-cache-inmemory";
-import { ApolloLink } from "apollo-link";
+import { ApolloLink, ApolloClient } from "@apollo/client";
+import { InMemoryCache, NormalizedCacheObject } from "@apollo/client/cache";
 import { TokenRefreshLink } from "apollo-link-token-refresh";
-import { onError } from "apollo-link-error";
-import { setContext } from "apollo-link-context";
-import { ApolloClient } from "apollo-client";
-import { HttpLink } from "apollo-link-http";
+import { onError } from "@apollo/client/link/error";
+import { setContext } from "@apollo/client/link/context";
+import { HttpLink } from "@apollo/client/link/http";
 
-import jwtDecode from "jwt-decode";
-import isomorphicFetch from "isomorphic-fetch";
+import fetch from "isomorphic-fetch";
 
 import { resolvers } from "./client-cache/resolvers";
 import { typeDefs } from "./client-cache/local-schema";
 import {
   getAccessToken,
   setAccessToken,
+  validateAccessToken
 } from "src/lib/auth/accessToken";
 
 // import { createUploadLink } from "apollo-upload-client";
@@ -34,30 +33,13 @@ let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
     credentials: "include",
     uri: "/api/graphql",
     fetch: (uri: string, options: RequestInit) => {
-      return isomorphicFetch(origin + uri, options);
+      return fetch(origin + uri, options);
     },
   })
 
   const refreshLink = new TokenRefreshLink({
     accessTokenField: "accessToken",
-    isTokenValidOrUndefined: () => {
-      const token = getAccessToken();
-
-      if (!token) {
-        return true;
-      }
-
-      try {
-        const { exp } = jwtDecode(token);
-        if (Date.now() >= exp * 1000) {
-          return false;
-        } else {
-          return true;
-        }
-      } catch {
-        return false;
-      }
-    },
+    isTokenValidOrUndefined: validateAccessToken,
     fetchAccessToken: () => {
       return fetch(`${origin}/api/auth/refresh`, {
         method: "POST",

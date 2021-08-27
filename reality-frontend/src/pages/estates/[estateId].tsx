@@ -25,6 +25,8 @@ import MapIcon from "@material-ui/icons/Map"
 import MoneyIcon from "@material-ui/icons/AttachMoney"
 import BankIcon from "@material-ui/icons/AccountBalance"
 import EditIcon from "@material-ui/icons/Edit"
+import CityIcon from "@material-ui/icons/LocationCity"
+import LibraryIcon from "@material-ui/icons/PhotoLibrary"
 
 import { Photo } from "react-bnb-gallery"
 
@@ -34,6 +36,7 @@ import { formatNumber } from "src/utils/number-formatter"
 import ImageCarousel from "src/components/estate/ImageCarousel"
 import { AppState } from "src/types"
 import estateModalStore from "src/store/estate-modal.store"
+import ImageDialogue from "../../components/estate/ImageDialogue"
 
 type ParameterListItemProps = {
   icon: React.ReactNode
@@ -66,6 +69,16 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     error: estateError
   } = useEstateQuery({ variables: { id: estateId as string } })
 
+  const [imageDialogue, setImageDialogue] = React.useState<boolean>(true)
+
+  const openImageDialogue = () => {
+    setImageDialogue(true)
+  }
+
+  const closeImageDialogue = () => {
+    setImageDialogue(false)
+  }
+
   if (estateLoading) {
     return (
       <Grid container justifyContent='center' alignItems='center'>
@@ -84,6 +97,8 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
       name,
       description,
       created_by,
+      images,
+      files,
       latitude,
       longitude,
       land_area,
@@ -102,8 +117,8 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
         primary_type_id: primary_type.id,
         secondary_type_id: secondary_type.id,
         coordinates: `${latitude}, ${longitude}`,
-        name: name ?? '',
-        description: description ?? '',
+        name: name ?? "",
+        description: description ?? "",
         advert_price: advert_price ?? ("" as unknown as number),
         estimated_price: estimated_price ?? ("" as unknown as number),
         land_area: land_area ?? ("" as unknown as number),
@@ -114,7 +129,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
       })
     }
 
-    const images: Photo[] = estateData.estate.images.map(img => ({
+    const galleryPhotos: Photo[] = estateData.estate.images.map(img => ({
       photo: img.large,
       thumbnail: img.small
     }))
@@ -134,13 +149,28 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                   </Typography>
                 </Grid>
 
-                <Grid item xs={2}>
+                <ImageDialogue
+                  estateId={id}
+                  images={images}
+                  onClose={closeImageDialogue}
+                  open={imageDialogue}
+                />
+
+                <Grid item xs={1}>
                   <IconButton onClick={onEstateEditButton}>
                     <EditIcon />
                   </IconButton>
                 </Grid>
 
-                {!!images.length && <ImageCarousel images={images} registerResizeListenerTrigger={estateData} />}
+                <Grid item xs={1}>
+                  <IconButton onClick={openImageDialogue}>
+                    <LibraryIcon />
+                  </IconButton>
+                </Grid>
+
+                {!!galleryPhotos.length && (
+                  <ImageCarousel images={galleryPhotos} registerResizeListenerTrigger={estateData} />
+                )}
 
                 {!!description && (
                   <Grid item md={6}>
@@ -197,6 +227,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                       value={`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}
                       parameter='Souřadnice'
                     />
+                    <ParameterListItem icon={<CityIcon />} value={city_address} parameter='Lokalita' />
                   </List>
                 </Grid>
               </Grid>

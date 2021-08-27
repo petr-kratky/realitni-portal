@@ -1,7 +1,5 @@
-import { NormalizedCacheObject } from 'apollo-cache-inmemory'
-import ApolloClient, { Resolvers } from 'apollo-client'
-import { ApolloCache } from 'apollo-cache'
-import { QueryResult } from '@apollo/react-common'
+import { NormalizedCacheObject, ApolloCache } from '@apollo/client/cache'
+import { Resolvers, QueryResult, ApolloClient } from '@apollo/client'
 
 type LocalContext = { cache: ApolloCache<NormalizedCacheObject>, client: ApolloClient<NormalizedCacheObject>, [field: string]: any }
 

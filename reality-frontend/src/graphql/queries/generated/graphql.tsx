@@ -1,7 +1,10 @@
-import gql from 'graphql-tag';
-import * as ApolloReactCommon from '@apollo/react-common';
-import * as ApolloReactHooks from '@apollo/react-hooks';
+import { gql } from '@apollo/client';
+import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
+export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
+const defaultOptions =  {}
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -14,7 +17,7 @@ export type Scalars = {
 };
 
 export type Account = {
-   __typename?: 'Account';
+  __typename?: 'Account';
   id: Scalars['ID'];
   username: Scalars['String'];
   password: Scalars['String'];
@@ -26,7 +29,7 @@ export type Account = {
 };
 
 export type AccountPublicInfo = {
-   __typename?: 'AccountPublicInfo';
+  __typename?: 'AccountPublicInfo';
   id: Scalars['ID'];
   username: Scalars['String'];
 };
@@ -38,7 +41,7 @@ export type AccountUpdateInput = {
 
 
 export type Estate = {
-   __typename?: 'Estate';
+  __typename?: 'Estate';
   id: Scalars['ID'];
   geom: Scalars['String'];
   name?: Maybe<Scalars['String']>;
@@ -76,7 +79,7 @@ export type EstateCreateInput = {
 };
 
 export type EstatePrimaryType = {
-   __typename?: 'EstatePrimaryType';
+  __typename?: 'EstatePrimaryType';
   id: Scalars['ID'];
   desc_cz: Scalars['String'];
   estates?: Maybe<Array<Estate>>;
@@ -84,7 +87,7 @@ export type EstatePrimaryType = {
 };
 
 export type EstateSecondaryType = {
-   __typename?: 'EstateSecondaryType';
+  __typename?: 'EstateSecondaryType';
   id: Scalars['ID'];
   desc_cz: Scalars['String'];
   primary_type: EstatePrimaryType;
@@ -108,14 +111,14 @@ export type EstateUpdateInput = {
 };
 
 export type File = {
-   __typename?: 'File';
+  __typename?: 'File';
   _id: Scalars['String'];
   size: Scalars['Int'];
   url: Scalars['String'];
 };
 
 export type Image = {
-   __typename?: 'Image';
+  __typename?: 'Image';
   _id: Scalars['String'];
   original: Scalars['String'];
   large: Scalars['String'];
@@ -124,13 +127,13 @@ export type Image = {
 };
 
 export type LoginResponse = {
-   __typename?: 'LoginResponse';
+  __typename?: 'LoginResponse';
   accessToken: Scalars['String'];
   account: Account;
 };
 
 export type Mutation = {
-   __typename?: 'Mutation';
+  __typename?: 'Mutation';
   deleteImage: Scalars['Boolean'];
   deleteEstate: Scalars['ID'];
   createEstate: Estate;
@@ -183,7 +186,7 @@ export type MutationRegisterArgs = {
 };
 
 export type Query = {
-   __typename?: 'Query';
+  __typename?: 'Query';
   estate?: Maybe<Estate>;
   estates: Array<Estate>;
   estatePrimaryTypes: Array<EstatePrimaryType>;
@@ -201,138 +204,74 @@ export type QueryEstatesArgs = {
   skip: Scalars['Float'];
 };
 
-export type CreateEstateMutationVariables = {
+export type CreateEstateMutationVariables = Exact<{
   estateInput: EstateCreateInput;
-};
+}>;
 
 
-export type CreateEstateMutation = (
-  { __typename?: 'Mutation' }
-  & { createEstate: (
-    { __typename?: 'Estate' }
-    & Pick<Estate, 'id' | 'name' | 'longitude' | 'latitude'>
-  ) }
-);
+export type CreateEstateMutation = { __typename?: 'Mutation', createEstate: { __typename?: 'Estate', id: string, name?: Maybe<string>, longitude: number, latitude: number } };
 
-export type DeleteEstateMutationVariables = {
+export type DeleteEstateMutationVariables = Exact<{
   id: Scalars['String'];
-};
+}>;
 
 
-export type DeleteEstateMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'deleteEstate'>
-);
+export type DeleteEstateMutation = { __typename?: 'Mutation', deleteEstate: string };
 
-export type EstateTypesQueryVariables = {};
+export type DeleteImageMutationVariables = Exact<{
+  estateId: Scalars['String'];
+  imageId: Scalars['String'];
+}>;
 
 
-export type EstateTypesQuery = (
-  { __typename?: 'Query' }
-  & { estatePrimaryTypes: Array<(
-    { __typename?: 'EstatePrimaryType' }
-    & Pick<EstatePrimaryType, 'id' | 'desc_cz'>
-    & { secondary_types: Array<(
-      { __typename?: 'EstateSecondaryType' }
-      & Pick<EstateSecondaryType, 'id' | 'desc_cz'>
-    )> }
-  )> }
-);
+export type DeleteImageMutation = { __typename?: 'Mutation', deleteImage: boolean };
 
-export type EstateQueryVariables = {
+export type EstateTypesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type EstateTypesQuery = { __typename?: 'Query', estatePrimaryTypes: Array<{ __typename?: 'EstatePrimaryType', id: string, desc_cz: string, secondary_types: Array<{ __typename?: 'EstateSecondaryType', id: string, desc_cz: string }> }> };
+
+export type EstateQueryVariables = Exact<{
   id: Scalars['String'];
-};
+}>;
 
 
-export type EstateQuery = (
-  { __typename?: 'Query' }
-  & { estate?: Maybe<(
-    { __typename?: 'Estate' }
-    & Pick<Estate, 'id' | 'name' | 'description' | 'longitude' | 'latitude' | 'advert_price' | 'estimated_price' | 'land_area' | 'usable_area' | 'street_address' | 'city_address' | 'postal_code'>
-    & { created_by: (
-      { __typename?: 'AccountPublicInfo' }
-      & Pick<AccountPublicInfo, 'id' | 'username'>
-    ), images: Array<(
-      { __typename?: 'Image' }
-      & Pick<Image, '_id' | 'original' | 'large' | 'mid' | 'small'>
-    )>, files: Array<(
-      { __typename?: 'File' }
-      & Pick<File, '_id' | 'url' | 'size'>
-    )>, primary_type: (
-      { __typename?: 'EstatePrimaryType' }
-      & Pick<EstatePrimaryType, 'id' | 'desc_cz'>
-    ), secondary_type: (
-      { __typename?: 'EstateSecondaryType' }
-      & Pick<EstateSecondaryType, 'id' | 'desc_cz'>
-    ) }
-  )> }
-);
+export type EstateQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, images: Array<{ __typename?: 'Image', _id: string, original: string, large: string, mid: string, small: string }>, files: Array<{ __typename?: 'File', _id: string, url: string, size: number }>, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
 
-export type UpdateEstateMutationVariables = {
+export type UpdateEstateMutationVariables = Exact<{
   id: Scalars['String'];
   estateInput: EstateUpdateInput;
-};
+}>;
 
 
-export type UpdateEstateMutation = (
-  { __typename?: 'Mutation' }
-  & { updateEstate: (
-    { __typename?: 'Estate' }
-    & Pick<Estate, 'id' | 'name' | 'longitude' | 'latitude'>
-  ) }
-);
+export type UpdateEstateMutation = { __typename?: 'Mutation', updateEstate: { __typename?: 'Estate', id: string, name?: Maybe<string>, longitude: number, latitude: number } };
 
-export type CurrentUserQueryVariables = {};
+export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CurrentUserQuery = (
-  { __typename?: 'Query' }
-  & { currentUser?: Maybe<(
-    { __typename?: 'Account' }
-    & Pick<Account, 'id' | 'username' | 'email'>
-  )> }
-);
+export type CurrentUserQuery = { __typename?: 'Query', currentUser?: Maybe<{ __typename?: 'Account', id: string, username: string, email: string }> };
 
-export type LoginMutationVariables = {
+export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
   password: Scalars['String'];
-};
+}>;
 
 
-export type LoginMutation = (
-  { __typename?: 'Mutation' }
-  & { login: (
-    { __typename?: 'LoginResponse' }
-    & Pick<LoginResponse, 'accessToken'>
-    & { account: (
-      { __typename?: 'Account' }
-      & Pick<Account, 'id' | 'email' | 'username'>
-    ) }
-  ) }
-);
+export type LoginMutation = { __typename?: 'Mutation', login: { __typename?: 'LoginResponse', accessToken: string, account: { __typename?: 'Account', id: string, email: string, username: string } } };
 
-export type LogoutMutationVariables = {};
+export type LogoutMutationVariables = Exact<{ [key: string]: never; }>;
 
 
-export type LogoutMutation = (
-  { __typename?: 'Mutation' }
-  & Pick<Mutation, 'logout'>
-);
+export type LogoutMutation = { __typename?: 'Mutation', logout: boolean };
 
-export type RegisterMutationVariables = {
+export type RegisterMutationVariables = Exact<{
   email: Scalars['String'];
   usermane: Scalars['String'];
   password: Scalars['String'];
-};
+}>;
 
 
-export type RegisterMutation = (
-  { __typename?: 'Mutation' }
-  & { register: (
-    { __typename?: 'Account' }
-    & Pick<Account, 'id' | 'createdOn'>
-  ) }
-);
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'Account', id: string, createdOn: any } };
 
 
 export const CreateEstateDocument = gql`
@@ -345,7 +284,7 @@ export const CreateEstateDocument = gql`
   }
 }
     `;
-export type CreateEstateMutationFn = ApolloReactCommon.MutationFunction<CreateEstateMutation, CreateEstateMutationVariables>;
+export type CreateEstateMutationFn = Apollo.MutationFunction<CreateEstateMutation, CreateEstateMutationVariables>;
 
 /**
  * __useCreateEstateMutation__
@@ -364,18 +303,19 @@ export type CreateEstateMutationFn = ApolloReactCommon.MutationFunction<CreateEs
  *   },
  * });
  */
-export function useCreateEstateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<CreateEstateMutation, CreateEstateMutationVariables>) {
-        return ApolloReactHooks.useMutation<CreateEstateMutation, CreateEstateMutationVariables>(CreateEstateDocument, baseOptions);
+export function useCreateEstateMutation(baseOptions?: Apollo.MutationHookOptions<CreateEstateMutation, CreateEstateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<CreateEstateMutation, CreateEstateMutationVariables>(CreateEstateDocument, options);
       }
 export type CreateEstateMutationHookResult = ReturnType<typeof useCreateEstateMutation>;
-export type CreateEstateMutationResult = ApolloReactCommon.MutationResult<CreateEstateMutation>;
-export type CreateEstateMutationOptions = ApolloReactCommon.BaseMutationOptions<CreateEstateMutation, CreateEstateMutationVariables>;
+export type CreateEstateMutationResult = Apollo.MutationResult<CreateEstateMutation>;
+export type CreateEstateMutationOptions = Apollo.BaseMutationOptions<CreateEstateMutation, CreateEstateMutationVariables>;
 export const DeleteEstateDocument = gql`
     mutation DeleteEstate($id: String!) {
   deleteEstate(id: $id)
 }
     `;
-export type DeleteEstateMutationFn = ApolloReactCommon.MutationFunction<DeleteEstateMutation, DeleteEstateMutationVariables>;
+export type DeleteEstateMutationFn = Apollo.MutationFunction<DeleteEstateMutation, DeleteEstateMutationVariables>;
 
 /**
  * __useDeleteEstateMutation__
@@ -394,12 +334,45 @@ export type DeleteEstateMutationFn = ApolloReactCommon.MutationFunction<DeleteEs
  *   },
  * });
  */
-export function useDeleteEstateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<DeleteEstateMutation, DeleteEstateMutationVariables>) {
-        return ApolloReactHooks.useMutation<DeleteEstateMutation, DeleteEstateMutationVariables>(DeleteEstateDocument, baseOptions);
+export function useDeleteEstateMutation(baseOptions?: Apollo.MutationHookOptions<DeleteEstateMutation, DeleteEstateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteEstateMutation, DeleteEstateMutationVariables>(DeleteEstateDocument, options);
       }
 export type DeleteEstateMutationHookResult = ReturnType<typeof useDeleteEstateMutation>;
-export type DeleteEstateMutationResult = ApolloReactCommon.MutationResult<DeleteEstateMutation>;
-export type DeleteEstateMutationOptions = ApolloReactCommon.BaseMutationOptions<DeleteEstateMutation, DeleteEstateMutationVariables>;
+export type DeleteEstateMutationResult = Apollo.MutationResult<DeleteEstateMutation>;
+export type DeleteEstateMutationOptions = Apollo.BaseMutationOptions<DeleteEstateMutation, DeleteEstateMutationVariables>;
+export const DeleteImageDocument = gql`
+    mutation DeleteImage($estateId: String!, $imageId: String!) {
+  deleteImage(estateId: $estateId, imageId: $imageId)
+}
+    `;
+export type DeleteImageMutationFn = Apollo.MutationFunction<DeleteImageMutation, DeleteImageMutationVariables>;
+
+/**
+ * __useDeleteImageMutation__
+ *
+ * To run a mutation, you first call `useDeleteImageMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteImageMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteImageMutation, { data, loading, error }] = useDeleteImageMutation({
+ *   variables: {
+ *      estateId: // value for 'estateId'
+ *      imageId: // value for 'imageId'
+ *   },
+ * });
+ */
+export function useDeleteImageMutation(baseOptions?: Apollo.MutationHookOptions<DeleteImageMutation, DeleteImageMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteImageMutation, DeleteImageMutationVariables>(DeleteImageDocument, options);
+      }
+export type DeleteImageMutationHookResult = ReturnType<typeof useDeleteImageMutation>;
+export type DeleteImageMutationResult = Apollo.MutationResult<DeleteImageMutation>;
+export type DeleteImageMutationOptions = Apollo.BaseMutationOptions<DeleteImageMutation, DeleteImageMutationVariables>;
 export const EstateTypesDocument = gql`
     query EstateTypes {
   estatePrimaryTypes {
@@ -428,15 +401,17 @@ export const EstateTypesDocument = gql`
  *   },
  * });
  */
-export function useEstateTypesQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<EstateTypesQuery, EstateTypesQueryVariables>) {
-        return ApolloReactHooks.useQuery<EstateTypesQuery, EstateTypesQueryVariables>(EstateTypesDocument, baseOptions);
+export function useEstateTypesQuery(baseOptions?: Apollo.QueryHookOptions<EstateTypesQuery, EstateTypesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<EstateTypesQuery, EstateTypesQueryVariables>(EstateTypesDocument, options);
       }
-export function useEstateTypesLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<EstateTypesQuery, EstateTypesQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<EstateTypesQuery, EstateTypesQueryVariables>(EstateTypesDocument, baseOptions);
+export function useEstateTypesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EstateTypesQuery, EstateTypesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<EstateTypesQuery, EstateTypesQueryVariables>(EstateTypesDocument, options);
         }
 export type EstateTypesQueryHookResult = ReturnType<typeof useEstateTypesQuery>;
 export type EstateTypesLazyQueryHookResult = ReturnType<typeof useEstateTypesLazyQuery>;
-export type EstateTypesQueryResult = ApolloReactCommon.QueryResult<EstateTypesQuery, EstateTypesQueryVariables>;
+export type EstateTypesQueryResult = Apollo.QueryResult<EstateTypesQuery, EstateTypesQueryVariables>;
 export const EstateDocument = gql`
     query Estate($id: String!) {
   estate(id: $id) {
@@ -498,15 +473,17 @@ export const EstateDocument = gql`
  *   },
  * });
  */
-export function useEstateQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<EstateQuery, EstateQueryVariables>) {
-        return ApolloReactHooks.useQuery<EstateQuery, EstateQueryVariables>(EstateDocument, baseOptions);
+export function useEstateQuery(baseOptions: Apollo.QueryHookOptions<EstateQuery, EstateQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<EstateQuery, EstateQueryVariables>(EstateDocument, options);
       }
-export function useEstateLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<EstateQuery, EstateQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<EstateQuery, EstateQueryVariables>(EstateDocument, baseOptions);
+export function useEstateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EstateQuery, EstateQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<EstateQuery, EstateQueryVariables>(EstateDocument, options);
         }
 export type EstateQueryHookResult = ReturnType<typeof useEstateQuery>;
 export type EstateLazyQueryHookResult = ReturnType<typeof useEstateLazyQuery>;
-export type EstateQueryResult = ApolloReactCommon.QueryResult<EstateQuery, EstateQueryVariables>;
+export type EstateQueryResult = Apollo.QueryResult<EstateQuery, EstateQueryVariables>;
 export const UpdateEstateDocument = gql`
     mutation UpdateEstate($id: String!, $estateInput: EstateUpdateInput!) {
   updateEstate(id: $id, estateInput: $estateInput) {
@@ -517,7 +494,7 @@ export const UpdateEstateDocument = gql`
   }
 }
     `;
-export type UpdateEstateMutationFn = ApolloReactCommon.MutationFunction<UpdateEstateMutation, UpdateEstateMutationVariables>;
+export type UpdateEstateMutationFn = Apollo.MutationFunction<UpdateEstateMutation, UpdateEstateMutationVariables>;
 
 /**
  * __useUpdateEstateMutation__
@@ -537,12 +514,13 @@ export type UpdateEstateMutationFn = ApolloReactCommon.MutationFunction<UpdateEs
  *   },
  * });
  */
-export function useUpdateEstateMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<UpdateEstateMutation, UpdateEstateMutationVariables>) {
-        return ApolloReactHooks.useMutation<UpdateEstateMutation, UpdateEstateMutationVariables>(UpdateEstateDocument, baseOptions);
+export function useUpdateEstateMutation(baseOptions?: Apollo.MutationHookOptions<UpdateEstateMutation, UpdateEstateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<UpdateEstateMutation, UpdateEstateMutationVariables>(UpdateEstateDocument, options);
       }
 export type UpdateEstateMutationHookResult = ReturnType<typeof useUpdateEstateMutation>;
-export type UpdateEstateMutationResult = ApolloReactCommon.MutationResult<UpdateEstateMutation>;
-export type UpdateEstateMutationOptions = ApolloReactCommon.BaseMutationOptions<UpdateEstateMutation, UpdateEstateMutationVariables>;
+export type UpdateEstateMutationResult = Apollo.MutationResult<UpdateEstateMutation>;
+export type UpdateEstateMutationOptions = Apollo.BaseMutationOptions<UpdateEstateMutation, UpdateEstateMutationVariables>;
 export const CurrentUserDocument = gql`
     query CurrentUser {
   currentUser {
@@ -568,15 +546,17 @@ export const CurrentUserDocument = gql`
  *   },
  * });
  */
-export function useCurrentUserQuery(baseOptions?: ApolloReactHooks.QueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
-        return ApolloReactHooks.useQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, baseOptions);
+export function useCurrentUserQuery(baseOptions?: Apollo.QueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, options);
       }
-export function useCurrentUserLazyQuery(baseOptions?: ApolloReactHooks.LazyQueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
-          return ApolloReactHooks.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, baseOptions);
+export function useCurrentUserLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<CurrentUserQuery, CurrentUserQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<CurrentUserQuery, CurrentUserQueryVariables>(CurrentUserDocument, options);
         }
 export type CurrentUserQueryHookResult = ReturnType<typeof useCurrentUserQuery>;
 export type CurrentUserLazyQueryHookResult = ReturnType<typeof useCurrentUserLazyQuery>;
-export type CurrentUserQueryResult = ApolloReactCommon.QueryResult<CurrentUserQuery, CurrentUserQueryVariables>;
+export type CurrentUserQueryResult = Apollo.QueryResult<CurrentUserQuery, CurrentUserQueryVariables>;
 export const LoginDocument = gql`
     mutation Login($email: String!, $password: String!) {
   login(email: $email, password: $password) {
@@ -589,7 +569,7 @@ export const LoginDocument = gql`
   }
 }
     `;
-export type LoginMutationFn = ApolloReactCommon.MutationFunction<LoginMutation, LoginMutationVariables>;
+export type LoginMutationFn = Apollo.MutationFunction<LoginMutation, LoginMutationVariables>;
 
 /**
  * __useLoginMutation__
@@ -609,18 +589,19 @@ export type LoginMutationFn = ApolloReactCommon.MutationFunction<LoginMutation, 
  *   },
  * });
  */
-export function useLoginMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
-        return ApolloReactHooks.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, baseOptions);
+export function useLoginMutation(baseOptions?: Apollo.MutationHookOptions<LoginMutation, LoginMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LoginMutation, LoginMutationVariables>(LoginDocument, options);
       }
 export type LoginMutationHookResult = ReturnType<typeof useLoginMutation>;
-export type LoginMutationResult = ApolloReactCommon.MutationResult<LoginMutation>;
-export type LoginMutationOptions = ApolloReactCommon.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
+export type LoginMutationResult = Apollo.MutationResult<LoginMutation>;
+export type LoginMutationOptions = Apollo.BaseMutationOptions<LoginMutation, LoginMutationVariables>;
 export const LogoutDocument = gql`
     mutation Logout {
   logout
 }
     `;
-export type LogoutMutationFn = ApolloReactCommon.MutationFunction<LogoutMutation, LogoutMutationVariables>;
+export type LogoutMutationFn = Apollo.MutationFunction<LogoutMutation, LogoutMutationVariables>;
 
 /**
  * __useLogoutMutation__
@@ -638,12 +619,13 @@ export type LogoutMutationFn = ApolloReactCommon.MutationFunction<LogoutMutation
  *   },
  * });
  */
-export function useLogoutMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
-        return ApolloReactHooks.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, baseOptions);
+export function useLogoutMutation(baseOptions?: Apollo.MutationHookOptions<LogoutMutation, LogoutMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<LogoutMutation, LogoutMutationVariables>(LogoutDocument, options);
       }
 export type LogoutMutationHookResult = ReturnType<typeof useLogoutMutation>;
-export type LogoutMutationResult = ApolloReactCommon.MutationResult<LogoutMutation>;
-export type LogoutMutationOptions = ApolloReactCommon.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
+export type LogoutMutationResult = Apollo.MutationResult<LogoutMutation>;
+export type LogoutMutationOptions = Apollo.BaseMutationOptions<LogoutMutation, LogoutMutationVariables>;
 export const RegisterDocument = gql`
     mutation Register($email: String!, $usermane: String!, $password: String!) {
   register(email: $email, username: $usermane, password: $password) {
@@ -652,7 +634,7 @@ export const RegisterDocument = gql`
   }
 }
     `;
-export type RegisterMutationFn = ApolloReactCommon.MutationFunction<RegisterMutation, RegisterMutationVariables>;
+export type RegisterMutationFn = Apollo.MutationFunction<RegisterMutation, RegisterMutationVariables>;
 
 /**
  * __useRegisterMutation__
@@ -673,9 +655,10 @@ export type RegisterMutationFn = ApolloReactCommon.MutationFunction<RegisterMuta
  *   },
  * });
  */
-export function useRegisterMutation(baseOptions?: ApolloReactHooks.MutationHookOptions<RegisterMutation, RegisterMutationVariables>) {
-        return ApolloReactHooks.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument, baseOptions);
+export function useRegisterMutation(baseOptions?: Apollo.MutationHookOptions<RegisterMutation, RegisterMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RegisterMutation, RegisterMutationVariables>(RegisterDocument, options);
       }
 export type RegisterMutationHookResult = ReturnType<typeof useRegisterMutation>;
-export type RegisterMutationResult = ApolloReactCommon.MutationResult<RegisterMutation>;
-export type RegisterMutationOptions = ApolloReactCommon.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
+export type RegisterMutationResult = Apollo.MutationResult<RegisterMutation>;
+export type RegisterMutationOptions = Apollo.BaseMutationOptions<RegisterMutation, RegisterMutationVariables>;
