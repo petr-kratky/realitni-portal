@@ -25,7 +25,7 @@ import {
 } from "@material-ui/core"
 import * as Yup from "yup"
 
-import estateModalStore from "../../../store/estate-modal.store"
+import estateModalStore from "../../store/estate-modal.store"
 import snackStore from "src/store/snack.store"
 import {
   CreateEstateMutationVariables,
@@ -34,7 +34,7 @@ import {
   useEstateTypesQuery,
   useUpdateEstateMutation
 } from "src/graphql/queries/generated/graphql"
-import { AppState, FormikSubmitFunction } from "../../../types"
+import { AppState, FormikSubmitFunction } from "../../types"
 import { geocodeLocation, removeEmptyStrings } from "src/utils/utils"
 
 export type EstateFormValues = {

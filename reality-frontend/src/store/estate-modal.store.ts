@@ -1,6 +1,6 @@
 import { Subject } from "rxjs"
 
-import { EstateFormValues } from "src/components/map/map/CreateEstateModal"
+import { EstateFormValues } from "src/components/estate/CreateEstateModal"
 
 export type EstateModalState = {
   formValues: EstateFormValues

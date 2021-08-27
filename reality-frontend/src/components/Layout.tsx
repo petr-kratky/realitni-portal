@@ -23,7 +23,7 @@ import { useCurrentUserQuery, useLogoutMutation } from "../graphql/queries/gener
 import LoginForm from "src/components/login/LoginForm"
 import SnackBar from "src/components/utils/SnackBar"
 import { setAccessToken } from "src/lib/auth/accessToken"
-import EstateModal from "./map/map/CreateEstateModal"
+import EstateModal from "./estate/CreateEstateModal"
 
 const DRAWER_WIDTH = 240
 
