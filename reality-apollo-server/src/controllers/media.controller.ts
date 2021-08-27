@@ -1,8 +1,9 @@
 import { Inject } from "typescript-ioc"
-import { POST, Path, PathParam, FilesParam, GET, Return, Errors, DELETE } from "typescript-rest"
+import { POST, Path, PathParam, FilesParam, GET, Return, Errors, PreProcessor } from "typescript-rest"
 
 import { MediaService } from "../services/media.service"
 import { Image, File } from "../models"
+import { authenticate } from "../decorators/auth-rest"
 
 @Path("/media")
 export class MediaController {
@@ -11,6 +12,7 @@ export class MediaController {
 
   @POST
   @Path("/images/estates/:estateId")
+  @PreProcessor(authenticate)
   async uploadImages(
     @PathParam("estateId") estateId: string,
     @FilesParam("images") images: Express.Multer.File[]
@@ -61,6 +63,7 @@ export class MediaController {
 
   @GET
   @Path("/images/estates/:estateId")
+  @PreProcessor(authenticate)
   async listImages(@PathParam("estateId") estateId: string): Promise<Image[]> {
     try {
       return await this.mediaService.listImages(estateId)
@@ -72,6 +75,7 @@ export class MediaController {
 
   @GET
   @Path("/images/estates/:estateId/:imageId/:imageSize")
+  @PreProcessor(authenticate)
   async getImage(
     @PathParam("estateId") estateId: string,
     @PathParam("imageId") imageId: string,
@@ -88,6 +92,7 @@ export class MediaController {
 
   @POST
   @Path("/files/estates/:estateId")
+  @PreProcessor(authenticate)
   async uploadFiles(
     @PathParam("estateId") estateId: string,
     @FilesParam("files") files: Express.Multer.File[]
@@ -112,6 +117,7 @@ export class MediaController {
 
   @GET
   @Path("/files/estates/:estateId")
+  @PreProcessor(authenticate)
   async listFiles(@PathParam("estateId") estateId: string): Promise<File[]> {
     try {
       return await this.mediaService.listFiles(estateId)
@@ -123,6 +129,7 @@ export class MediaController {
 
   @GET
   @Path("/files/estates/:estateId/:fileName")
+  @PreProcessor(authenticate)
   async getFile(
     @PathParam("estateId") estateId: string,
     @PathParam("fileName") fileName: string

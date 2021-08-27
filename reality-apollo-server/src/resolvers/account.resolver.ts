@@ -15,7 +15,7 @@ import { Account, AccountUpdateInput, LoginResponse } from "../models";
 import { resolverManager } from "./_resolver-manager";
 import { MyContext } from "../typings";
 import { attachRefreshToken } from "../lib/auth/refreshToken";
-import { RequireAuthentication } from "../decorators/RequireAuthentication";
+import { RequireAuthentication } from "../decorators/auth-gql";
 import { AccountService } from "../services";
 import { ServiceConfig } from "../config";
 

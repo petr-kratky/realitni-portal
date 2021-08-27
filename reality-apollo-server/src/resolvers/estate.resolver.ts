@@ -3,7 +3,7 @@ import { Inject } from "typescript-ioc"
 import { Arg, Ctx, FieldResolver, ID, Mutation, Query, Resolver, ResolverInterface, Root } from "type-graphql"
 
 import { Estate, EstateCreateInput, EstatePrimaryType, EstateSecondaryType, EstateUpdateInput, Image, File } from "../models"
-import { RequireAuthentication } from "../decorators/RequireAuthentication"
+import { RequireAuthentication } from "../decorators/auth-gql"
 import { resolverManager } from "./_resolver-manager"
 import { EstateService, MediaService } from "../services"
 import { MyContext } from "../typings"
