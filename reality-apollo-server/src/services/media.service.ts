@@ -33,7 +33,7 @@ export class MediaService {
   }
 
   public async resizeImage(buffer: Buffer, maxDimension: number): Promise<Buffer> {
-    return await sharp(buffer).resize(maxDimension, maxDimension, { fit: "inside" }).toBuffer()
+    return await sharp(buffer).resize(maxDimension, maxDimension, { fit: "inside" }).withMetadata().toBuffer()
   }
 
   public async uploadImage(options: {
