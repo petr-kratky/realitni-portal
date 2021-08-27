@@ -84,10 +84,13 @@ export class MediaService {
     })
   }
 
-  public async deleteImages(keys: string[]): Promise<boolean> {
+  public async deleteImage(estateId: string, imageId: string): Promise<boolean> {
+    const imageKeys = ["2000", "1000", "500", "original"].map(
+      size => `media/estates/${estateId}/images/${imageId}/${size}`
+    )
     const params: S3.DeleteObjectsRequest = {
       Bucket: this.config.s3.bucket,
-      Delete: { Objects: keys.map(key => ({ Key: key })) }
+      Delete: { Objects: imageKeys.map(key => ({ Key: key })) }
     }
     return new Promise<boolean>((resolve, reject) => {
       this.s3.deleteObjects(params, err => {

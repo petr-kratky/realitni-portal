@@ -131,6 +131,7 @@ export type LoginResponse = {
 
 export type Mutation = {
    __typename?: 'Mutation';
+  deleteImage: Scalars['Boolean'];
   deleteEstate: Scalars['ID'];
   createEstate: Estate;
   updateEstate: Estate;
@@ -139,6 +140,12 @@ export type Mutation = {
   updateAccount: Account;
   deleteAccount: Scalars['ID'];
   register: Account;
+};
+
+
+export type MutationDeleteImageArgs = {
+  imageId: Scalars['String'];
+  estateId: Scalars['String'];
 };
 
 

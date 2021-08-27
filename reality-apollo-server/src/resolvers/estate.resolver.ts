@@ -2,7 +2,15 @@ import { ApolloError } from "apollo-server-express"
 import { Inject } from "typescript-ioc"
 import { Arg, Ctx, FieldResolver, ID, Mutation, Query, Resolver, ResolverInterface, Root } from "type-graphql"
 
-import { Estate, EstateCreateInput, EstatePrimaryType, EstateSecondaryType, EstateUpdateInput, Image, File } from "../models"
+import {
+  Estate,
+  EstateCreateInput,
+  EstatePrimaryType,
+  EstateSecondaryType,
+  EstateUpdateInput,
+  Image,
+  File
+} from "../models"
 import { RequireAuthentication } from "../decorators/auth-gql"
 import { resolverManager } from "./_resolver-manager"
 import { EstateService, MediaService } from "../services"
@@ -57,6 +65,12 @@ export class EstateResolver implements ResolverInterface<Estate> {
     } catch (e) {
       throw new ApolloError(e.message, "500", e)
     }
+  }
+
+  @Mutation(returns => Boolean)
+  @RequireAuthentication()
+  async deleteImage(@Arg("estateId") estateId: string, @Arg("imageId") imageId: string): Promise<boolean> {
+    return await this.mediaService.deleteImage(estateId, imageId)
   }
 
   @Mutation(returns => ID)
