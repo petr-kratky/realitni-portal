@@ -109,8 +109,12 @@ const EstateModal: React.FunctionComponent<ImageEditModalProps> = ({ images, est
       } catch (err) {
         console.log(err)
         snackStore.toggle("error", `Fotografie se nepodařilo nahrát`)
+      } finally {
+        setUploading(false)
+        if (inputRef.current) {
+          inputRef.current.value = ""
+        }
       }
-      setUploading(false)
     }
   }
 
@@ -132,8 +136,9 @@ const EstateModal: React.FunctionComponent<ImageEditModalProps> = ({ images, est
     } catch (err) {
       console.log(err)
       snackStore.toggle("error", "Fotografii se nepodařilo odstranit")
+    } finally {
+      setDeleting(deleting.filter(id => id !== imageId))
     }
-    setDeleting(deleting.filter(id => id !== imageId))
   }
 
   return (
