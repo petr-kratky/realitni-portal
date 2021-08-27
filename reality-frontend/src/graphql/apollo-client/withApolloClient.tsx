@@ -76,7 +76,7 @@ export function withApollo(PageComponent: any, { ssr = true } = {}): ReactNode {
         const cookies = cookie.parse(req?.headers.cookie ?? "")
 
         if (cookies.jid) {
-          const response = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/refresh_token`, {
+          const response = await fetch(`http://${process.env.HOST}:${process.env.PORT}/api/auth/refresh`, {
             method: "POST",
             credentials: "include",
             headers: {

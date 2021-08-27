@@ -1,6 +1,4 @@
 import {
-  Field,
-  ObjectType,
   Ctx,
   Arg,
   Mutation,
@@ -13,28 +11,23 @@ import { Inject } from "typescript-ioc";
 import { hash, compare } from "bcryptjs";
 import { verify } from "jsonwebtoken";
 
-import { Account, AccountUpdateInput } from "../models";
+import { Account, AccountUpdateInput, LoginResponse } from "../models";
 import { resolverManager } from "./_resolver-manager";
 import { MyContext } from "../typings";
-import { createRefreshToken, createAccessToken } from "../lib/auth/auth";
-import { sendRefreshToken } from "../lib/auth/sendRefreshToken";
+import { attachRefreshToken } from "../lib/auth/refreshToken";
 import { RequireAuthentication } from "../decorators/RequireAuthentication";
 import { AccountService } from "../services";
+import { ServiceConfig } from "../config";
 
-@ObjectType()
-class LoginResponse {
-  @Field(() => String)
-  accessToken: string;
-  @Field(() => Account)
-  account: Account;
-}
+
 
 
 @Resolver((of) => Account)
 export class AccountResolver {
-
   @Inject
   accountService: AccountService
+  @Inject
+  config: ServiceConfig
 
   @Query(() => Account, { nullable: true })
   currentUser(@Ctx() context: MyContext) {
@@ -42,11 +35,10 @@ export class AccountResolver {
     if (!authHeader) {
       return null;
     }
-
     try {
       const token = authHeader.split(" ")[1];
-      const payload: any = verify(token, process.env.ACCESS_TOKEN_SECRET!);
-      return Account.findOne(payload.id);
+      const payload: any = verify(token, this.config.auth.accessTokenSecret);
+      return this.accountService.getAccountById(payload.id)
 
     } catch (err) {
       throw new AuthenticationError("AUTH_FAILED")
@@ -58,7 +50,7 @@ export class AccountResolver {
   @Mutation(() => Boolean)
   async logout(@Ctx() { res }: MyContext) {
     try {
-      sendRefreshToken(res, "", process.env.DOMAIN);
+      attachRefreshToken(res, "", this.config.server.domain);
       return true;
     } catch (err) {
       throw new ApolloError("LOGOUT_FAILED", "500", { err })
@@ -82,10 +74,10 @@ export class AccountResolver {
       throw new ApolloError('LOGIN_INVALID_PASSWORD', "400")
     }
 
-    sendRefreshToken(res, createRefreshToken(account), process.env.DOMAIN);
+    attachRefreshToken(res, this.accountService.createRefreshToken(account), this.config.server.domain);
 
     return {
-      accessToken: createAccessToken(account),
+      accessToken: this.accountService.createAccessToken(account),
       account,
     }
   }

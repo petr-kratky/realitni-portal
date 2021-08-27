@@ -42,6 +42,13 @@ export class Account extends BaseEntity {
   estates: Estate[]
 }
 
+@ObjectType()
+export class LoginResponse {
+  @Field(() => String)
+  accessToken: string;
+  @Field(() => Account)
+  account: Account;
+}
 
 @ObjectType()
 export class AccountPublicInfo implements Partial<Account> {

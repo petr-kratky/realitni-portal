@@ -1,4 +1,4 @@
-import { DatabaseConfig, S3Config, ServerConfig } from '../typings'
+import { AuthConfig, DatabaseConfig, S3Config, ServerConfig } from '../typings'
 import { Estate, Account, EstatePrimaryType, EstateSecondaryType } from '../models/'
 import { Singleton } from 'typescript-ioc'
 import { getEnv } from '../util/get-env'
@@ -9,6 +9,7 @@ export class ServiceConfig {
   database: DatabaseConfig
   server: ServerConfig
   s3: S3Config
+  auth: AuthConfig
   dev: boolean
 
   constructor() {
@@ -16,10 +17,23 @@ export class ServiceConfig {
     this.database = this.getDatabaseConfig()
     this.server = this.getServerConfig()
     this.s3 = this.getS3Config()
+    this.auth = this.getAuthConfig()
+  }
+
+  private getAuthConfig(): AuthConfig {
+    return {
+      accessTokenSecret: getEnv('ACCESS_TOKEN_SECRET', ''),
+      refreshTokenSecret: getEnv('REFRESH_TOKEN_SECRET', '')
+    }
   }
 
   private getServerConfig(): ServerConfig {
-    return {}
+    return {
+      port: getEnv('PORT', '4000'),
+      host: getEnv('HOST', 'localhost'),
+      protocol: getEnv('PROTOCOL', 'http'),
+      domain: getEnv('DOMAIN', 'localhost')
+    }
   }
 
   private getDatabaseConfig(): DatabaseConfig {

@@ -59,7 +59,7 @@ let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
       }
     },
     fetchAccessToken: () => {
-      return fetch(`${origin}/api/refresh_token`, {
+      return fetch(`${origin}/api/auth/refresh`, {
         method: "POST",
         credentials: "include"
       });

@@ -1,38 +1,29 @@
+import { ApolloServer } from 'apollo-server-express'
 import { Server } from 'typescript-rest';
 import { Config, Container, Inject } from 'typescript-ioc';
-import { join } from "path";
-import { existsSync } from 'fs';
 import { AddressInfo } from 'net';
-import { ApolloServer } from 'apollo-server-express'
 import { Express } from 'express'
 import 'reflect-metadata';
 
-import { buildGraphqlSchema } from './schema';
-import { LoggerApi } from './logger';
-import { ServiceConfig } from './config'
 import { ConnectionOptions, createConnection } from 'typeorm'
-import { RefreshTokenRequestHandler } from './lib/auth/auth'
 import express = require('express')
 import http = require('http')
 import cookieParser = require('cookie-parser')
 import cors = require('cors')
-import { graphqlUploadExpress } from 'graphql-upload';
 
-const npmPackage = require(join(process.cwd(), 'package.json'));
-
-const config = npmPackage.config || { port: 4000 };
+import { buildGraphqlSchema } from './schema';
+import { LoggerApi } from './logger';
+import { ServiceConfig } from './config'
 
 export class ApiServer {
   @Inject
-  logger: LoggerApi;
+  private logger: LoggerApi;
   @Inject
-  config: ServiceConfig
+  private config: ServiceConfig
 
   private graphQLServerPromise: Promise<Express>;
   private server: http.Server;
-  public PORT: number = +process.env.PORT || config.port;
-  public HOST: string = process.env.HOST || config.host;
-  public PROTOCOL: string = process.env.PROTOCOL || config.protocol;
+
   // @ts-ignore
   private async getGraphQLServer(): Promise<Express> {
     if (this.graphQLServerPromise) {
@@ -55,15 +46,13 @@ export class ApiServer {
       const expressServer = express()
       expressServer.use(
         cors({
-          origin: `${this.PROTOCOL}://${this.HOST}:${this.PORT}`,
+          origin: `${this.config.server.protocol}://${this.config.server.host}:${this.config.server.port}`,
           credentials: true
         })
       );
       expressServer.use(cookieParser());
       // this.logger.apply(expressServer);
       expressServer.use(apiRouter);
-      // expressServer.use(graphqlUploadExpress({ maxFileSize: 10000000, maxFiles: 10 }));
-      expressServer.post("/refresh_token", RefreshTokenRequestHandler);
       graphqlServer.applyMiddleware({ app: expressServer })
       // const swaggerPath = join(process.cwd(), 'dist/swagger.json');
       // if (existsSync(swaggerPath)) {
@@ -95,12 +84,6 @@ export class ApiServer {
     }
   }
 
-  // public async getApp(): Promise<express.Application> {
-  //   const graphQLServer = await this.getGraphQLServer();
-  //
-  //   return graphQLServer.();
-  // }
-
   get swaggerProtocols(): string[] {
     return parseCSVString(process.env.PROTOCOLS, '');
   }
@@ -120,7 +103,7 @@ export class ApiServer {
   public async start(): Promise<ApiServer> {
     const expressGraphQLServer = await this.getGraphQLServer();
 
-    this.server = await expressGraphQLServer.listen({host: this.HOST, port: this.PORT });
+    this.server = await expressGraphQLServer.listen({ host: this.config.server.host, port: this.config.server.port });
 
     await this.connectDatabase(this.config.database)
 
