@@ -33,6 +33,14 @@ export type ImageEditModalProps = {
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
+    "@keyframes rotating": {
+      from: {
+        transform: "rotate(0deg)"
+      },
+      to: {
+        transform: "rotate(-360deg)"
+      }
+    },
     imageWrapper: {
       borderRadius: theme.shape.borderRadius,
       position: "relative"
@@ -48,6 +56,12 @@ const useStyles = makeStyles((theme: Theme) =>
       "&:hover": {
         backgroundColor: theme.palette.grey[100],
         color: theme.palette.error.dark
+      },
+      "&.Mui-disabled": {
+        opacity: 0.6,
+        backgroundColor: theme.palette.grey[100],
+        color: theme.palette.primary.main,
+        animation: "$rotating 2s linear infinite"
       }
     },
     input: {
@@ -79,7 +93,7 @@ const EstateModal: React.FunctionComponent<ImageEditModalProps> = ({ images, est
   }
 
   const uploadFiles = async () => {
-    if (selectedFiles) {
+    if (selectedFiles?.length) {
       setUploading(true)
       const formData = new FormData()
       for (let i = 0; i < selectedFiles.length; i++) {
