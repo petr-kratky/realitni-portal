@@ -17,9 +17,10 @@ export class AuthController {
   @Path("/refresh")
   async refresh(@Context { request, response }: ServiceContext): Promise<any> {
     const token = request.cookies.jid
-
+    
     if (!token) {
-      return response.send({ ok: false, accessToken: "" })
+      response.send({ ok: false, accessToken: "" })
+      return
     }
 
     let payload: any = null
@@ -28,21 +29,24 @@ export class AuthController {
       payload = verify(token, this.config.auth.refreshTokenSecret)
     } catch (err) {
       console.log(err)
-      return response.send({ ok: false, accessToken: "" })
+      response.send({ ok: false, accessToken: "" })
+      return
     }
 
     const user = await this.accountService.getAccountById(payload.id)
 
     if (!user) {
-      return response.send({ ok: false, accessToken: "" })
+      response.send({ ok: false, accessToken: "" })
+      return
     }
 
     if (user.tokenVersion !== payload.tokenVersion) {
-      return response.send({ ok: false, accessToken: "" })
+      response.send({ ok: false, accessToken: "" })
+      return
     }
 
     attachRefreshToken(response, this.accountService.createRefreshToken(user), this.config.server.domain)
 
-    return response.send({ ok: true, accessToken: this.accountService.createAccessToken(user) })
+    response.send({ ok: true, accessToken: this.accountService.createAccessToken(user) })
   }
 }
