@@ -69,7 +69,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     error: estateError
   } = useEstateQuery({ variables: { id: estateId as string } })
 
-  const [imageDialogue, setImageDialogue] = React.useState<boolean>(true)
+  const [imageDialogue, setImageDialogue] = React.useState<boolean>(false)
 
   const openImageDialogue = () => {
     setImageDialogue(true)
