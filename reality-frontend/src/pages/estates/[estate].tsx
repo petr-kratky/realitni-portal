@@ -61,13 +61,13 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
   const router = useRouter()
   const theme = useTheme()
 
-  const { estateId } = router.query
+  const { estate } = router.query
 
   const {
     data: estateData,
     loading: estateLoading,
     error: estateError
-  } = useEstateQuery({ variables: { id: estateId as string } })
+  } = useEstateQuery({ variables: { id: estate as string } })
 
   const [imageLibraryOpen, setImageLibraryOpen] = React.useState<boolean>(false)
 
