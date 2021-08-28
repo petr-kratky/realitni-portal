@@ -83,7 +83,7 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ images }) 
 
   const containerRef = React.useRef<HTMLDivElement>(null)
 
-  React.useLayoutEffect(() => {
+  React.useEffect(() => {
     const resizeObserver = new ResizeObserver(() => {
       adjustCarouselHeight()
     })
