@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react"
 import { createUseStyles } from "react-jss"
 import { Popup, PopupProps } from "react-map-gl"
-import { MenuList, MenuItem } from "@material-ui/core"
+import { MenuList, MenuItem, Tooltip } from "@material-ui/core"
 
 import { copyToClipboard, geocodeLocation } from "src/utils/utils"
 import estateModalStore from "src/store/estate-modal.store"
@@ -30,7 +30,12 @@ const useStyles = createUseStyles({
   }
 })
 
-const ContextMenu: FunctionComponent<ContextMenuProps & AppState> = ({ isVisible, longitude, latitude, handleClose, appState }) => {
+const ContextMenu: FunctionComponent<ContextMenuProps & AppState> = ({
+  isVisible,
+  longitude,
+  latitude,
+  handleClose
+}) => {
   const classes = useStyles()
 
   const getShortFormatCoords = () => `${latitude.toFixed(5)}, ${longitude.toFixed(5)}`
@@ -89,9 +94,11 @@ const ContextMenu: FunctionComponent<ContextMenuProps & AppState> = ({ isVisible
         dynamicPosition={false}
       >
         <MenuList>
-          <MenuItem id='coords' dense={true} onClick={onCopyCoords}>
-            {getShortFormatCoords()}
-          </MenuItem>
+          <Tooltip title='Zkopírovat souřadnice' placement='right'>
+            <MenuItem id='coords' dense={true} onClick={onCopyCoords}>
+              {getShortFormatCoords()}
+            </MenuItem>
+          </Tooltip>
           <MenuItem dense={true} onClick={onCreateEstateButton}>
             Vytvořit nemovitost
           </MenuItem>

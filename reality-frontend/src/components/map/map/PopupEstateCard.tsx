@@ -17,7 +17,8 @@ import {
   makeStyles,
   Menu,
   MenuItem,
-  Theme
+  Theme,
+  Tooltip
 } from "@material-ui/core"
 import MoreVertIcon from "@material-ui/icons/MoreVert"
 import EditIcon from "@material-ui/icons/Edit"
@@ -149,9 +150,11 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
             secondary={fullAddress}
           />
           <ListItemSecondaryAction>
-            <IconButton size='small' onClick={handleMenuOpen}>
-              <MoreVertIcon />
-            </IconButton>
+            <Tooltip title='Možnosti'>
+              <IconButton size='small' onClick={handleMenuOpen}>
+                <MoreVertIcon />
+              </IconButton>
+            </Tooltip>
             <Menu
               anchorEl={menuAnchor}
               keepMounted

@@ -1,34 +1,37 @@
-import React, { Dispatch, FunctionComponent, SetStateAction, useState, useEffect } from 'react';
-import { createStyles, Fab, makeStyles, Theme } from '@material-ui/core'
-import AddIcon from '@material-ui/icons/Add'
+import React, { Dispatch, FunctionComponent, SetStateAction, useState } from "react"
+import { createStyles, Fab, makeStyles, Theme, Tooltip } from "@material-ui/core"
+import AddIcon from "@material-ui/icons/Add"
 
-import estateModalStore from '../../../store/estate-modal.store'
-import CustomPopup, { CustomPopupProps } from './CustomPopup'
-import ContextMenu, { ContextMenuProps } from './ContextMenu'
-import RSMap from './RSMap'
-import { AppState } from 'src/types';
+import estateModalStore from "../../../store/estate-modal.store"
+import CustomPopup, { CustomPopupProps } from "./CustomPopup"
+import ContextMenu, { ContextMenuProps } from "./ContextMenu"
+import RSMap from "./RSMap"
+import { AppState } from "src/types"
 
 type MapContainerProps = {
-  setOnScreenEstates: Dispatch<SetStateAction<string[]>>,
+  setOnScreenEstates: Dispatch<SetStateAction<string[]>>
 }
 
-const useStyles = makeStyles((theme: Theme) => createStyles({
-  mapContainer: {
-    height: 'calc(100vh - 48px)',
-    width: '100%'
-  },
-  fabRoot: {
-    position: "fixed",
-    bottom: theme.spacing(5),
-    right: theme.spacing(4)
-  }
-}));
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    mapContainer: {
+      height: "calc(100vh - 48px)",
+      width: "100%"
+    },
+    fabRoot: {
+      position: "fixed",
+      bottom: theme.spacing(5),
+      right: theme.spacing(4)
+    }
+  })
+)
 
-
-const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnScreenEstates, appState } ) => {
+const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnScreenEstates, appState }) => {
   const classes = useStyles()
 
-  const [contextMenuProps, setContextMenuProps] = useState<ContextMenuProps>(ContextMenu.defaultProps as ContextMenuProps)
+  const [contextMenuProps, setContextMenuProps] = useState<ContextMenuProps>(
+    ContextMenu.defaultProps as ContextMenuProps
+  )
   const [popupProps, setPopupProps] = useState<CustomPopupProps>(CustomPopup.defaultProps as CustomPopupProps)
 
   const _handleContextMenuClose = (): void => setContextMenuProps({ ...contextMenuProps, isVisible: false })
@@ -46,28 +49,23 @@ const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnSc
         setPopupProps={setPopupProps}
         setOnScreenEstates={setOnScreenEstates}
       >
-        {popupProps.features &&
-          <CustomPopup {...popupProps}
+        {popupProps.features && (
+          <CustomPopup
+            {...popupProps}
             handleClose={_handlePopupClose}
             popupProps={popupProps}
             setPopupProps={setPopupProps}
           />
-        }
-        {contextMenuProps.isVisible &&
-          <ContextMenu
-            {...contextMenuProps}
-            appState={appState}
-            handleClose={_handleContextMenuClose}
-          />
-        }
+        )}
+        {contextMenuProps.isVisible && (
+          <ContextMenu {...contextMenuProps} appState={appState} handleClose={_handleContextMenuClose} />
+        )}
       </RSMap>
-      <Fab
-        color="primary"
-        onClick={estateModalStore.openCreateMode}
-        classes={{ root: classes.fabRoot }}
-      >
-        <AddIcon />
-      </Fab>
+      <Tooltip title="Přidat nemovitost">
+        <Fab color='primary' onClick={estateModalStore.openCreateMode} classes={{ root: classes.fabRoot }}>
+          <AddIcon />
+        </Fab>
+      </Tooltip>
     </div>
   ) : null
 }

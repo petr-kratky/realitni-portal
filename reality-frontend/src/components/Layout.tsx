@@ -11,7 +11,8 @@ import {
   ListItemText,
   makeStyles,
   Theme,
-  Toolbar
+  Toolbar,
+  Tooltip
 } from "@material-ui/core"
 import MenuIcon from "@material-ui/icons/Menu"
 import SearchIcon from "@material-ui/icons/Search"
@@ -100,9 +101,11 @@ function Layout({ children, pageProps, appState }) {
       <AppBar position='fixed' className={classes.appBar}>
         <Toolbar variant='dense'>
           {currentUserData?.currentUser?.id && (
-            <IconButton edge='start' color='inherit' onClick={() => setDrawerOpen(true)}>
-              <MenuIcon />
-            </IconButton>
+            <Tooltip title='Nabídka'>
+              <IconButton edge='start' color='inherit' onClick={() => setDrawerOpen(true)}>
+                <MenuIcon />
+              </IconButton>
+            </Tooltip>
           )}
         </Toolbar>
       </AppBar>
