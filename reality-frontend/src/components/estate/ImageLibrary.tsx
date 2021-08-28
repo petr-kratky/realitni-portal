@@ -25,7 +25,7 @@ import snackStore from "src/store/snack.store"
 import authFetch from "../../lib/auth/authFetch"
 import LoadingDialogue from "../utils/LoadingDialogue"
 
-export type ImageEditModalProps = {
+export type ImageLibraryProps = {
   estateId: string
   images: Image[]
   open: boolean
@@ -71,7 +71,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const EstateModal: React.FunctionComponent<ImageEditModalProps> = ({ images, estateId, open, onClose }) => {
+const EstateModal: React.FunctionComponent<ImageLibraryProps> = ({ images, estateId, open, onClose }) => {
   const classes = useStyles()
   const theme = useTheme()
 

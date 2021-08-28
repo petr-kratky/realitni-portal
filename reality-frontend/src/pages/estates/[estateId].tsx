@@ -36,7 +36,7 @@ import { formatNumber } from "src/utils/number-formatter"
 import ImageCarousel from "src/components/estate/ImageCarousel"
 import { AppState } from "src/types"
 import estateModalStore from "src/store/estate-modal.store"
-import ImageDialogue from "../../components/estate/ImageDialogue"
+import ImageLibrary from "../../components/estate/ImageLibrary"
 
 type ParameterListItemProps = {
   icon: React.ReactNode
@@ -69,14 +69,14 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     error: estateError
   } = useEstateQuery({ variables: { id: estateId as string } })
 
-  const [imageDialogue, setImageDialogue] = React.useState<boolean>(false)
+  const [imageLibraryOpen, setImageLibraryOpen] = React.useState<boolean>(false)
 
   const openImageDialogue = () => {
-    setImageDialogue(true)
+    setImageLibraryOpen(true)
   }
 
   const closeImageDialogue = () => {
-    setImageDialogue(false)
+    setImageLibraryOpen(false)
   }
 
   if (estateLoading) {
@@ -149,11 +149,11 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                   </Typography>
                 </Grid>
 
-                <ImageDialogue
+                <ImageLibrary
                   estateId={id}
                   images={images}
                   onClose={closeImageDialogue}
-                  open={imageDialogue}
+                  open={imageLibraryOpen}
                 />
 
                 <Grid item xs={1}>
