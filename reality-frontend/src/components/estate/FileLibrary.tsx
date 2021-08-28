@@ -73,6 +73,11 @@ const FileLibrary: React.FunctionComponent<ImageEditModalProps> = ({ files, esta
   const [uploading, setUploading] = React.useState<boolean>(false)
   const [selectedFiles, setSelectedFiles] = React.useState<FileList | null>(null)
 
+  const sortedFiles = React.useMemo(() => {
+    const sortedFiles = [...files]
+    return sortedFiles.sort((a, b) => (a._id.toLocaleLowerCase() < b._id.toLocaleLowerCase() ? -1 : 1))
+  }, [files])
+
   const inputRef = React.useRef<HTMLInputElement>(null)
 
   React.useEffect(() => {
@@ -149,7 +154,7 @@ const FileLibrary: React.FunctionComponent<ImageEditModalProps> = ({ files, esta
             <DialogContentText>K této nemovitosti zatím nebyly nahrány žádné přílohy.</DialogContentText>
           )}
           <List>
-            {files.map(({ _id, size, url }, index) => {
+            {sortedFiles.map(({ _id, size, url }, index) => {
               const disabled = deleting.includes(_id)
               const filesize = size >= 1e6 ? `${(size / 1e6).toFixed(2)} MB` : `${(size / 1e3).toFixed(0)} kB`
               const fileExtension = _id.split(".").pop()?.toUpperCase() ?? ""
@@ -182,14 +187,7 @@ const FileLibrary: React.FunctionComponent<ImageEditModalProps> = ({ files, esta
               )
             })}
           </List>
-          <input
-            ref={inputRef}
-            onChange={onSelectFiles}
-            className={classes.input}
-            multiple
-            type='file'
-            accept='*'
-          />
+          <input ref={inputRef} onChange={onSelectFiles} className={classes.input} multiple type='file' accept='*' />
         </DialogContent>
         <DialogActions>
           <Button color='default' onClick={onUploadButton}>
