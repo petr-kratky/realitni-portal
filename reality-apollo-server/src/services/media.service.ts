@@ -147,10 +147,23 @@ export class MediaService {
     })
   }
 
-  public async getFile(estateId: string, fileKey: string): Promise<S3.GetObjectOutput> {
+  public async deleteFile(estateId: string, filename: string): Promise<boolean> {
+    const params: S3.DeleteObjectRequest = {
+      Bucket: this.config.s3.bucket,
+      Key: `media/estates/${estateId}/images/${filename}`
+    }
+    return new Promise<boolean>((resolve, reject) => {
+      this.s3.deleteObject(params, err => {
+        if (err) reject(err)
+        resolve(true)
+      })
+    })
+  }
+
+  public async getFile(estateId: string, filename: string): Promise<S3.GetObjectOutput> {
     const params: S3.GetObjectRequest = {
       Bucket: this.config.s3.bucket,
-      Key: `media/estates/${estateId}/files/${fileKey}`
+      Key: `media/estates/${estateId}/files/${filename}`
     }
     return new Promise<S3.GetObjectOutput>((resolve, reject) => {
       this.s3.getObject(params, (err, data) => {
