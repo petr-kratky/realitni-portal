@@ -4,16 +4,22 @@ import { getAccessToken, setAccessToken, validateAccessToken } from "./accessTok
 
 export default async function authFetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
   if (!validateAccessToken()) {
-    const response = await fetch("/api/auth/refresh", {
+    const tokenResponse = await fetch("/api/auth/refresh", {
       method: "POST",
       credentials: "include"
     })
-    const data = await response.json()
-    setAccessToken(data.accessToken)
+    const tokenData = await tokenResponse.json()
+    setAccessToken(tokenData.accessToken)
   }
   const headers = {
     ...init?.headers,
     Authorization: `Bearer ${getAccessToken()}`
   }
-  return await fetch(input, { ...init, headers })
+  const fetchResponse = await fetch(input, { ...init, headers })
+
+  if (fetchResponse.ok) {
+    return fetchResponse
+  } else {
+    throw new Error(fetchResponse.statusText)
+  }
 }
