@@ -1,0 +1,3 @@
+mutation DeleteFile($estateId: String!, $fileName: String!) {
+  deleteFile(estateId: $estateId, fileName: $fileName)
+}

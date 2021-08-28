@@ -135,6 +135,7 @@ export type LoginResponse = {
 export type Mutation = {
   __typename?: 'Mutation';
   deleteImage: Scalars['Boolean'];
+  deleteFile: Scalars['Boolean'];
   deleteEstate: Scalars['ID'];
   createEstate: Estate;
   updateEstate: Estate;
@@ -148,6 +149,12 @@ export type Mutation = {
 
 export type MutationDeleteImageArgs = {
   imageId: Scalars['String'];
+  estateId: Scalars['String'];
+};
+
+
+export type MutationDeleteFileArgs = {
+  fileName: Scalars['String'];
   estateId: Scalars['String'];
 };
 
@@ -217,6 +224,14 @@ export type DeleteEstateMutationVariables = Exact<{
 
 
 export type DeleteEstateMutation = { __typename?: 'Mutation', deleteEstate: string };
+
+export type DeleteFileMutationVariables = Exact<{
+  estateId: Scalars['String'];
+  fileName: Scalars['String'];
+}>;
+
+
+export type DeleteFileMutation = { __typename?: 'Mutation', deleteFile: boolean };
 
 export type DeleteImageMutationVariables = Exact<{
   estateId: Scalars['String'];
@@ -341,6 +356,38 @@ export function useDeleteEstateMutation(baseOptions?: Apollo.MutationHookOptions
 export type DeleteEstateMutationHookResult = ReturnType<typeof useDeleteEstateMutation>;
 export type DeleteEstateMutationResult = Apollo.MutationResult<DeleteEstateMutation>;
 export type DeleteEstateMutationOptions = Apollo.BaseMutationOptions<DeleteEstateMutation, DeleteEstateMutationVariables>;
+export const DeleteFileDocument = gql`
+    mutation DeleteFile($estateId: String!, $fileName: String!) {
+  deleteFile(estateId: $estateId, fileName: $fileName)
+}
+    `;
+export type DeleteFileMutationFn = Apollo.MutationFunction<DeleteFileMutation, DeleteFileMutationVariables>;
+
+/**
+ * __useDeleteFileMutation__
+ *
+ * To run a mutation, you first call `useDeleteFileMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useDeleteFileMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [deleteFileMutation, { data, loading, error }] = useDeleteFileMutation({
+ *   variables: {
+ *      estateId: // value for 'estateId'
+ *      fileName: // value for 'fileName'
+ *   },
+ * });
+ */
+export function useDeleteFileMutation(baseOptions?: Apollo.MutationHookOptions<DeleteFileMutation, DeleteFileMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<DeleteFileMutation, DeleteFileMutationVariables>(DeleteFileDocument, options);
+      }
+export type DeleteFileMutationHookResult = ReturnType<typeof useDeleteFileMutation>;
+export type DeleteFileMutationResult = Apollo.MutationResult<DeleteFileMutation>;
+export type DeleteFileMutationOptions = Apollo.BaseMutationOptions<DeleteFileMutation, DeleteFileMutationVariables>;
 export const DeleteImageDocument = gql`
     mutation DeleteImage($estateId: String!, $imageId: String!) {
   deleteImage(estateId: $estateId, imageId: $imageId)

@@ -55,13 +55,13 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: theme.palette.grey[300],
       opacity: 0.8,
       "&:hover": {
-        backgroundColor: theme.palette.grey[100],
+        backgroundColor: theme.palette.grey[100], 
         color: theme.palette.error.dark
       },
       "&.Mui-disabled": {
         opacity: 0.6,
         backgroundColor: theme.palette.grey[100],
-        color: theme.palette.primary.main,
+        color: theme.palette.grey[600],
         animation: "$rotating 2s linear infinite"
       }
     },
@@ -108,7 +108,6 @@ const EstateModal: React.FunctionComponent<ImageLibraryProps> = ({ images, estat
         await client.refetchQueries({ include: [EstateDocument] })
         snackStore.toggle("success", `Fotografie úspěšně nahrány (${selectedFiles.length})`)
       } catch (err) {
-        console.log(err)
         snackStore.toggle("error", `Fotografie se nepodařilo nahrát`)
       } finally {
         setUploading(false)
@@ -146,7 +145,7 @@ const EstateModal: React.FunctionComponent<ImageLibraryProps> = ({ images, estat
     <React.Fragment>
       <LoadingDialogue open={uploading} title='Nahrávám fotografie' />
       <Dialog scroll='paper' open={open} onClose={onClose} fullScreen={xs} maxWidth='sm' fullWidth>
-        <DialogTitle>Fotogalerie</DialogTitle>
+        <DialogTitle>Fotografie ({images.length})</DialogTitle>
         <DialogContent>
           {!images.length && (
             <DialogContentText>K této nemovitosti zatím nebyly nahrány žádné fotografie.</DialogContentText>
@@ -174,7 +173,6 @@ const EstateModal: React.FunctionComponent<ImageLibraryProps> = ({ images, estat
             className={classes.input}
             multiple
             type='file'
-            id='avatar'
             capture='environment'
             accept='image/png, image/jpeg'
           />

@@ -16,6 +16,7 @@ import {
   makeStyles,
   Paper,
   Theme,
+  Tooltip,
   Typography,
   useTheme
 } from "@material-ui/core"
@@ -26,7 +27,8 @@ import MoneyIcon from "@material-ui/icons/AttachMoney"
 import BankIcon from "@material-ui/icons/AccountBalance"
 import EditIcon from "@material-ui/icons/Edit"
 import CityIcon from "@material-ui/icons/LocationCity"
-import LibraryIcon from "@material-ui/icons/PhotoLibrary"
+import ImageLibraryIcon from "@material-ui/icons/PhotoLibrary"
+import FileLibraryIcon from "@material-ui/icons/AttachFile"
 
 import { Photo } from "react-bnb-gallery"
 
@@ -37,6 +39,7 @@ import ImageCarousel from "src/components/estate/ImageCarousel"
 import { AppState } from "src/types"
 import estateModalStore from "src/store/estate-modal.store"
 import ImageLibrary from "../../components/estate/ImageLibrary"
+import FileLibrary from "../../components/estate/FileLibrary"
 
 type ParameterListItemProps = {
   icon: React.ReactNode
@@ -70,13 +73,22 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
   } = useEstateQuery({ variables: { id: estate as string } })
 
   const [imageLibraryOpen, setImageLibraryOpen] = React.useState<boolean>(false)
+  const [fileLibraryOpen, setFileLibraryOpen] = React.useState<boolean>(false)
 
-  const openImageDialogue = () => {
+  const openImageLibrary = () => {
     setImageLibraryOpen(true)
   }
 
-  const closeImageDialogue = () => {
+  const closeImageLibrary = () => {
     setImageLibraryOpen(false)
+  }
+
+  const openFileLibrary = () => {
+    setFileLibraryOpen(true)
+  }
+
+  const closeFileLibrary = () => {
+    setFileLibraryOpen(false)
   }
 
   if (estateLoading) {
@@ -140,7 +152,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
           <Grid item xs={12} sm={9} lg={7} xl={6}>
             <Paper style={{ padding: theme.spacing(2) }} variant='outlined'>
               <Grid container direction='row'>
-                <Grid item xs={10}>
+                <Grid item xs={12}>
                   <Typography variant='h4'>
                     {capitalize(primary_type.desc_cz)}, {secondary_type.desc_cz}
                   </Typography>
@@ -149,23 +161,26 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                   </Typography>
                 </Grid>
 
-                <ImageLibrary
-                  estateId={id}
-                  images={images}
-                  onClose={closeImageDialogue}
-                  open={imageLibraryOpen}
-                />
+                <ImageLibrary estateId={id} images={images} onClose={closeImageLibrary} open={imageLibraryOpen} />
 
-                <Grid item xs={1}>
-                  <IconButton onClick={onEstateEditButton}>
-                    <EditIcon />
-                  </IconButton>
-                </Grid>
+                <FileLibrary estateId={id} files={files} onClose={closeFileLibrary} open={fileLibraryOpen} />
 
-                <Grid item xs={1}>
-                  <IconButton onClick={openImageDialogue}>
-                    <LibraryIcon />
-                  </IconButton>
+                <Grid item xs={12} container>
+                  <Tooltip title='Upravit'>
+                    <IconButton edge='start' onClick={onEstateEditButton}>
+                      <EditIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title='Nahrát fotografie'>
+                    <IconButton onClick={openImageLibrary}>
+                      <ImageLibraryIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title='Nahrát přílohy'>
+                    <IconButton onClick={openFileLibrary}>
+                      <FileLibraryIcon />
+                    </IconButton>
+                  </Tooltip>
                 </Grid>
 
                 {!!galleryPhotos.length && (

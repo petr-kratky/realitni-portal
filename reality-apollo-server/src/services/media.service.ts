@@ -93,9 +93,9 @@ export class MediaService {
       Delete: { Objects: imageKeys.map(key => ({ Key: key })) }
     }
     return new Promise<boolean>((resolve, reject) => {
-      this.s3.deleteObjects(params, err => {
+      this.s3.deleteObjects(params, (err, data) => {
         if (err) reject(err)
-        resolve(true)
+        resolve(data.Deleted.length === imageKeys.length)
       })
     })
   }
@@ -150,12 +150,12 @@ export class MediaService {
   public async deleteFile(estateId: string, filename: string): Promise<boolean> {
     const params: S3.DeleteObjectRequest = {
       Bucket: this.config.s3.bucket,
-      Key: `media/estates/${estateId}/images/${filename}`
+      Key: `media/estates/${estateId}/files/${filename}`
     }
     return new Promise<boolean>((resolve, reject) => {
-      this.s3.deleteObject(params, err => {
+      this.s3.deleteObject(params, (err, data) => {
         if (err) reject(err)
-        resolve(true)
+        resolve(!!data.VersionId)
       })
     })
   }

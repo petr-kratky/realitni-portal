@@ -73,6 +73,12 @@ export class EstateResolver implements ResolverInterface<Estate> {
     return await this.mediaService.deleteImage(estateId, imageId)
   }
 
+  @Mutation(returns => Boolean)
+  @RequireAuthentication()
+  async deleteFile(@Arg("estateId") estateId: string, @Arg("fileName") fileName: string): Promise<boolean> {
+    return await this.mediaService.deleteFile(estateId, fileName)
+  }
+
   @Mutation(returns => ID)
   @RequireAuthentication()
   async deleteEstate(@Arg("id") id: string): Promise<string> {
