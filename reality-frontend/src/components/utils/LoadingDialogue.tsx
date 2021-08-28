@@ -30,11 +30,11 @@ const LoadingDialogue: React.FunctionComponent<LoadingDialogueProps> = ({ open, 
   const classes = useStyles()
 
   return (
-    <Dialog open={open}>
+    <Dialog open={open} maxWidth='xs' fullWidth>
       <DialogTitle>{title}...</DialogTitle>
       <DialogContent>
         <Grid container justifyContent='center' alignItems='center'>
-          <LinearProgress className={classes.progress} style={{}} />
+          <LinearProgress className={classes.progress} />
         </Grid>
       </DialogContent>
     </Dialog>
