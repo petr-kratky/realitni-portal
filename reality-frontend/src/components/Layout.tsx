@@ -60,11 +60,13 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     content: {
       flexGrow: 1,
-      transition: theme.transitions.create("margin", {
-        easing: theme.transitions.easing.sharp,
-        duration: theme.transitions.duration.leavingScreen
-      }),
-      marginLeft: -DRAWER_WIDTH
+      [theme.breakpoints.up("md")]: {
+        transition: theme.transitions.create("margin", {
+          easing: theme.transitions.easing.sharp,
+          duration: theme.transitions.duration.leavingScreen
+        }),
+        marginLeft: -DRAWER_WIDTH
+      }
     },
     contentShift: {
       transition: theme.transitions.create("margin", {
