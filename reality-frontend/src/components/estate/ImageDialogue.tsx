@@ -23,6 +23,7 @@ import LoopIcon from "@material-ui/icons/Loop"
 import { EstateDocument, useDeleteImageMutation, Image } from "src/graphql/queries/generated/graphql"
 import snackStore from "src/store/snack.store"
 import authFetch from "../../lib/auth/authFetch"
+import LoadingDialogue from "../utils/LoadingDialogue"
 
 export type ImageEditModalProps = {
   estateId: string
@@ -142,49 +143,52 @@ const EstateModal: React.FunctionComponent<ImageEditModalProps> = ({ images, est
   }
 
   return (
-    <Dialog scroll='paper' open={open} onClose={onClose} fullScreen={xs} maxWidth='sm' fullWidth>
-      <DialogTitle>Fotogalerie</DialogTitle>
-      <DialogContent>
-        {!images.length && (
-          <DialogContentText>K této nemovitosti zatím nebyly nahrány žádné fotografie.</DialogContentText>
-        )}
-        <ImageList rowHeight={160} cols={xs ? 2 : 3} gap={6}>
-          {images.map(({ _id, mid }) => (
-            <ImageListItem key={_id} classes={{ item: classes.imageWrapper }}>
-              <Tooltip title='Odstranit'>
-                <IconButton
-                  disabled={deleting.includes(_id)}
-                  size='small'
-                  onClick={onDelete(_id)}
-                  classes={{ root: classes.imageButton }}
-                >
-                  {deleting.includes(_id) ? <LoopIcon /> : <DeleteIcon />}
-                </IconButton>
-              </Tooltip>
-              <img src={mid} alt={_id} />
-            </ImageListItem>
-          ))}
-        </ImageList>
-        <input
-          ref={inputRef}
-          onChange={onSelectFiles}
-          className={classes.input}
-          multiple
-          type='file'
-          id='avatar'
-          capture='environment'
-          accept='image/png, image/jpeg'
-        />
-      </DialogContent>
-      <DialogActions>
-        <Button color='default' onClick={onUploadButton}>
-          nahrát fotografie
-        </Button>
-        <Button color='primary' onClick={onClose}>
-          hotovo
-        </Button>
-      </DialogActions>
-    </Dialog>
+    <React.Fragment>
+      <LoadingDialogue open={uploading} title='Nahrávám fotografie' />
+      <Dialog scroll='paper' open={open} onClose={onClose} fullScreen={xs} maxWidth='sm' fullWidth>
+        <DialogTitle>Fotogalerie</DialogTitle>
+        <DialogContent>
+          {!images.length && (
+            <DialogContentText>K této nemovitosti zatím nebyly nahrány žádné fotografie.</DialogContentText>
+          )}
+          <ImageList rowHeight={160} cols={xs ? 2 : 3} gap={6}>
+            {images.map(({ _id, mid }) => (
+              <ImageListItem key={_id} classes={{ item: classes.imageWrapper }}>
+                <Tooltip title='Odstranit'>
+                  <IconButton
+                    disabled={deleting.includes(_id)}
+                    size='small'
+                    onClick={onDelete(_id)}
+                    classes={{ root: classes.imageButton }}
+                  >
+                    {deleting.includes(_id) ? <LoopIcon /> : <DeleteIcon />}
+                  </IconButton>
+                </Tooltip>
+                <img src={mid} alt={_id} />
+              </ImageListItem>
+            ))}
+          </ImageList>
+          <input
+            ref={inputRef}
+            onChange={onSelectFiles}
+            className={classes.input}
+            multiple
+            type='file'
+            id='avatar'
+            capture='environment'
+            accept='image/png, image/jpeg'
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button color='default' onClick={onUploadButton}>
+            nahrát fotografie
+          </Button>
+          <Button color='primary' onClick={onClose}>
+            hotovo
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </React.Fragment>
   )
 }
 
