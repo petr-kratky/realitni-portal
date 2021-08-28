@@ -8,7 +8,6 @@ import ReactBnbGallery, { Props, Photo } from "react-bnb-gallery"
 import "react-bnb-gallery/dist/style.css"
 
 type ImageCarouselProps = {
-  registerResizeListenerTrigger: any
   images: Photo[]
 }
 
@@ -73,7 +72,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerResizeListenerTrigger, images }) => {
+const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ images }) => {
   const classes = useStyles()
   const theme = useTheme()
 
@@ -82,10 +81,16 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerRe
   const [galleryOpen, setGalleryOpen] = React.useState<boolean>(false)
   const [currentImage, setCurrentImage] = React.useState<number>(0)
 
-  React.useEffect(() => {
-    adjustCarouselHeight()
-    window.addEventListener("resize", adjustCarouselHeight)
-  }, [registerResizeListenerTrigger])
+  const containerRef = React.useRef<HTMLDivElement>(null)
+
+  React.useLayoutEffect(() => {
+    const resizeObserver = new ResizeObserver(() => {
+      adjustCarouselHeight()
+    })
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current)
+    }
+  }, [])
 
   const adjustCarouselHeight = () => {
     const carouselContainer = document.getElementById("carousel-container")
@@ -126,9 +131,9 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerRe
     }
   }
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = (event) => {
-    if (event.key === 'ArrowLeft') onPrevImage()
-    if (event.key === 'ArrowRight') onNextImage()
+  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = event => {
+    if (event.key === "ArrowLeft") onPrevImage()
+    if (event.key === "ArrowRight") onNextImage()
   }
 
   return (
@@ -136,6 +141,7 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerRe
       <ReactBnbGallery {...reactBnbGalleryProps} />
       <Grid
         item
+        ref={containerRef}
         container
         sm={12}
         justifyContent='center'
@@ -167,7 +173,7 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerRe
         {/* <Grid item> */}
         <img
           onClick={() => setGalleryOpen(true)}
-          src={images[currentImage]?.photo ?? ''}
+          src={images[currentImage]?.photo ?? ""}
           alt=''
           id='carousel-image'
           className={classes.carouselImage}

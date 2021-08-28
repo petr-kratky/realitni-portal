@@ -183,9 +183,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                   </Tooltip>
                 </Grid>
 
-                {!!galleryPhotos.length && (
-                  <ImageCarousel images={galleryPhotos} registerResizeListenerTrigger={estateData} />
-                )}
+                {!!galleryPhotos.length && <ImageCarousel images={galleryPhotos} />}
 
                 {!!description && (
                   <Grid item md={6}>
