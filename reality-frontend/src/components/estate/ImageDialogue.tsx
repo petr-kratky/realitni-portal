@@ -152,7 +152,7 @@ const EstateModal: React.FunctionComponent<ImageEditModalProps> = ({ images, est
             <DialogContentText>K této nemovitosti zatím nebyly nahrány žádné fotografie.</DialogContentText>
           )}
           <ImageList rowHeight={160} cols={xs ? 2 : 3} gap={6}>
-            {images.map(({ _id, mid }) => (
+            {images.map(({ _id, small }) => (
               <ImageListItem key={_id} classes={{ item: classes.imageWrapper }}>
                 <Tooltip title='Odstranit'>
                   <IconButton
@@ -164,7 +164,7 @@ const EstateModal: React.FunctionComponent<ImageEditModalProps> = ({ images, est
                     {deleting.includes(_id) ? <LoopIcon /> : <DeleteIcon />}
                   </IconButton>
                 </Tooltip>
-                <img src={mid} alt={_id} />
+                <img src={small} alt={_id} />
               </ImageListItem>
             ))}
           </ImageList>
