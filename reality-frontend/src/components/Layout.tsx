@@ -18,13 +18,16 @@ import MenuIcon from "@material-ui/icons/Menu"
 import SearchIcon from "@material-ui/icons/Search"
 import AddIcon from "@material-ui/icons/Add"
 import ExitIcon from "@material-ui/icons/ExitToApp"
+import MapIcon from "@material-ui/icons/Map"
 
 import { useCurrentUserQuery, useLogoutMutation } from "../graphql/queries/generated/graphql"
 
 import LoginForm from "src/components/login/LoginForm"
 import SnackBar from "src/components/utils/SnackBar"
-import { setAccessToken } from "src/lib/auth/accessToken"
 import EstateModal from "./estate/CreateEstateModal"
+import { setAccessToken } from "src/lib/auth/accessToken"
+import estateModalStore from "../store/estate-modal.store"
+import { useRouter } from "next/router"
 
 const DRAWER_WIDTH = 240
 
@@ -66,6 +69,7 @@ const useStyles = makeStyles((theme: Theme) =>
 
 function Layout({ children, pageProps, appState }) {
   const classes = useStyles()
+  const router = useRouter()
 
   const { data: currentUserData, loading: currentUserLoading } = useCurrentUserQuery({ fetchPolicy: "network-only" })
   const [logout, { client }] = useLogoutMutation()
@@ -79,9 +83,20 @@ function Layout({ children, pageProps, appState }) {
       onClick: () => console.log("vyhledat")
     },
     {
+      text: "Mapa",
+      icon: <MapIcon />,
+      onClick: () => {
+        setDrawerOpen(false)
+        if (router.pathname !== "/map") router.push("/map")
+      }
+    },
+    {
       text: "Přidat nemovitost",
       icon: <AddIcon />,
-      onClick: () => console.log("vytvořit nemovitost")
+      onClick: () => {
+        setDrawerOpen(false)
+        estateModalStore.openCreateMode()
+      }
     }
   ]
 
