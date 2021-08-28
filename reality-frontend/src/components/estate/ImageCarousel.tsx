@@ -167,7 +167,7 @@ const ImageCarousel: React.FunctionComponent<ImageCarouselProps> = ({ registerRe
         {/* <Grid item> */}
         <img
           onClick={() => setGalleryOpen(true)}
-          src={images[currentImage].photo}
+          src={images[currentImage].photo ?? ''}
           alt=''
           id='carousel-image'
           className={classes.carouselImage}
