@@ -142,7 +142,7 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
       <AppBar position='fixed' className={classes.appBar}>
         <Toolbar variant='dense'>
           {currentUserData?.currentUser?.id && (
-            <Tooltip title='Nabídka'>
+            <Tooltip title='Nabídka' enterDelay={1250}>
               <IconButton edge='start' color='inherit' onClick={toggleDrawer}>
                 <MenuIcon />
               </IconButton>
