@@ -23,7 +23,7 @@ import MoreVertIcon from "@material-ui/icons/MoreVert"
 import EditIcon from "@material-ui/icons/Edit"
 import DeleteIcon from "@material-ui/icons/Delete"
 
-import { useDeleteEstateMutation, useEstateQuery } from "../../../graphql/queries/generated/graphql"
+import { useDeleteEstateMutation, useEstateWithoutMediaQuery } from "../../../graphql/queries/generated/graphql"
 import snackStore from "src/store/snack.store"
 import { CustomPopupProps } from "./CustomPopup"
 import { EstateFeature } from "src/types"
@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme: Theme) =>
 const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features, setPopupProps, popupProps }) => {
   const classes = useStyles()
 
-  const { data: estateData, loading: estateLoading } = useEstateQuery({ variables: { id } })
+  const { data: estateData, loading: estateLoading } = useEstateWithoutMediaQuery({ variables: { id } })
   const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
 
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null)

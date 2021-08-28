@@ -1,0 +1,30 @@
+query EstateWithoutMedia($id: String!) {
+  estate(id: $id) {
+    id
+    created_by {
+      id
+      username
+    }
+    name
+    description
+    longitude
+    latitude
+    advert_price
+    estimated_price
+    land_area
+    usable_area
+    primary_type {
+      id
+      desc_cz
+    }
+    secondary_type {
+      id
+      desc_cz
+    }
+    usable_area
+    land_area
+    street_address
+    city_address
+    postal_code
+  }
+}

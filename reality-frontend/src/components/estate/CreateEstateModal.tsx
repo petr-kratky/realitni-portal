@@ -30,6 +30,7 @@ import snackStore from "src/store/snack.store"
 import {
   CreateEstateMutationVariables,
   EstateDocument,
+  EstateWithoutMediaDocument,
   useCreateEstateMutation,
   useEstateTypesQuery,
   useUpdateEstateMutation
@@ -155,7 +156,10 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
       if (appState.estateModal.editMode.estateId) {
         const updateEstateResponse = await updateEstate({
           variables: { id: appState.estateModal.editMode.estateId, estateInput: variables.estateInput },
-          refetchQueries: [{ query: EstateDocument, variables: { id: appState.estateModal.editMode.estateId } }]
+          refetchQueries: [
+            { query: EstateDocument, variables: { id: appState.estateModal.editMode.estateId } },
+            { query: EstateWithoutMediaDocument, variables: { id: appState.estateModal.editMode.estateId } }
+          ]
         })
         snackStore.toggle("success", "Nemovitost uložena")
         console.log(updateEstateResponse.data?.updateEstate)
