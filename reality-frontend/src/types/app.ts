@@ -2,7 +2,7 @@ import { ApolloClient } from "@apollo/client"
 import { NormalizedCacheObject } from "@apollo/client/cache"
 
 import { NextPageContext } from "next"
-import { AppInitialProps, AppProps } from "next/app"
+import { AppContext, AppInitialProps, AppProps } from "next/app"
 
 import { Request, Response } from "express"
 
@@ -26,9 +26,18 @@ export interface ExpressNextContext extends NextPageContext {
   res: Response
 }
 
+interface NextPageContextWithApollo extends NextPageContext {
+  apolloClient: ApolloClient<NormalizedCacheObject> | null
+  apolloState: NormalizedCacheObject
+  ctx: NextPageContextApp
+}
+
+export type NextPageContextApp = NextPageContextWithApollo & AppContext
+
 export type AppState = {
   appState: {
     snack: SnackState
     estateModal: EstateModalState
   }
 }
+

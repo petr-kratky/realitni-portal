@@ -3,8 +3,6 @@ import React, { ReactNode } from "react"
 import { ApolloClient } from "@apollo/client"
 import { NormalizedCacheObject } from "@apollo/client/cache"
 
-import { NextPageContext } from "next"
-import { AppContext } from "next/app"
 import Head from "next/head"
 
 import cookie from "cookie"
@@ -12,14 +10,7 @@ import fetch from "isomorphic-fetch"
 
 import { getAccessToken, setAccessToken } from "../../lib/auth/accessToken"
 import { initApollo } from "./initApollo"
-
-interface NextPageContextWithApollo extends NextPageContext {
-  apolloClient: ApolloClient<NormalizedCacheObject> | null
-  apolloState: NormalizedCacheObject
-  ctx: NextPageContextApp
-}
-
-type NextPageContextApp = NextPageContextWithApollo & AppContext
+import { NextPageContextApp } from "../../types"
 
 const isServer = () => typeof window === "undefined"
 

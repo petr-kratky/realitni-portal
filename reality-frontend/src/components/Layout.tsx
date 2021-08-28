@@ -1,4 +1,6 @@
-import React, { useState } from "react"
+import React from "react"
+import { useRouter } from "next/router"
+import { setCookie } from "nookies"
 import { createStyles } from "@material-ui/styles"
 import {
   AppBar,
@@ -12,7 +14,9 @@ import {
   makeStyles,
   Theme,
   Toolbar,
-  Tooltip
+  Tooltip,
+  useMediaQuery,
+  useTheme
 } from "@material-ui/core"
 import MenuIcon from "@material-ui/icons/Menu"
 import SearchIcon from "@material-ui/icons/Search"
@@ -27,7 +31,12 @@ import SnackBar from "src/components/utils/SnackBar"
 import EstateModal from "./estate/CreateEstateModal"
 import { setAccessToken } from "src/lib/auth/accessToken"
 import estateModalStore from "../store/estate-modal.store"
-import { useRouter } from "next/router"
+import { AppState } from "../types"
+
+type LayoutProps = {
+  pageProps: any
+  drawer: boolean
+}
 
 const DRAWER_WIDTH = 240
 
@@ -50,31 +59,38 @@ const useStyles = makeStyles((theme: Theme) =>
       overflow: "auto"
     },
     content: {
-      flexGrow: 1
-      // transition: theme.transitions.create('margin', {
-      //   easing: theme.transitions.easing.sharp,
-      //   duration: theme.transitions.duration.leavingScreen,
-      // }),
-      // marginLeft: -drawerWidth,
+      flexGrow: 1,
+      transition: theme.transitions.create("margin", {
+        easing: theme.transitions.easing.sharp,
+        duration: theme.transitions.duration.leavingScreen
+      }),
+      marginLeft: -DRAWER_WIDTH
     },
     contentShift: {
-      // transition: theme.transitions.create('margin', {
-      //   easing: theme.transitions.easing.easeOut,
-      //   duration: theme.transitions.duration.enteringScreen,
-      // }),
-      // marginLeft: 0,
+      transition: theme.transitions.create("margin", {
+        easing: theme.transitions.easing.easeOut,
+        duration: theme.transitions.duration.enteringScreen
+      }),
+      marginLeft: 0
     }
   })
 )
 
-function Layout({ children, pageProps, appState }) {
+const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pageProps, appState, drawer }) => {
   const classes = useStyles()
   const router = useRouter()
+  const theme = useTheme()
+
+  const sm = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true })
 
   const { data: currentUserData, loading: currentUserLoading } = useCurrentUserQuery({ fetchPolicy: "network-only" })
   const [logout, { client }] = useLogoutMutation()
 
-  const [isDrawerOpen, setDrawerOpen] = useState<boolean>(false)
+  const [isDrawerOpen, setDrawerOpen] = React.useState<boolean>(drawer && !sm)
+
+  React.useEffect(() => {
+    setCookie(null, "drawer", `${isDrawerOpen}`)
+  }, [isDrawerOpen])
 
   const navigationOptions = [
     {
@@ -86,7 +102,7 @@ function Layout({ children, pageProps, appState }) {
       text: "Mapa",
       icon: <MapIcon />,
       onClick: () => {
-        setDrawerOpen(false)
+        closeDrawer()
         if (router.pathname !== "/map") router.push("/map")
       }
     },
@@ -94,7 +110,7 @@ function Layout({ children, pageProps, appState }) {
       text: "Přidat nemovitost",
       icon: <AddIcon />,
       onClick: () => {
-        setDrawerOpen(false)
+        closeDrawer()
         estateModalStore.openCreateMode()
       }
     }
@@ -104,11 +120,21 @@ function Layout({ children, pageProps, appState }) {
     try {
       await logout()
       setAccessToken("")
-      setDrawerOpen(false)
+      toggleDrawer()
       await client!.resetStore()
     } catch (err) {
       console.log(err)
     }
+  }
+
+  const closeDrawer = () => {
+    if (sm) {
+      setDrawerOpen(false)
+    }
+  }
+
+  const toggleDrawer = () => {
+    setDrawerOpen(!isDrawerOpen)
   }
 
   return (
@@ -117,7 +143,7 @@ function Layout({ children, pageProps, appState }) {
         <Toolbar variant='dense'>
           {currentUserData?.currentUser?.id && (
             <Tooltip title='Nabídka'>
-              <IconButton edge='start' color='inherit' onClick={() => setDrawerOpen(true)}>
+              <IconButton edge='start' color='inherit' onClick={toggleDrawer}>
                 <MenuIcon />
               </IconButton>
             </Tooltip>
@@ -126,12 +152,13 @@ function Layout({ children, pageProps, appState }) {
       </AppBar>
       <Drawer
         anchor='left'
-        variant='temporary'
+        variant={sm ? "temporary" : "persistent"}
         open={isDrawerOpen}
-        onClose={() => setDrawerOpen(false)}
+        onClose={toggleDrawer}
         className={classes.drawer}
         classes={{ paper: classes.drawerPaper }}
       >
+        {!sm && <Toolbar variant='dense' />}
         <List>
           {navigationOptions.map(({ text, onClick, icon }) => (
             <ListItem button onClick={onClick} key={text}>
@@ -148,7 +175,7 @@ function Layout({ children, pageProps, appState }) {
           </ListItem>
         </List>
       </Drawer>
-      <main className={`${classes.content} ${isDrawerOpen ? classes.contentShift : ""}`}>
+      <main className={`${classes.content} ${isDrawerOpen && !sm ? classes.contentShift : ""}`}>
         <Toolbar variant='dense' />
         <EstateModal appState={appState} />
         {!currentUserLoading &&
