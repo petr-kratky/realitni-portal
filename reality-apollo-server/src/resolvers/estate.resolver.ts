@@ -83,6 +83,16 @@ export class EstateResolver implements ResolverInterface<Estate> {
     }
 
     try {
+      estate.files = await this.mediaService.listFiles(id)
+      if (estate.files.length) {
+        await Promise.all(estate.files.map(file => this.mediaService.deleteFile(id, file._id)))
+      }
+    } catch (e) {
+      console.error(e)
+      throw new ApolloError("ESTATE_DELETE_FILES_FAILED", "500", e)
+    }
+
+    try {
       estate.images = await this.mediaService.listImages(id)
       if (estate.images.length) {
         await Promise.all(estate.images.map(image => this.mediaService.deleteImage(id, image._id)))
