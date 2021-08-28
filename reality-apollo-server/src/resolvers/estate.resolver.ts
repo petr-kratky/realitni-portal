@@ -77,12 +77,27 @@ export class EstateResolver implements ResolverInterface<Estate> {
   @RequireAuthentication()
   async deleteEstate(@Arg("id") id: string): Promise<string> {
     const estate = await this.estateService.getEstateById(id)
+
+    if (!estate) {
+      throw new ApolloError("ESTATE_NOT_FOUND", "404")
+    }
+
+    try {
+      estate.images = await this.mediaService.listImages(id)
+      if (estate.images.length) {
+        await Promise.all(estate.images.map(image => this.mediaService.deleteImage(id, image._id)))
+      }
+    } catch (e) {
+      console.error(e)
+      throw new ApolloError("ESTATE_DELETE_IMAGES_FAILED", "500", e)
+    }
+
     try {
       await estate.remove()
       return id
     } catch (e) {
       console.error(e)
-      throw new ApolloError("ESTATE_DELETE_FAILED", "500")
+      throw new ApolloError("ESTATE_DELETE_RECORD_FAILED", "500", e)
     }
   }
 
