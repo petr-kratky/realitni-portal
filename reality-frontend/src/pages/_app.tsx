@@ -64,7 +64,7 @@ Application.getInitialProps = async (ctx: NextPageContextApp) => {
   if (!process.browser) {
     const cookies = parseCookies(ctx.ctx)
     return {
-      drawer: cookies.drawer === "true"
+      drawer: cookies.drawer === "true" || typeof cookies.drawer === 'undefined'
     }
   }
 }

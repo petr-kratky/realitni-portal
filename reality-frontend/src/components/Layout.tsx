@@ -88,6 +88,8 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
   const { data: currentUserData, loading: currentUserLoading } = useCurrentUserQuery({ fetchPolicy: "network-only" })
   const [logout, { client }] = useLogoutMutation()
 
+  const isAuth = !!currentUserData?.currentUser?.id
+
   const [isDrawerOpen, setDrawerOpen] = React.useState<boolean>(drawer && !sm)
 
   React.useEffect(() => {
@@ -122,7 +124,6 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
     try {
       await logout()
       setAccessToken("")
-      toggleDrawer()
       await client!.resetStore()
     } catch (err) {
       console.log(err)
@@ -152,35 +153,37 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
           )}
         </Toolbar>
       </AppBar>
-      <Drawer
-        anchor='left'
-        variant={sm ? "temporary" : "persistent"}
-        open={isDrawerOpen}
-        onClose={toggleDrawer}
-        className={classes.drawer}
-        classes={{ paper: classes.drawerPaper }}
-      >
-        {!sm && <Toolbar variant='dense' />}
-        <List>
-          {navigationOptions.map(({ text, onClick, icon }) => (
-            <ListItem button onClick={onClick} key={text}>
-              <ListItemIcon>{icon}</ListItemIcon>
-              <ListItemText primary={text} />
+      {isAuth && (
+        <Drawer
+          anchor='left'
+          variant={sm ? "temporary" : "persistent"}
+          open={isDrawerOpen}
+          onClose={toggleDrawer}
+          className={classes.drawer}
+          classes={{ paper: classes.drawerPaper }}
+        >
+          {!sm && <Toolbar variant='dense' />}
+          <List>
+            {navigationOptions.map(({ text, onClick, icon }) => (
+              <ListItem button onClick={onClick} key={text}>
+                <ListItemIcon>{icon}</ListItemIcon>
+                <ListItemText primary={text} />
+              </ListItem>
+            ))}
+            <Divider />
+            <ListItem button onClick={handleLogout}>
+              <ListItemIcon>
+                <ExitIcon />
+              </ListItemIcon>
+              <ListItemText primary='Odhlásit' />
             </ListItem>
-          ))}
-          <Divider />
-          <ListItem button onClick={handleLogout}>
-            <ListItemIcon>
-              <ExitIcon />
-            </ListItemIcon>
-            <ListItemText primary='Odhlásit' />
-          </ListItem>
-        </List>
-      </Drawer>
+          </List>
+        </Drawer>
+      )}
       <main className={`${classes.content} ${isDrawerOpen && !sm ? classes.contentShift : ""}`}>
         <Toolbar variant='dense' />
         <EstateModal appState={appState} />
-        {currentUserData?.currentUser?.id ? children : <LoginForm {...pageProps} appState={appState} />}
+        {isAuth ? children : <LoginForm {...pageProps} appState={appState} />}
         <SnackBar />
       </main>
     </div>
