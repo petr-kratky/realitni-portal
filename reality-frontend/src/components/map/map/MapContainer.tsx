@@ -40,7 +40,7 @@ const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnSc
 
   // console.log('createEstateModalState', createEstateModalState)
 
-  return process.browser ? (
+  return (
     <div className={classes.mapContainer}>
       <RSMap
         contextMenuProps={contextMenuProps}
@@ -61,13 +61,13 @@ const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnSc
           <ContextMenu {...contextMenuProps} appState={appState} handleClose={_handleContextMenuClose} />
         )}
       </RSMap>
-      <Tooltip title="Přidat nemovitost">
+      <Tooltip title='Přidat nemovitost'>
         <Fab color='primary' onClick={estateModalStore.openCreateMode} classes={{ root: classes.fabRoot }}>
           <AddIcon />
         </Fab>
       </Tooltip>
     </div>
-  ) : null
+  )
 }
 
 export default MapContainer

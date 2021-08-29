@@ -26,7 +26,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   const [viewportState, setViewportState] = useState<CachedViewport>(viewportStore.initialState)
   const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false)
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const subs = viewportStore.subscribe(setViewportState)
     return () => subs.unsubscribe()
   }, [])
