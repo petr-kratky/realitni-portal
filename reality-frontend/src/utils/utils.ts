@@ -31,6 +31,7 @@ export function removeSpaces(string: string): string {
   return string.split(' ').join('')
 }
 
+// @ts-ignore
 export function getDeviceLocation(): Promise<Position> {
   return new Promise((resolve, reject) => {
     if (typeof window !== 'undefined') {

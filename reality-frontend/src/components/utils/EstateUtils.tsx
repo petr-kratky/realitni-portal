@@ -1,6 +1,5 @@
 import { Estate } from "src/graphql/queries/generated/graphql";
 import { getSubtypeOptions, useCodebook } from "../../lib/data/codebook";
-import { TSelectOption, ISelectInputProps } from "../forms/SelectInput";
 
 import { ChangeEventHandler, FunctionComponent } from "react";
 
@@ -114,50 +113,50 @@ const TBIsEmptyVal = (val) =>
 //   });
 // };
 
-const selectOptionsFactory = (codebookProp: string): TSelectOption[] =>
-  Object.entries(useCodebook()[codebookProp])
-    .map((entry) => ({ label: entry[1], value: entry[0] }))
-    .concat([{ label: "none", value: "" }]);
+// const selectOptionsFactory = (codebookProp: string): TSelectOption[] =>
+//   Object.entries(useCodebook()[codebookProp])
+//     .map((entry) => ({ label: entry[1], value: entry[0] }))
+//     .concat([{ label: "none", value: "" }]);
 
 // Object.fromEntries(decodedEntries)
 
-export const getFormOptions = (selectedAdvertType: string) => {
-  const options = Object.fromEntries(
-    Object.entries(useCodebook()).map(([key, field]) => [
-      key,
-      selectOptionsFactory(key),
-    ])
-  );
-  options["advertSubtype"] = generateAdvertSubtypeOptions(selectedAdvertType);
-  return options;
-};
+// export const getFormOptions = (selectedAdvertType: string) => {
+//   const options = Object.fromEntries(
+//     Object.entries(useCodebook()).map(([key, field]) => [
+//       key,
+//       selectOptionsFactory(key),
+//     ])
+//   );
+//   options["advertSubtype"] = generateAdvertSubtypeOptions(selectedAdvertType);
+//   return options;
+// };
 
-const generateAdvertSubtypeOptions = (
-  selectedAdvertType: string
-): TSelectOption[] => {
-  const advertSubtypeOptions = selectOptionsFactory("advertSubtype");
-  if (selectedAdvertType) {
-    return advertSubtypeOptions
-      .filter((rec) =>
-        getSubtypeOptions(selectedAdvertType).includes(rec.label)
-      )
-      .concat({ label: "none", value: "" });
-  } else {
-    return advertSubtypeOptions;
-  }
-};
+// const generateAdvertSubtypeOptions = (
+//   selectedAdvertType: string
+// ): TSelectOption[] => {
+//   const advertSubtypeOptions = selectOptionsFactory("advertSubtype");
+//   if (selectedAdvertType) {
+//     return advertSubtypeOptions
+//       .filter((rec) =>
+//         getSubtypeOptions(selectedAdvertType).includes(rec.label)
+//       )
+//       .concat({ label: "none", value: "" });
+//   } else {
+//     return advertSubtypeOptions;
+//   }
+// };
 
-export const setAdvertTypeFieldValue: ISelectInputProps["setFieldValue"] = (
-  setFieldValue: any,
-  ...args
-) => {
-  setFieldValue("advertSubtype", "", false);
-  setFieldValue(...args);
-};
-export interface IHandlePriceFieldChange {
-  setFieldValue: any;
-  ChangeEventHandler: ChangeEventHandler<HTMLInputElement>;
-}
+// export const setAdvertTypeFieldValue: ISelectInputProps["setFieldValue"] = (
+//   setFieldValue: any,
+//   ...args
+// ) => {
+//   setFieldValue("advertSubtype", "", false);
+//   setFieldValue(...args);
+// };
+// export interface IHandlePriceFieldChange {
+//   setFieldValue: any;
+//   ChangeEventHandler: ChangeEventHandler<HTMLInputElement>;
+// }
 
 export const setPriceFieldChange = (setFieldValue, id, value) => {
   if (

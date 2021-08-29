@@ -1,7 +1,6 @@
 import React, { FunctionComponent } from "react"
-import { createUseStyles } from "react-jss"
 import { Popup, PopupProps } from "react-map-gl"
-import { MenuList, MenuItem, Tooltip } from "@material-ui/core"
+import { MenuList, MenuItem, Tooltip, makeStyles } from "@material-ui/core"
 
 import { copyToClipboard, geocodeLocation } from "src/utils/utils"
 import estateModalStore from "src/store/estate-modal.store"
@@ -14,7 +13,7 @@ export interface ContextMenuProps extends PopupProps {
   handleClose: () => void
 }
 
-const useStyles = createUseStyles({
+const useStyles = makeStyles({
   popup: {
     "& > .mapboxgl-popup-content": {
       padding: 0,

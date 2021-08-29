@@ -1,9 +1,9 @@
-import React, { useEffect, useLayoutEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { ParsedUrlQuery } from "querystring"
 import { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { createUseStyles } from "react-jss"
+import { makeStyles } from "@material-ui/core"
 
 import MapContainer from "../components/map/map/MapContainer"
 import { filterObject, isUndef, pushViewportToUrl } from "../utils/utils"
@@ -20,7 +20,7 @@ interface MapPageProps {
   queryViewport: QueryViewport
 }
 
-const useStyles = createUseStyles({
+const useStyles = makeStyles({
   contentContainer: {
     display: "flex"
   }

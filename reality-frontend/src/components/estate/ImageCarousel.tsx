@@ -4,6 +4,8 @@ import { Button, createStyles, Grid, IconButton, makeStyles, Theme, useMediaQuer
 import ArrowLeftIcon from "@material-ui/icons/KeyboardArrowLeftRounded"
 import ArrowRightIcon from "@material-ui/icons/KeyboardArrowRightRounded"
 
+import ResizeObserver from 'resize-observer-polyfill'
+
 import ReactBnbGallery, { Props, Photo } from "react-bnb-gallery"
 import "react-bnb-gallery/dist/style.css"
 

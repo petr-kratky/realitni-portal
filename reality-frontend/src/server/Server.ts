@@ -1,7 +1,6 @@
 import express, { Express } from 'express'
 import next from 'next'
 import helmet from 'helmet'
-import cookieParser from 'cookie-parser'
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware'
 
 async function startServer(): Promise<{ protocol: string; port: number; host: string }> {
@@ -36,7 +35,6 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
 
 
   server.use(helmet())
-  server.use(cookieParser())
   server.use(postgisProxy, apiProxy)
 
   server.get('*', (req, res) => nextMiddleware(req, res))

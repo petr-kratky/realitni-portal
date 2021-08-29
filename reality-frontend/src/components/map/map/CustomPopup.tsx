@@ -1,27 +1,16 @@
-import React, { CSSProperties, FunctionComponent, useEffect, useState } from "react"
-import { createUseStyles } from "react-jss"
+import React, { FunctionComponent } from "react"
 import { Popup, PopupProps } from "react-map-gl"
 
 import { EstateFeature } from "../../../types"
 import PopupEstateCard from "./PopupEstateCard"
 import {
-  Button,
   createStyles,
   Divider,
   Grid,
-  Icon,
-  IconButton,
   List,
-  ListItem,
   makeStyles,
-  Paper,
   Theme,
-  Typography
 } from "@material-ui/core"
-import { Transition } from "react-transition-group"
-import useDebounce from "../../../lib/hooks/useDebounce"
-import LeftArrowIcon from "@material-ui/icons/KeyboardArrowLeft"
-import RightArrowIcon from "@material-ui/icons/KeyboardArrowRight"
 
 export interface CustomPopupProps extends PopupProps {
   markerId: string
