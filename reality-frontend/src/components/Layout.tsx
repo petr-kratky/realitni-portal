@@ -180,8 +180,7 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
       <main className={`${classes.content} ${isDrawerOpen && !sm ? classes.contentShift : ""}`}>
         <Toolbar variant='dense' />
         <EstateModal appState={appState} />
-        {!currentUserLoading &&
-          (currentUserData?.currentUser?.id ? children : <LoginForm {...pageProps} appState={appState} />)}
+        {currentUserData?.currentUser?.id ? children : <LoginForm {...pageProps} appState={appState} />}
         <SnackBar />
       </main>
     </div>
