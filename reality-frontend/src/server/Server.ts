@@ -21,21 +21,17 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
   // @ts-ignore
   const port: number = +process.env.PORT || 3000
 
-  const apiProxy: RequestHandler = createProxyMiddleware('/api', {
+  const backendProxy: RequestHandler = createProxyMiddleware('/api', {
     target: apiServerUrl,
     pathRewrite: { '^/api': '' },
-    onError: err => console.error(err)
+    onError: (_err, _req, res) => {
+      res.writeHead(502, 'Cannot open connection to API server')
+      res.end()
+    }
   })
-
-  const postgisProxy: RequestHandler = createProxyMiddleware('/api/postgis', {
-    target: postgisUrl,
-    pathRewrite: { '^/api/postgis': '' },
-    onError: err => console.error(err)
-  })
-
 
   server.use(helmet())
-  server.use(postgisProxy, apiProxy)
+  server.use(backendProxy)
 
   server.get('*', (req, res) => nextMiddleware(req, res))
 

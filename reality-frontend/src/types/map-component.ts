@@ -34,6 +34,13 @@ export type MapViewport = {
   transitionEasing?: EasingFunction;
 }
 
+export type GeoJSONRequestParams = {
+  columns: Array<string>
+  bounds: Array<number>
+  filter?: string
+  geom_column?: string
+}
+
 export type EstateClusterProperties = {
   cluster: boolean
   cluster_id: number

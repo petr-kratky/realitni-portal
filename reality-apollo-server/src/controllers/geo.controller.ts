@@ -1,5 +1,5 @@
 import { Inject } from "typescript-ioc"
-import { Errors, GET, Path, PathParam, PreProcessor } from "typescript-rest"
+import { Errors, Path, PathParam, POST, PreProcessor } from "typescript-rest"
 import { GeoJSON } from "geojson"
 
 import { GeoService } from "../services/geo.service"
@@ -11,7 +11,7 @@ export class GeoController {
   @Inject
   geoService: GeoService
 
-  @GET
+  @POST
   @Path("/geojson/:table")
   @PreProcessor(authenticate)
   async getGeoJSON(@PathParam("table") table: string, options: GeoJSONRequestParams): Promise<GeoJSON> {

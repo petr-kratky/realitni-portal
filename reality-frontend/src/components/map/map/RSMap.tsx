@@ -1,19 +1,27 @@
-import React, { FunctionComponent, useEffect, useRef, useState, useLayoutEffect } from 'react';
+import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 
-import { GeoJSONSource, LngLatBounds, Map } from 'mapbox-gl'
+import { GeoJSONSource, Map } from 'mapbox-gl'
 import ReactMapGL, { ExtraState, PointerEvent, ViewportProps } from 'react-map-gl'
 import { FeatureCollection, Point } from 'geojson'
 
 import { useRouter } from 'next/router'
 
 import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
+import authFetch from '../../../lib/auth/authFetch';
 import viewportStore, { CachedViewport } from 'src/store/viewport.store'
 import {
   EstateCluster,
   EstateFeature,
   EstateFeatureProperties,
+  GeoJSONRequestParams,
   MapComponentProps,
 } from '../../../types'
+import snackStore from '../../../store/snack.store';
+
+const INIT_DATA = {
+  type: "FeatureCollection",
+  features: []
+} as FeatureCollection<Point>
 
 const MAPBOX_MAP_STYLE_URL = 'mapbox://styles/pkratky/ck2dpu35v14ox1co4654rrb9n?optimize=true'
 
@@ -32,13 +40,13 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   }, [])
 
   useEffect(() => {
-    if (mapRef.current !== null && isMapLoaded) {
-      const map: Map = mapRef.current.getMap()
+    if (mapRef.current && isMapLoaded) {
+      const map = mapRef.current.getMap()
 
       try {
         map.addSource('estates', {
           type: 'geojson',
-          data: getGeojsonSourceUri(),
+          data: INIT_DATA,
           buffer: 0,
           tolerance: 10,
           cluster: true,
@@ -90,9 +98,8 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
             'circle-stroke-color': '#fff'
           }
         })
-
-      } catch (err) {
-        console.error(err)
+      } catch (err: any) {
+        // console.error(err.message)
       }
 
       // Get initial viewport 'height' and 'width' to match its container div
@@ -100,13 +107,14 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
       viewportStore.setViewport({ ...viewportState, width, height })
       // @ts-ignore
       pushViewportToUrl(router, {  ...viewportState, width, height })
-      // Initial update of rendered features
+      // Refresh geoJSON data source from API
+      updateGeojsonSource()
       updateOnScreenEstates()
     }
   }, [isMapLoaded])
 
   useEffect(() => {
-    updateGeojsonSource(getGeojsonSourceUri())
+    updateGeojsonSource()
   }, [popupProps.features])
 
 
@@ -126,7 +134,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
       setContextMenuProps({ ...contextMenuProps, isVisible: false })
       setPopupProps({ ...popupProps, isVisible: false })
     }
-    if (isMapLoaded && mapRef.current !== null) {
+    if (isMapLoaded && mapRef.current) {
       const clickedEstateFeature: EstateFeature = e.features.find(ftr => ftr.layer.id === 'unclustered-point')
       if (clickedEstateFeature) onEstateClick(clickedEstateFeature)
 
@@ -152,14 +160,14 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
     if (!isZooming && !isPanning && !inTransition && !isDragging) {
       await pushViewportToUrl(router, viewportState)
-      await updateGeojsonSource(getGeojsonSourceUri())
+      await updateGeojsonSource()
       await updateOnScreenEstates()
     }
   }
 
 
   const onClusterClick = async (cluster: EstateCluster) => {
-    if (mapRef.current !== null) {
+    if (mapRef.current) {
       const { geometry: { coordinates } } = cluster
       const features = await getEstatesFromCluster(cluster)
       setPopupProps({
@@ -186,7 +194,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
 
   const updateOnScreenEstates = async () => {
-    if (mapRef.current !== null && isMapLoaded) {
+    if (mapRef.current && isMapLoaded) {
       const map = mapRef.current.getMap()
 
       // Re-run function every X milliseconds if the source is not finished loading data
@@ -221,13 +229,40 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   }
 
 
-  const updateGeojsonSource = async (geojsonEndpointUri: string) => {
-    if (mapRef.current !== null && isMapLoaded) {
-      const map: Map = mapRef.current.getMap()
-      const geojsonResponse = await fetch(geojsonEndpointUri, { cache: 'no-cache' })
-      const geojsonData: FeatureCollection<Point, EstateFeatureProperties> = await geojsonResponse.json()
-      const geojsonSource = map.getSource('estates') as GeoJSONSource
-      geojsonSource.setData(geojsonData)
+  const updateGeojsonSource = async () => {
+    if (mapRef.current && isMapLoaded) {
+      const geojsonSource = mapRef.current.getMap().getSource('estates') as GeoJSONSource
+      const geojsonRequestParams = getGeoJSONRequestParams()
+      try {
+        const geojsonResponse = await authFetch('/api/gis/geojson/estates', { 
+          method: 'POST',
+          cache: 'no-cache', 
+          body: JSON.stringify(geojsonRequestParams),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+        const geojsonData: FeatureCollection<Point, EstateFeatureProperties> = await geojsonResponse.json()
+        geojsonSource.setData(geojsonData)
+      } catch (err) {
+        console.log(err)
+        snackStore.toggle('error', 'Nepodařilo se obnovit data na mapě!')
+      }
+    }
+  }
+
+
+  const getGeoJSONRequestParams = (): GeoJSONRequestParams => {
+    if (mapRef.current && isMapLoaded) {
+      const bounds = mapRef.current.getMap().getBounds()
+      const sw = bounds.getSouthWest()
+      const ne = bounds.getNorthEast()
+      return {
+        columns: ['id'],
+        bounds: [sw.lng, sw.lat, ne.lng, ne.lat]
+      }
+    } else {
+      throw new Error('Cannot generate GeoJSONRequestParams')
     }
   }
 
@@ -235,7 +270,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   const getEstatesFromCluster = async (cluster: EstateCluster): Promise<EstateFeature[]> => {
     return new Promise<EstateFeature[]>((resolve, reject) => {
 
-      if (mapRef.current !== null && isMapLoaded) {
+      if (mapRef.current && isMapLoaded) {
         const { id, properties: { point_count } } = cluster
         const clusterSource = mapRef.current.getMap().getSource('estates') as GeoJSONSource
 
@@ -248,30 +283,30 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
   }
 
 
-  const getGeojsonSourceUri = (): string => {
-    if (mapRef.current !== null && isMapLoaded) {
-      const map: Map = mapRef.current.getMap()
-      const bbox: LngLatBounds = map.getBounds()
-      const ne = bbox.getNorthEast()
-      const sw = bbox.getSouthWest()
+  // const getGeojsonSourceUri = (): string => {
+  //   if (mapRef.current !== null && isMapLoaded) {
+  //     const map: Map = mapRef.current.getMap()
+  //     const bbox: LngLatBounds = map.getBounds()
+  //     const ne = bbox.getNorthEast()
+  //     const sw = bbox.getSouthWest()
 
-      const parameters = {
-        geom_column: 'geom',
-        columns: ['id'].join(','),
-        bounds: `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`,
-        // filter: getGeojsonSourceFilter()
-      }
+  //     const parameters = {
+  //       geom_column: 'geom',
+  //       columns: ['id'].join(','),
+  //       bounds: `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`,
+  //       // filter: getGeojsonSourceFilter()
+  //     }
 
-      const geojsonEndpointUri: URL = new URL(window.location.origin + `/api/postgis/v1/geojson/estates`)
-      Object.entries(parameters).forEach(entry => {
-        geojsonEndpointUri.searchParams.append(entry[0], entry[1])
-      })
+  //     const geojsonEndpointUri: URL = new URL(window.location.origin + `/api/postgis/v1/geojson/estates`)
+  //     Object.entries(parameters).forEach(entry => {
+  //       geojsonEndpointUri.searchParams.append(entry[0], entry[1])
+  //     })
 
-      return geojsonEndpointUri.href
-    } else {
-      return ''
-    }
-  }
+  //     return geojsonEndpointUri.href
+  //   } else {
+  //     return ''
+  //   }
+  // }
 
 
   const generatePriceFilters = (price_from: string, price_to: string): string => {
