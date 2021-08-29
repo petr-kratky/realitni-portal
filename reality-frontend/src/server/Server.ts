@@ -15,7 +15,6 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
 
   // Env vars can only be loaded after app.prepare() to allow NextJS to first load the values from .env.*
   const apiServerUrl: string = process.env.API_SERVER || ''
-  const postgisUrl: string = process.env.POSTGIS_SERVER || ''
   const protocol: string = process.env.PROTOCOL || 'http'
   const host: string = process.env.HOST || 'localhost'
   // @ts-ignore
