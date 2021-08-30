@@ -1,9 +1,9 @@
-import { GET, Path } from "typescript-rest"
+import { Context, GET, Path, ServiceContext } from "typescript-rest"
 
 @Path("/health")
 export class HealthController {
   @GET
-  async healthCheck(): Promise<{ status: string }> {
-    return { status: "OK" }
+  async healthCheck(@Context { response }: ServiceContext): Promise<void> {
+    response.sendStatus(200)
   }
 }
