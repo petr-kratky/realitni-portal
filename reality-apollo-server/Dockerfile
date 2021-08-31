@@ -1,20 +1,56 @@
-FROM registry.access.redhat.com/ubi8/nodejs-12 AS builder
+# --- ARGS ---
 
-WORKDIR /opt/app-root/src
+ARG HOME=/home/node
+ARG APP=app
+ARG USER=node
+ARG NODE_VERSION=12
 
-COPY . .
+# --- BUILDER STAGE ---
+
+FROM node:$NODE_VERSION AS builder
+
+ARG HOME
+ARG APP
+ARG USER
+
+USER $USER
+
+ENV NPM_CONFIG_PREFIX=$HOME/.npm-global
+ENV PATH=$PATH:$HOME/.npm-global/bin
+
+WORKDIR $HOME/$APP
+
+COPY package*.json .
 
 RUN npm install
+
+COPY --chown=$USER:$USER . .
+
 RUN npm run build
 
-FROM registry.access.redhat.com/ubi8/nodejs-12
+# --- RUNNER STAGE ---
 
-COPY --from=builder /opt/app-root/src/dist dist
-COPY package.json .
+FROM node:$NODE_VERSION as runner
+
+ARG HOME
+ARG APP
+ARG USER
+
+USER $USER
+
+ENV NPM_CONFIG_PREFIX=$HOME/.npm-global
+ENV PATH=$PATH:$HOME/.npm-global/bin
+
+WORKDIR $HOME/$APP
+
+COPY package*.json .
+
 RUN npm install --production
+
+COPY --from=builder --chown=$USER:$USER $HOME/$APP/dist dist
 
 ENV HOST=0.0.0.0 PORT=3100
 
 EXPOSE 3100/tcp
 
-CMD npm run serve
+CMD ["npm", "run", "serve"]
