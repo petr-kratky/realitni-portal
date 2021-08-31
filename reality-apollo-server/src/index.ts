@@ -4,7 +4,7 @@ import * as dotenv from 'dotenv'
 import { start } from './start';
 
 if (process.env.NODE_ENV !== 'production') {
-  const envFilePath: string = path.resolve('.env')
+  const envFilePath: string = path.resolve('.env.local')
   console.log(`Loading environment variables from "${envFilePath}"`);
   dotenv.config({ path: envFilePath })
 }
