@@ -4,6 +4,7 @@ ARG HOME=/home/node
 ARG APP=app
 ARG USER=node
 ARG NODE_VERSION=12
+ARG PORT=4000
 
 # --- BUILDER STAGE ---
 
@@ -35,6 +36,7 @@ FROM node:$NODE_VERSION as runner
 ARG HOME
 ARG APP
 ARG USER
+ARG PORT
 
 USER $USER
 
@@ -49,8 +51,8 @@ RUN npm install --production
 
 COPY --from=builder --chown=$USER:$USER $HOME/$APP/dist dist
 
-ENV HOST=0.0.0.0 PORT=3100
+ENV HOST=0.0.0.0
 
-EXPOSE 3100/tcp
+EXPOSE $PORT/tcp
 
 CMD ["npm", "run", "serve"]
