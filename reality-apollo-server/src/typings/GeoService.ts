@@ -16,3 +16,20 @@ export type GeoJSONRequestParams = {
 export type GeoJSONQueryOptions = GeoJSONRequestParams & {
   table: string
 }
+
+interface GeocodeBaseOptions {
+  language: string
+  region: string
+}
+
+interface StandardGeocodeOptions extends GeocodeBaseOptions {
+  address: string
+  latlng?: never
+}
+
+interface ReverseGeocodeOptions extends GeocodeBaseOptions {
+  latlng: string
+  address?: never
+}
+
+export type GeocodeOptions = StandardGeocodeOptions | ReverseGeocodeOptions

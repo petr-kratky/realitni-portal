@@ -20,3 +20,7 @@ export type S3Config = {
   region: string
   bucket: string
 }
+
+export type GoogleAPIConfig = {
+  apiKey: string
+}

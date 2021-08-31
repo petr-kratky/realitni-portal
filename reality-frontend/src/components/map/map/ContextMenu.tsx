@@ -2,11 +2,12 @@ import React, { FunctionComponent } from "react"
 import { Popup, PopupProps } from "react-map-gl"
 import { MenuList, MenuItem, Tooltip, makeStyles } from "@material-ui/core"
 
-import { copyToClipboard, geocodeLocation } from "src/utils/utils"
+import { copyToClipboard } from "src/utils/utils"
 import estateModalStore from "src/store/estate-modal.store"
 import snackStore from "src/store/snack.store"
 import { ComponentType } from "src/types/geocode-result"
 import { AppState } from "src/types"
+import { geocodeLocation } from "../../../lib/api/geocode"
 
 export interface ContextMenuProps extends PopupProps {
   isVisible: boolean
@@ -42,7 +43,7 @@ const ContextMenu: FunctionComponent<ContextMenuProps & AppState> = ({
 
   const onCreateEstateButton = async () => {
     const longFormatCoords = getLongFormatCoords()
-    const geocodeResults = await geocodeLocation(longFormatCoords, true)
+    const geocodeResults = await geocodeLocation({ latlng: longFormatCoords })
 
     if (!geocodeResults?.results?.length) {
       snackStore.toggle("warning", "Pro zadanou polohu nebyla nalezena žádná adresa")

@@ -1,6 +1,5 @@
 import { NextRouter } from 'next/router'
 import { ViewportUrlOptions } from '../types'
-import { GeocodeResults } from '../types/geocode-result'
 
 
 export async function pushViewportToUrl(router: NextRouter, urlOptions: ViewportUrlOptions): Promise<void> {
@@ -40,31 +39,6 @@ export function getDeviceLocation(): Promise<Position> {
       reject('Cannot get device location - not on client.')
     }
   })
-}
-
-export async function geocodeLocation(searchStr: string, reverse?: boolean): Promise<GeocodeResults | undefined> {
-  const googleApiKey: string | undefined = process.env.NEXT_PUBLIC_GOOGLE_API_KEY
-  const googleGeocodeUrl: string | undefined = process.env.NEXT_PUBLIC_GOOGLE_GEOCODE_URL
-
-  const searchParam = reverse ? 'latlng' : 'address'
-
-  if (googleGeocodeUrl && googleApiKey) {
-    const params = { language: 'cs', region: 'cz', key: googleApiKey, [searchParam]: searchStr }
-    const requestUrl: URL = new URL(googleGeocodeUrl)
-
-    Object.entries(params)
-      .forEach(entry => requestUrl.searchParams.append(entry[0], entry[1]))
-
-    try {
-      const response = await fetch(requestUrl.href)
-      return await response.json()
-    } catch (err) {
-      console.error('Geocoding failed with error:\n' + err);
-    }
-
-  } else {
-    console.error('Google geocode API env vars not specified!')
-  }
 }
 
 export const parseIntParam = (param: string | undefined | null): number | undefined => {

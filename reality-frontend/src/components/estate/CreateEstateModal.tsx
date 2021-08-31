@@ -36,7 +36,8 @@ import {
   useUpdateEstateMutation
 } from "src/graphql/queries/generated/graphql"
 import { AppState, FormikSubmitFunction } from "../../types"
-import { geocodeLocation, removeEmptyStrings } from "src/utils/utils"
+import { removeEmptyStrings } from "src/utils/utils"
+import { geocodeLocation } from "../../lib/api/geocode"
 
 export type EstateFormValues = {
   coordinates: string
@@ -193,7 +194,7 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
 
           const onAddressGeocode = async (): Promise<void> => {
             const composedAddress = `${values.street_address} ${values.city_address} ${values.postal_code}`
-            const geocodeResults = await geocodeLocation(composedAddress)
+            const geocodeResults = await geocodeLocation({ address: composedAddress })
 
             if (!geocodeResults?.results.length) {
               snackStore.toggle("error", `Pro zadanou adresu nebyly nalezeny žádné souřadnice`)

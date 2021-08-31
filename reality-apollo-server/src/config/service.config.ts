@@ -1,4 +1,4 @@
-import { AuthConfig, DatabaseConfig, S3Config, ServerConfig } from '../typings'
+import { AuthConfig, DatabaseConfig, GoogleAPIConfig, S3Config, ServerConfig } from '../typings'
 import { Estate, Account, EstatePrimaryType, EstateSecondaryType } from '../models/'
 import { Singleton } from 'typescript-ioc'
 import { getEnv } from '../util/get-env'
@@ -10,6 +10,7 @@ export class ServiceConfig {
   server: ServerConfig
   s3: S3Config
   auth: AuthConfig
+  google: GoogleAPIConfig
   dev: boolean
 
   constructor() {
@@ -18,6 +19,7 @@ export class ServiceConfig {
     this.server = this.getServerConfig()
     this.s3 = this.getS3Config()
     this.auth = this.getAuthConfig()
+    this.google = this.getGoogleAPIConfig()
   }
 
   private getAuthConfig(): AuthConfig {
@@ -64,4 +66,11 @@ export class ServiceConfig {
       bucket: getEnv('AWS_S3_BUCKET_NAME'),
     }
   }
+
+  private getGoogleAPIConfig(): GoogleAPIConfig {
+    return {
+      apiKey: getEnv('GOOGLE_API_KEY')
+    }
+  }
+
 }

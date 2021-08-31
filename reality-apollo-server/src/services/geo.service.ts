@@ -1,8 +1,10 @@
 import { getConnection } from "typeorm"
-import { Singleton } from "typescript-ioc"
+import { Inject, Singleton } from "typescript-ioc"
 import { GeoJSON } from "geojson"
+import * as fetch from "isomorphic-fetch"
 
-import { GeoJSONQueryOptions } from "../typings/GeoService"
+import { GeocodeOptions, GeoJSONQueryOptions } from "../typings/GeoService"
+import { ServiceConfig } from "../config"
 
 const sql = ({ bounds, columns, geom_column = "geom", table, filter }: GeoJSONQueryOptions): string => {
   return `
@@ -49,6 +51,9 @@ const sql = ({ bounds, columns, geom_column = "geom", table, filter }: GeoJSONQu
 
 @Singleton
 export class GeoService {
+  @Inject
+  config: ServiceConfig
+
   public async getGeoJSON(options: GeoJSONQueryOptions): Promise<GeoJSON> {
     try {
       const data = await getConnection().query(sql(options))
@@ -58,6 +63,21 @@ export class GeoService {
       } else {
         return geojson
       }
+    } catch (err) {
+      throw new Error(err)
+    }
+  }
+
+  public async geocode(options: GeocodeOptions): Promise<any> {
+    const geocodeEndpoint = "https://maps.googleapis.com/maps/api/geocode/json"
+    const geocodeURL: URL = new URL(geocodeEndpoint)
+
+    Object.entries({ ...options, key: this.config.google.apiKey }).forEach(entry =>
+      geocodeURL.searchParams.append(entry[0], entry[1] as string)
+    )
+    
+    try {
+      return await (await fetch(geocodeURL.href)).json()
     } catch (err) {
       throw new Error(err)
     }
