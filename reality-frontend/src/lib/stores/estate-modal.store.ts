@@ -47,18 +47,11 @@ export const estateModalStore = {
     }
     subject.next(state)
   },
-  // resetFormValues: () => {
-  //   state = {
-  //     ...state,
-  //     formValues: initialState.formValues
-  //   }
-  //   subject.next(state)
-  // },
   resetState: () => {
     state = initialState
     subject.next(state)
   },
-  openCreateMode: () => {
+  openCreateMode: (formValues?: Partial<EstateFormValues>) => {
     state = {
       ...state,
       isOpen: true
