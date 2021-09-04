@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs'
 
-export type CachedViewport = {
+export type ViewportState = {
   width: number
   height: number
   latitude: number
@@ -8,9 +8,9 @@ export type CachedViewport = {
   zoom: number
 }
 
-const subject = new Subject<CachedViewport>()
+const subject = new Subject<ViewportState>()
 
-const initialState: CachedViewport = {
+const initialState: ViewportState = {
   width: 0,
   height: 0,
   latitude: 50.035007,
@@ -20,9 +20,9 @@ const initialState: CachedViewport = {
 
 let state = initialState
 
-const viewportStore = {
-  subscribe: (setState: React.Dispatch<React.SetStateAction<CachedViewport>>) => subject.subscribe(setState),
-  setViewport: (viewport: CachedViewport) => {
+export const viewportStore = {
+  subscribe: (setState: React.Dispatch<React.SetStateAction<ViewportState>>) => subject.subscribe(setState),
+  setViewport: (viewport: ViewportState) => {
     state = {
       ...state,
       ...viewport
@@ -35,5 +35,3 @@ const viewportStore = {
   },
   initialState
 }
-
-export default viewportStore

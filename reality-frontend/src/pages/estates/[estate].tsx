@@ -37,7 +37,7 @@ import { capitalize } from "src/utils/capitalize"
 import { formatNumber } from "src/utils/number-formatter"
 import ImageCarousel from "src/components/estate/ImageCarousel"
 import { AppState } from "src/types"
-import estateModalStore from "src/store/estate-modal.store"
+import { estateModalStore } from "src/lib/stores"
 import ImageLibrary from "../../components/estate/ImageLibrary"
 import FileLibrary from "../../components/estate/FileLibrary"
 

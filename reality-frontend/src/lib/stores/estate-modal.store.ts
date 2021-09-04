@@ -35,7 +35,7 @@ const initialState: EstateModalState = {
 
 let state = initialState
 
-const estateModalStore = {
+export const estateModalStore = {
   subscribe: (setState: React.Dispatch<React.SetStateAction<EstateModalState>>) => subject.subscribe(setState),
   updateFormValues: (formValues: Partial<EstateFormValues>) => {
     state = {
@@ -85,5 +85,3 @@ const estateModalStore = {
   },
   initialState
 }
-
-export default estateModalStore

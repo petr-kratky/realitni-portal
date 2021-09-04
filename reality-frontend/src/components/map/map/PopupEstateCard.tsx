@@ -25,10 +25,9 @@ import EditIcon from "@material-ui/icons/Edit"
 import DeleteIcon from "@material-ui/icons/Delete"
 
 import { useDeleteEstateMutation, useEstateWithoutMediaQuery } from "../../../graphql/queries/generated/graphql"
-import snackStore from "src/store/snack.store"
+import { estateModalStore, snackStore } from "src/lib/stores"
 import { CustomPopupProps } from "./CustomPopup"
 import { EstateFeature } from "src/types"
-import estateModalStore from "src/store/estate-modal.store"
 
 type PopupEstateCardProps = {
   id: string

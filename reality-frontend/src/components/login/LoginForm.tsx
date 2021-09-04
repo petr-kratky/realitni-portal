@@ -8,7 +8,7 @@ import { Button, TextField, Theme, makeStyles, createStyles } from "@material-ui
 import { useLoginMutation, CurrentUserDocument, CurrentUserQuery } from "src/graphql/queries/generated/graphql"
 import { setAccessToken } from "src/lib/auth/accessToken"
 import { AppState, FormikSubmitFunction } from "../../types"
-import snackStore from "../../store/snack.store"
+import { snackStore } from "src/lib/stores"
 
 type LoginFormProps = AppState & {}
 

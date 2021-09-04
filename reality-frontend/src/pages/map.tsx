@@ -7,7 +7,7 @@ import { makeStyles } from "@material-ui/core"
 
 import MapContainer from "../components/map/map/MapContainer"
 import { filterObject, isUndef, pushViewportToUrl } from "../utils/utils"
-import viewportStore, { CachedViewport } from "src/store/viewport.store"
+import { ViewportState, viewportStore } from "src/lib/stores"
 import { AppState } from "src/types"
 
 type QueryViewport = {
@@ -32,15 +32,8 @@ const MapPage: NextPage<MapPageProps & AppState> = ({ appState }) => {
 
   const [onScreenEstates, setOnScreenEstates] = useState<string[]>([])
 
-  const [viewportState, setViewportState] = useState<CachedViewport>(viewportStore.initialState)
-
   useEffect(() => {
-    const subs = viewportStore.subscribe(setViewportState)
-    return () => subs.unsubscribe()
-  }, [])
-
-  useEffect(() => {
-    const initViewport = { ...viewportState, ...getQueryViewport(router.query) }
+    const initViewport = { ...appState.viewport, ...getQueryViewport(router.query) }
     viewportStore.setViewport(initViewport)
     pushViewportToUrl(router, initViewport)
   }, [])

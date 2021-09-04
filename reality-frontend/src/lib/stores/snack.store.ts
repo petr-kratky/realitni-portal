@@ -18,7 +18,7 @@ const initialState: SnackState = {
 
 let state = initialState
 
-const snackStore = {
+export const snackStore = {
   subscribe: (setState: React.Dispatch<React.SetStateAction<SnackState>>) => subject.subscribe(setState),
   toggle: (type: SnackType, message: string) => {
     state = {
@@ -37,5 +37,3 @@ const snackStore = {
   },
   initialState
 }
-
-export default snackStore

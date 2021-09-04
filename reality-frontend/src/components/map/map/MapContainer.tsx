@@ -2,7 +2,7 @@ import React, { Dispatch, FunctionComponent, SetStateAction, useState } from "re
 import { createStyles, Fab, makeStyles, Theme, Tooltip } from "@material-ui/core"
 import AddIcon from "@material-ui/icons/Add"
 
-import estateModalStore from "../../../store/estate-modal.store"
+import {estateModalStore} from "src/lib/stores"
 import CustomPopup, { CustomPopupProps } from "./CustomPopup"
 import ContextMenu, { ContextMenuProps } from "./ContextMenu"
 import RSMap from "./RSMap"
@@ -43,6 +43,7 @@ const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnSc
   return (
     <div className={classes.mapContainer}>
       <RSMap
+        appState={appState}
         contextMenuProps={contextMenuProps}
         popupProps={popupProps}
         setContextMenuProps={setContextMenuProps}

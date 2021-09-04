@@ -21,7 +21,7 @@ import DeleteIcon from "@material-ui/icons/Delete"
 import LoopIcon from "@material-ui/icons/Loop"
 
 import { EstateDocument, useDeleteImageMutation, Image } from "src/graphql/queries/generated/graphql"
-import snackStore from "src/store/snack.store"
+import { snackStore } from "src/lib/stores"
 import authFetch from "../../lib/auth/authFetch"
 import LoadingDialogue from "../utils/LoadingDialogue"
 
@@ -55,7 +55,7 @@ const useStyles = makeStyles((theme: Theme) =>
       backgroundColor: theme.palette.grey[300],
       opacity: 0.8,
       "&:hover": {
-        backgroundColor: theme.palette.grey[100], 
+        backgroundColor: theme.palette.grey[100],
         color: theme.palette.error.dark
       },
       "&.Mui-disabled": {

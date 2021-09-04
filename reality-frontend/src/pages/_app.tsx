@@ -5,16 +5,20 @@ import { AppProps } from "next/app"
 import { parseCookies } from "nookies"
 
 import { createStyles, ThemeProvider } from "@material-ui/styles"
-import CssBaseline from "@material-ui/core/CssBaseline"
-import { makeStyles, Theme } from "@material-ui/core"
+import { makeStyles, Theme, CssBaseline } from "@material-ui/core"
 
 import { withApollo } from "../graphql/apollo-client/withApolloClient"
 import { theme } from "../lib/styles/mui-theme"
 import Layout from "src/components/Layout"
 import { AppRoot, NextPageContextApp } from "src/types"
-
-import estateModalStore, { EstateModalState } from "src/store/estate-modal.store"
-import snackStore, { SnackState } from "src/store/snack.store"
+import {
+  estateModalStore,
+  EstateModalState,
+  snackStore,
+  SnackState,
+  viewportStore,
+  ViewportState
+} from "src/lib/stores"
 
 type AppCustomProps = {
   drawer: boolean
@@ -26,10 +30,12 @@ const useStyles = makeStyles((theme: Theme) => createStyles({}))
 function Application({ Component, apolloClient, pageProps, drawer }: AppProps & AppRoot & AppCustomProps) {
   const [estateModalState, setEstateModalState] = React.useState<EstateModalState>(estateModalStore.initialState)
   const [snackState, setSnackState] = React.useState<SnackState>(snackStore.initialState)
+  const [viewportState, setViewportState] = React.useState<ViewportState>(viewportStore.initialState)
 
   const appState = {
     snack: snackState,
-    estateModal: estateModalState
+    estateModal: estateModalState,
+    viewport: viewportState
   }
 
   useEffect(() => {
@@ -42,9 +48,11 @@ function Application({ Component, apolloClient, pageProps, drawer }: AppProps & 
   useEffect(() => {
     const estateModalStoreSub = estateModalStore.subscribe(setEstateModalState)
     const snackStoreSub = snackStore.subscribe(setSnackState)
+    const viewportStoreSub = viewportStore.subscribe(setViewportState)
     return () => {
       estateModalStoreSub.unsubscribe()
       snackStoreSub.unsubscribe()
+      viewportStoreSub.unsubscribe()
     }
   }, [])
 
@@ -64,7 +72,7 @@ Application.getInitialProps = async (ctx: NextPageContextApp) => {
   if (!process.browser) {
     const cookies = parseCookies(ctx.ctx)
     return {
-      drawer: cookies.drawer === "true" || typeof cookies.drawer === 'undefined'
+      drawer: cookies.drawer === "true" || typeof cookies.drawer === "undefined"
     }
   }
 }

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Snackbar, Typography } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 
-import snackStore, { SnackState } from '../../store/snack.store'
+import { snackStore, SnackState } from "src/lib/stores"
 
 
 const SnackBar: React.FunctionComponent = () => {

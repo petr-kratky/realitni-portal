@@ -30,7 +30,7 @@ import LoginForm from "src/components/login/LoginForm"
 import SnackBar from "src/components/utils/SnackBar"
 import EstateModal from "./estate/CreateEstateModal"
 import { setAccessToken } from "src/lib/auth/accessToken"
-import estateModalStore from "../store/estate-modal.store"
+import { estateModalStore } from "src/lib/stores"
 import { AppState } from "../types"
 
 type LayoutProps = {

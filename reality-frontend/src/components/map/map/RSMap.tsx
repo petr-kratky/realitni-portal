@@ -1,6 +1,6 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
 
-import { GeoJSONSource, Map } from 'mapbox-gl'
+import { GeoJSONSource } from 'mapbox-gl'
 import ReactMapGL, { ExtraState, PointerEvent, ViewportProps } from 'react-map-gl'
 import { FeatureCollection, Point } from 'geojson'
 
@@ -8,15 +8,15 @@ import { useRouter } from 'next/router'
 
 import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
 import authFetch from '../../../lib/auth/authFetch';
-import viewportStore, { CachedViewport } from 'src/store/viewport.store'
+import { viewportStore, snackStore } from "src/lib/stores"
 import {
+  AppState,
   EstateCluster,
   EstateFeature,
   EstateFeatureProperties,
   GeoJSONRequestParams,
   MapComponentProps,
 } from '../../../types'
-import snackStore from '../../../store/snack.store';
 
 const INIT_DATA = {
   type: "FeatureCollection",
@@ -25,19 +25,13 @@ const INIT_DATA = {
 
 const MAPBOX_MAP_STYLE_URL = 'mapbox://styles/pkratky/ck2dpu35v14ox1co4654rrb9n?optimize=true'
 
-const RSMap: FunctionComponent<MapComponentProps> = (props) => {
-  const { children, contextMenuProps, setContextMenuProps, setOnScreenEstates, popupProps, setPopupProps } = props
+const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
+  const { children, contextMenuProps, setContextMenuProps, setOnScreenEstates, popupProps, setPopupProps, appState } = props
 
   const router = useRouter()
   const mapRef = useRef<ReactMapGL>(null)
 
-  const [viewportState, setViewportState] = useState<CachedViewport>(viewportStore.initialState)
   const [isMapLoaded, setIsMapLoaded] = useState<boolean>(false)
-
-  useEffect(() => {
-    const subs = viewportStore.subscribe(setViewportState)
-    return () => subs.unsubscribe()
-  }, [])
 
   useEffect(() => {
     if (mapRef.current && isMapLoaded) {
@@ -104,9 +98,9 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
       // Get initial viewport 'height' and 'width' to match its container div
       const { clientWidth: width, clientHeight: height } = map.getContainer()
-      viewportStore.setViewport({ ...viewportState, width, height })
+      viewportStore.setViewport({ ...appState.viewport, width, height })
       // @ts-ignore
-      pushViewportToUrl(router, {  ...viewportState, width, height })
+      pushViewportToUrl(router, {  ...appState.viewport, width, height })
       // Refresh geoJSON data source from API
       updateGeojsonSource()
       updateOnScreenEstates()
@@ -159,7 +153,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
     const { isZooming, isPanning, inTransition, isDragging } = interactionState
 
     if (!isZooming && !isPanning && !inTransition && !isDragging) {
-      await pushViewportToUrl(router, viewportState)
+      await pushViewportToUrl(router, appState.viewport)
       await updateGeojsonSource()
       await updateOnScreenEstates()
     }
@@ -345,7 +339,7 @@ const RSMap: FunctionComponent<MapComponentProps> = (props) => {
 
   return (
     <ReactMapGL
-      {...viewportState}
+      {...appState.viewport}
       onLoad={_onLoad}
       onClick={_onClick}
       onContextMenu={_onContextMenu}

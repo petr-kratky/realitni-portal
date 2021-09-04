@@ -28,7 +28,7 @@ import DownloadIcon from "@material-ui/icons/GetApp"
 import { saveAs } from "file-saver"
 
 import { EstateDocument, useDeleteFileMutation, File } from "src/graphql/queries/generated/graphql"
-import snackStore from "src/store/snack.store"
+import { snackStore } from "src/lib/stores"
 import authFetch from "../../lib/auth/authFetch"
 import LoadingDialogue from "../utils/LoadingDialogue"
 

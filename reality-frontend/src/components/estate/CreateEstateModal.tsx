@@ -25,8 +25,7 @@ import {
 } from "@material-ui/core"
 import * as Yup from "yup"
 
-import estateModalStore from "../../store/estate-modal.store"
-import snackStore from "src/store/snack.store"
+import { estateModalStore, snackStore } from "src/lib/stores"
 import {
   CreateEstateMutationVariables,
   EstateDocument,
