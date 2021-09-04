@@ -25,7 +25,7 @@ import EditIcon from "@material-ui/icons/Edit"
 import DeleteIcon from "@material-ui/icons/Delete"
 
 import { useDeleteEstateMutation, useEstateWithoutMediaQuery } from "../../../graphql/queries/generated/graphql"
-import { estateModalStore, snackStore } from "src/lib/stores"
+import { estateModalStore, geojsonStore, snackStore } from "src/lib/stores"
 import { CustomPopupProps } from "./CustomPopup"
 import { EstateFeature } from "src/types"
 
@@ -79,10 +79,11 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
         const updatedFeatures = features.filter(f => f.properties.id !== id)
         setPopupProps({ ...popupProps, features: updatedFeatures })
       }
+      geojsonStore.requestUpdate()
       snackStore.toggle("success", "Nemovitost odstraněna")
     } catch (err) {
       console.error(`Could not delete estate id ${id}`, err)
-      snackStore.toggle("error", "Nemovitost se nepodařilo smazat")
+      snackStore.toggle("error", "Nemovitost se nepodařilo odstranit")
     }
   }
 

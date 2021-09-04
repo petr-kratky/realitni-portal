@@ -8,25 +8,21 @@ import { useRouter } from 'next/router'
 
 import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
 import authFetch from '../../../lib/auth/authFetch';
-import { viewportStore, snackStore } from "src/lib/stores"
+import { viewportStore, snackStore, geojsonStore } from "src/lib/stores"
 import {
   AppState,
   EstateCluster,
   EstateFeature,
+  EstateFeatureCollection,
   EstateFeatureProperties,
   GeoJSONRequestParams,
   MapComponentProps,
 } from '../../../types'
 
-const INIT_DATA = {
-  type: "FeatureCollection",
-  features: []
-} as FeatureCollection<Point>
-
 const MAPBOX_MAP_STYLE_URL = 'mapbox://styles/pkratky/ck2dpu35v14ox1co4654rrb9n?optimize=true'
 
 const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
-  const { children, contextMenuProps, setContextMenuProps, setOnScreenEstates, popupProps, setPopupProps, appState } = props
+  const { children, contextMenuProps, setContextMenuProps, popupProps, setPopupProps, appState } = props
 
   const router = useRouter()
   const mapRef = useRef<ReactMapGL>(null)
@@ -40,7 +36,7 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
       try {
         map.addSource('estates', {
           type: 'geojson',
-          data: INIT_DATA,
+          data: geojsonStore.initialState.featureCollection,
           buffer: 0,
           tolerance: 10,
           cluster: true,
@@ -92,24 +88,22 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
             'circle-stroke-color': '#fff'
           }
         })
+        // Get initial viewport 'height' and 'width' to match its container div
+        const { clientWidth: width, clientHeight: height } = map.getContainer()
+        viewportStore.setViewport({ ...appState.viewport, width, height })
+        // @ts-ignore
+        pushViewportToUrl(router, {  ...appState.viewport, width, height })
+        // Refresh geoJSON data source from API
+        updateGeojsonSource()
       } catch (err: any) {
         // console.error(err.message)
       }
-
-      // Get initial viewport 'height' and 'width' to match its container div
-      const { clientWidth: width, clientHeight: height } = map.getContainer()
-      viewportStore.setViewport({ ...appState.viewport, width, height })
-      // @ts-ignore
-      pushViewportToUrl(router, {  ...appState.viewport, width, height })
-      // Refresh geoJSON data source from API
-      updateGeojsonSource()
-      updateOnScreenEstates()
     }
   }, [isMapLoaded])
 
   useEffect(() => {
     updateGeojsonSource()
-  }, [popupProps.features])
+  }, [appState.geojson.updateCounter])
 
 
   const _onContextMenu = (e: PointerEvent): void => {
@@ -155,7 +149,6 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
     if (!isZooming && !isPanning && !inTransition && !isDragging) {
       await pushViewportToUrl(router, appState.viewport)
       await updateGeojsonSource()
-      await updateOnScreenEstates()
     }
   }
 
@@ -186,48 +179,11 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
     })
   }
 
-
-  const updateOnScreenEstates = async () => {
-    if (mapRef.current && isMapLoaded) {
-      const map = mapRef.current.getMap()
-
-      // Re-run function every X milliseconds if the source is not finished loading data
-      // TODO: Find better solution
-      if (!map.isSourceLoaded('estates')) {
-        setTimeout(updateOnScreenEstates, 50)
-        return
-      }
-
-      // Clear currently visible estates, otherwise list is not load from scratch
-      setOnScreenEstates([])
-
-      const onScreenEstates: Array<string> = []
-
-      const estates = map.queryRenderedFeatures(undefined, { layers: ['unclustered-point'] })
-      estates.forEach(estate => onScreenEstates.push(estate.properties?.id))
-
-      const clusters = map.queryRenderedFeatures(undefined, { layers: ['clusters'] })
-
-      await Promise.all(clusters.map(async cluster => {
-        try {
-          const features = await getEstatesFromCluster(cluster as unknown as EstateCluster)
-          features.forEach(estate => onScreenEstates.push(estate.properties.id))
-        } catch (err) {
-          console.error(err)
-        }
-
-      }))
-      
-      setOnScreenEstates(onScreenEstates)
-    }
-  }
-
-
   const updateGeojsonSource = async () => {
     if (mapRef.current && isMapLoaded) {
-      const geojsonSource = mapRef.current.getMap().getSource('estates') as GeoJSONSource
-      const geojsonRequestParams = getGeoJSONRequestParams()
       try {
+        const geojsonSource = mapRef.current.getMap().getSource('estates') as GeoJSONSource
+        const geojsonRequestParams = getGeoJSONRequestParams()
         const geojsonResponse = await authFetch('/api/gis/geojson/estates', { 
           method: 'POST',
           cache: 'no-cache', 
@@ -236,11 +192,12 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
             'Content-Type': 'application/json'
           }
         })
-        const geojsonData: FeatureCollection<Point, EstateFeatureProperties> = await geojsonResponse.json()
+        const geojsonData: EstateFeatureCollection = await geojsonResponse.json()
+        geojsonStore.updateFeatures(geojsonData)
         geojsonSource.setData(geojsonData)
-      } catch (err) {
-        console.log(err)
+      } catch (err: any) {
         snackStore.toggle('error', 'Nepodařilo se obnovit data na mapě!')
+        console.error(err)
       }
     }
   }
@@ -256,7 +213,10 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
         bounds: [sw.lng, sw.lat, ne.lng, ne.lat]
       }
     } else {
-      throw new Error('Cannot generate GeoJSONRequestParams')
+      return {
+        columns: ['id'],
+        bounds: [0, 0, 0, 0]
+      }
     }
   }
 

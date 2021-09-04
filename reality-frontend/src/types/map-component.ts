@@ -1,6 +1,6 @@
 import { EasingFunction, TRANSITION_EVENTS, TransitionInterpolator } from 'react-map-gl'
 import { Dispatch, ReactNode, SetStateAction } from 'react'
-import { Feature, Point } from 'geojson'
+import { Feature, Point, FeatureCollection } from 'geojson'
 
 import { ContextMenuProps } from '../components/map/map/ContextMenu'
 import { CustomPopupProps } from '../components/map/map/CustomPopup'
@@ -12,7 +12,6 @@ export type MapComponentProps = {
   setContextMenuProps: Dispatch<SetStateAction<ContextMenuProps>>
   popupProps: CustomPopupProps
   setPopupProps: Dispatch<SetStateAction<CustomPopupProps>>
-  setOnScreenEstates: Dispatch<SetStateAction<string[]>>
 }
 
 export type MapViewport = {
@@ -58,3 +57,5 @@ export type EstateCluster = Feature<Point, EstateClusterProperties> & {
 }
 
 export type EstateFeature = Feature<Point, EstateFeatureProperties>
+
+export type EstateFeatureCollection = FeatureCollection<Point, EstateFeatureProperties>

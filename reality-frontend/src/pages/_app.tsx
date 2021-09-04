@@ -17,7 +17,9 @@ import {
   snackStore,
   SnackState,
   viewportStore,
-  ViewportState
+  ViewportState,
+  geojsonStore,
+  GeojsonState
 } from "src/lib/stores"
 
 type AppCustomProps = {
@@ -31,11 +33,13 @@ function Application({ Component, apolloClient, pageProps, drawer }: AppProps & 
   const [estateModalState, setEstateModalState] = React.useState<EstateModalState>(estateModalStore.initialState)
   const [snackState, setSnackState] = React.useState<SnackState>(snackStore.initialState)
   const [viewportState, setViewportState] = React.useState<ViewportState>(viewportStore.initialState)
+  const [geojsonState, setGeojsonState] = React.useState<GeojsonState>(geojsonStore.initialState)
 
   const appState = {
     snack: snackState,
     estateModal: estateModalState,
-    viewport: viewportState
+    viewport: viewportState,
+    geojson: geojsonState
   }
 
   useEffect(() => {
@@ -49,10 +53,12 @@ function Application({ Component, apolloClient, pageProps, drawer }: AppProps & 
     const estateModalStoreSub = estateModalStore.subscribe(setEstateModalState)
     const snackStoreSub = snackStore.subscribe(setSnackState)
     const viewportStoreSub = viewportStore.subscribe(setViewportState)
+    const geojsonStoreSub = geojsonStore.subscribe(setGeojsonState)
     return () => {
       estateModalStoreSub.unsubscribe()
       snackStoreSub.unsubscribe()
       viewportStoreSub.unsubscribe()
+      geojsonStoreSub.unsubscribe()
     }
   }, [])
 

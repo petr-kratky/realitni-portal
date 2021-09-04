@@ -8,9 +8,7 @@ import ContextMenu, { ContextMenuProps } from "./ContextMenu"
 import RSMap from "./RSMap"
 import { AppState } from "src/types"
 
-type MapContainerProps = {
-  setOnScreenEstates: Dispatch<SetStateAction<string[]>>
-}
+type MapContainerProps = {}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -26,7 +24,7 @@ const useStyles = makeStyles((theme: Theme) =>
   })
 )
 
-const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnScreenEstates, appState }) => {
+const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ appState }) => {
   const classes = useStyles()
 
   const [contextMenuProps, setContextMenuProps] = useState<ContextMenuProps>(
@@ -38,8 +36,6 @@ const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnSc
 
   const _handlePopupClose = (): void => setPopupProps({ ...popupProps, isVisible: false })
 
-  // console.log('createEstateModalState', createEstateModalState)
-
   return (
     <div className={classes.mapContainer}>
       <RSMap
@@ -48,7 +44,6 @@ const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ setOnSc
         popupProps={popupProps}
         setContextMenuProps={setContextMenuProps}
         setPopupProps={setPopupProps}
-        setOnScreenEstates={setOnScreenEstates}
       >
         {popupProps.features && (
           <CustomPopup

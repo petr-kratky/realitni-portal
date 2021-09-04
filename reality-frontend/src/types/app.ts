@@ -4,7 +4,7 @@ import { NextPageContext } from "next"
 import { AppContext, AppInitialProps, AppProps } from "next/app"
 import { Request, Response } from "express"
 
-import { ViewportState, EstateModalState, SnackState } from "../lib/stores"
+import { ViewportState, EstateModalState, SnackState, GeojsonState } from "../lib/stores"
 
 interface ApolloProps {
   apolloState: NormalizedCacheObject
@@ -36,6 +36,6 @@ export type AppState = {
     snack: SnackState
     estateModal: EstateModalState
     viewport: ViewportState
+    geojson: GeojsonState
   }
 }
-

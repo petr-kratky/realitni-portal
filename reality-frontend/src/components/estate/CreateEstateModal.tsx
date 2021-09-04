@@ -25,11 +25,13 @@ import {
 } from "@material-ui/core"
 import * as Yup from "yup"
 
-import { estateModalStore, snackStore } from "src/lib/stores"
+import { estateModalStore, geojsonStore, snackStore } from "src/lib/stores"
 import {
+  CreateEstateMutationResult,
   CreateEstateMutationVariables,
   EstateDocument,
   EstateWithoutMediaDocument,
+  UpdateEstateMutationResult,
   useCreateEstateMutation,
   useEstateTypesQuery,
   useUpdateEstateMutation
@@ -154,24 +156,27 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
 
     try {
       if (appState.estateModal.editMode.estateId) {
-        const updateEstateResponse = await updateEstate({
+        const response = await updateEstate({
           variables: { id: appState.estateModal.editMode.estateId, estateInput: variables.estateInput },
           refetchQueries: [
             { query: EstateDocument, variables: { id: appState.estateModal.editMode.estateId } },
             { query: EstateWithoutMediaDocument, variables: { id: appState.estateModal.editMode.estateId } }
           ]
         })
-        snackStore.toggle("success", "Nemovitost uložena")
-        console.log(updateEstateResponse.data?.updateEstate)
+        if (response.data) {
+          geojsonStore.requestUpdate()
+          snackStore.toggle("success", "Nemovitost uložena")
+        }
       } else {
-        const createEstateResponse = await createEstate({ variables })
-        snackStore.toggle("success", "Nemovitost vytvořena")
-        console.log(createEstateResponse.data?.createEstate)
+        const response = await createEstate({ variables })
+        if (response.data) {
+          geojsonStore.requestUpdate()
+          snackStore.toggle("success", "Nemovitost vytvořena")
+        }
       }
       handleClose()
-    } catch (err) {
-      // @ts-ignore
-      snackStore.toggle("error", err.message)
+    } catch (err: any) {
+      snackStore.toggle("error", "Nemovitost se nepodařilo uložit")
     }
   }
 

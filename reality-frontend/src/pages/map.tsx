@@ -7,7 +7,7 @@ import { makeStyles } from "@material-ui/core"
 
 import MapContainer from "../components/map/map/MapContainer"
 import { filterObject, isUndef, pushViewportToUrl } from "../utils/utils"
-import { ViewportState, viewportStore } from "src/lib/stores"
+import { viewportStore } from "src/lib/stores"
 import { AppState } from "src/types"
 
 type QueryViewport = {
@@ -30,8 +30,6 @@ const MapPage: NextPage<MapPageProps & AppState> = ({ appState }) => {
   const classes = useStyles()
   const router = useRouter()
 
-  const [onScreenEstates, setOnScreenEstates] = useState<string[]>([])
-
   useEffect(() => {
     const initViewport = { ...appState.viewport, ...getQueryViewport(router.query) }
     viewportStore.setViewport(initViewport)
@@ -44,7 +42,7 @@ const MapPage: NextPage<MapPageProps & AppState> = ({ appState }) => {
         <title>Realitní Portál | Mapa</title>
         <link href='https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.css' rel='stylesheet' />
       </Head>
-      <MapContainer setOnScreenEstates={setOnScreenEstates} appState={appState} />
+      <MapContainer appState={appState} />
     </div>
   )
 }
