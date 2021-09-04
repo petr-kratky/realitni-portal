@@ -54,17 +54,24 @@ export const estateModalStore = {
   openCreateMode: (formValues?: Partial<EstateFormValues>) => {
     state = {
       ...state,
-      isOpen: true
+      isOpen: true,
+      formValues: {
+        ...state.formValues,
+        ...formValues
+      }
     }
     subject.next(state)
   },
-  openEditMode: (estateId: string, formValues: EstateFormValues) => {
+  openEditMode: (estateId: string, formValues: Partial<EstateFormValues>) => {
     state = {
       ...state,
       isOpen: true,
-      formValues,
       editMode: {
         estateId
+      },
+      formValues: {
+        ...state.formValues,
+        ...formValues
       }
     }
     subject.next(state)
