@@ -55,9 +55,6 @@ const useStyles = makeStyles((theme: Theme) =>
     drawerPaper: {
       width: DRAWER_WIDTH
     },
-    drawerContainer: {
-      overflow: "auto"
-    },
     content: {
       flexGrow: 1,
       [theme.breakpoints.up("md")]: {

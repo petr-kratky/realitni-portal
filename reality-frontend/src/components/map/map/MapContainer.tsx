@@ -2,7 +2,7 @@ import React, { Dispatch, FunctionComponent, SetStateAction, useState } from "re
 import { createStyles, Fab, makeStyles, Theme, Tooltip } from "@material-ui/core"
 import AddIcon from "@material-ui/icons/Add"
 
-import {estateModalStore} from "src/lib/stores"
+import { estateModalStore } from "src/lib/stores"
 import CustomPopup, { CustomPopupProps } from "./CustomPopup"
 import ContextMenu, { ContextMenuProps } from "./ContextMenu"
 import RSMap from "./RSMap"
@@ -14,10 +14,11 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     mapContainer: {
       height: "calc(100vh - 48px)",
-      width: "100%"
+      width: "100%",
+      position: "relative"
     },
     fabRoot: {
-      position: "fixed",
+      position: "absolute",
       bottom: theme.spacing(5),
       right: theme.spacing(4)
     }
@@ -58,7 +59,7 @@ const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ appStat
         )}
       </RSMap>
       <Tooltip title='Přidat nemovitost'>
-        <Fab color='primary' onClick={estateModalStore.openCreateMode} classes={{ root: classes.fabRoot }}>
+        <Fab color='primary' onClick={() => estateModalStore.openCreateMode()} classes={{ root: classes.fabRoot }}>
           <AddIcon />
         </Fab>
       </Tooltip>
