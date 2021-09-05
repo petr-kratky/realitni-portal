@@ -1,6 +1,7 @@
 import express, { Express } from 'express'
 import next from 'next'
 import helmet from 'helmet'
+import path from 'path'
 import { createProxyMiddleware, RequestHandler } from 'http-proxy-middleware'
 
 async function startServer(): Promise<{ protocol: string; port: number; host: string }> {
@@ -29,6 +30,7 @@ async function startServer(): Promise<{ protocol: string; port: number; host: st
     }
   })
 
+  server.use('/static', express.static('public'))
   server.use(helmet())
   server.use(backendProxy)
 

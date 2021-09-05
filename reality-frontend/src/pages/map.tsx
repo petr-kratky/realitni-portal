@@ -21,7 +21,7 @@ interface MapPageProps {
   queryViewport: QueryViewport
 }
 
-const DRAWER_WIDTH = 400
+const DRAWER_WIDTH = 600
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -33,6 +33,8 @@ const useStyles = makeStyles((theme: Theme) =>
       flexShrink: 0
     },
     drawerPaper: {
+      backgroundColor: theme.palette.grey[50],
+      padding: theme.spacing(2),
       width: DRAWER_WIDTH
     },
     content: {

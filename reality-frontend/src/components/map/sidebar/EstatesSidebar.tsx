@@ -1,27 +1,37 @@
-import React, { ChangeEvent } from "react"
+import React from "react"
 
-import { createStyles, Grid, makeStyles, Theme } from "@material-ui/core"
+import { createStyles, Divider, makeStyles, Theme, Typography } from "@material-ui/core"
 
 import { AppState } from "src/types"
 import { Pagination } from "@material-ui/lab"
+
+import SidebarEstateCard from "./SidebarEstateCard"
 
 type EstatesSidebarProps = {}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    sidebarContainer: {
-      padding: theme.spacing(2)
+    container: {
+      display: "flex",
+      flexDirection: "column",
+      flexGrow: 1,
+      "& > *": {
+        margin: theme.spacing(0.5, 0)
+      }
     },
     pagination: {
       width: "100%",
       display: "flex",
-      justifyContent: "center",
-      marginBottom: theme.spacing(2)
+      justifyContent: "center"
+    },
+    content: {
+      flexGrow: 1
     }
   })
 )
 
 const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = ({
+  appState,
   appState: {
     geojson: {
       featureCollection: { features }
@@ -32,7 +42,7 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
 
   const [currentPage, setCurrentPage] = React.useState<number>(1)
 
-  const pageSize = 5
+  const pageSize = 8
   const pageCount = Math.ceil(features.length ? features.length / pageSize : 1)
   const startIndex = currentPage * pageSize - pageSize
   const endIndex = currentPage * pageSize
@@ -53,11 +63,23 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
   }
 
   return (
-    <div className={classes.sidebarContainer}>
-      <Pagination className={classes.pagination} count={pageCount} page={currentPage} onChange={onPageChange} />
-      {estates.map(id => {
-        return <div key={id}>{id}</div>
-      })}
+    <div className={classes.container}>
+      <Typography variant='subtitle1' color='textSecondary'>
+        Nelezené nemovitosti ({features.length})
+      </Typography>
+      <Divider />
+      <div className={classes.content}>
+        {estates.map(id => (
+          <SidebarEstateCard key={id} id={id} appState={appState} />
+        ))}
+      </div>
+      <Pagination
+        className={classes.pagination}
+        count={pageCount}
+        page={currentPage}
+        onChange={onPageChange}
+        color='primary'
+      />
     </div>
   )
 }
