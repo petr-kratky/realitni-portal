@@ -76,7 +76,7 @@ const MapPage: NextPage<MapPageProps & AppState> = ({ appState }) => {
     <div className={classes.root}>
       <Head>
         <title>Realitní Portál | Mapa</title>
-        <link href='https://api.mapbox.com/mapbox-gl-js/v1.9.0/mapbox-gl.css' rel='stylesheet' />
+        <link href='https://api.mapbox.com/mapbox-gl-js/v1.13.1/mapbox-gl.css' rel='stylesheet' />
       </Head>
       <div className={`${classes.content} ${sidebarOpen ? classes.contentShift : ""}`}>
         <MapContainer appState={appState} />

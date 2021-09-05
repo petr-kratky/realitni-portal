@@ -19,10 +19,6 @@ export default class JssDocument extends Document {
                 margin: 0;
               }
 
-              .mapboxgl-ctrl-attrib-button {
-                display: none !important;
-              }
-              
               button.thumbnail-button {
                 border-color: transparent; 
               }
