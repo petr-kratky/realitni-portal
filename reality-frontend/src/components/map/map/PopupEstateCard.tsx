@@ -157,7 +157,6 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
             </Tooltip>
             <Menu
               anchorEl={menuAnchor}
-              keepMounted
               elevation={2}
               open={isMenuOpen}
               onClose={handleMenuClose}
@@ -178,7 +177,7 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
             </Menu>
           </ListItemSecondaryAction>
         </ListItem>
-        <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose}>
+        <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose} keepMounted={false}>
           <DialogTitle>Smazat nemovitost</DialogTitle>
           <DialogContent>
             <DialogContentText>

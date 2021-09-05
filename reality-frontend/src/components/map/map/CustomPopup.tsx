@@ -1,15 +1,19 @@
-import React, { FunctionComponent } from "react"
+import React from "react"
 import { Popup, PopupProps } from "react-map-gl"
+import InfiniteScroll from "react-infinite-scroll-component"
 
 import { EstateFeature } from "../../../types"
 import PopupEstateCard from "./PopupEstateCard"
 import {
+  CircularProgress,
   createStyles,
   Divider,
   Grid,
   List,
   makeStyles,
   Theme,
+  Typography,
+  useTheme
 } from "@material-ui/core"
 
 export interface CustomPopupProps extends PopupProps {
@@ -42,28 +46,38 @@ const useStyles = makeStyles((theme: Theme) =>
       "& > .mapboxgl-popup-content": {
         animationName: "$content",
         padding: 0,
-        overflowY: "scroll",
-        maxHeight: 280,
         cursor: "default",
         borderRadius: 5
-        // paddingLeft: 10
       },
       "& > .mapboxgl-popup-tip": {
         animationName: "$tip",
         margin: -1,
         cursor: "default"
       }
-    },
-    containerRoot: {
-      // padding: theme.spacing(1, 2)
     }
   })
 )
 
-const CustomPopup: FunctionComponent<CustomPopupProps> = props => {
-  const { isVisible, longitude, latitude, handleClose, features, setPopupProps, popupProps } = props
-
+const CustomPopup: React.FunctionComponent<CustomPopupProps> = ({
+  isVisible,
+  longitude,
+  latitude,
+  handleClose,
+  features,
+  setPopupProps,
+  popupProps
+}) => {
   const classes = useStyles()
+
+  const [visibleFeatures, setVisibleFeatures] = React.useState<EstateFeature[]>(features.slice(0, 4))
+
+  const displayMoreFeatures = () => {
+    setVisibleFeatures(features.slice(0, visibleFeatures.length + 4))
+  }
+
+  React.useEffect(() => {
+    setVisibleFeatures(features.slice(0, 4))
+  }, [features])
 
   return isVisible ? (
     <Popup
@@ -77,14 +91,24 @@ const CustomPopup: FunctionComponent<CustomPopupProps> = props => {
       dynamicPosition={false}
       onClose={handleClose}
     >
-      <Grid container direction='column' alignItems='center' classes={{ root: classes.containerRoot }}>
+      <Grid container direction='column' alignItems='center'>
         <List>
-          {features.map(({ properties: { id } }, index, array) => (
-            <React.Fragment key={id}>
-              <PopupEstateCard id={id} popupProps={popupProps!} setPopupProps={setPopupProps!} features={array} />
-              {index !== array.length - 1 && <Divider />}
-            </React.Fragment>
-          ))}
+          <InfiniteScroll
+            hasMore={features.length > visibleFeatures.length}
+            next={displayMoreFeatures}
+            dataLength={visibleFeatures.length}
+            loader={<Typography>Načítám...</Typography>}
+            scrollThreshold={0.8}
+            style={{ maxHeight: 280 }}
+            height={"100%"}
+          >
+            {visibleFeatures.map(({ properties: { id } }, index, array) => (
+              <React.Fragment key={id}>
+                <PopupEstateCard id={id} popupProps={popupProps!} setPopupProps={setPopupProps!} features={array} />
+                {index !== array.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
+          </InfiniteScroll>
         </List>
       </Grid>
     </Popup>
