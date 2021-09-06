@@ -17,7 +17,7 @@ const SnackBar: React.FunctionComponent = () => {
   return (
     <Snackbar open={snackState.isOpen} autoHideDuration={4000} onClose={snackStore.handleClose}>
       <Alert variant="standard" severity={snackState.type} elevation={3} onClose={snackStore.handleClose}>
-        {snackState.message}
+        {snackState.message}!
       </Alert>
     </Snackbar>
   )
