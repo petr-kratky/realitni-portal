@@ -3,11 +3,9 @@ import React from "react"
 import {
   Card,
   CardActionArea,
-  CardActions,
   CardContent,
   CardMedia,
   createStyles,
-  Grid,
   IconButton,
   makeStyles,
   Theme,
@@ -17,7 +15,10 @@ import {
 import MoreVertIcon from "@material-ui/icons/MoreVert"
 
 import { AppState } from "../../../types"
-import { useEstateQuery } from "../../../graphql/queries/generated/graphql"
+import EstateMenu from "../../estate/EstateMenu"
+import DeleteDialogue from "../../utils/DeleteDialogue"
+import { estateModalStore, geojsonStore, snackStore } from "../../../lib/stores"
+import { useDeleteEstateMutation, useEstateQuery } from "../../../graphql/queries/generated/graphql"
 
 type ComponentProps = {
   id: string
@@ -30,8 +31,8 @@ const useStyles = makeStyles((theme: Theme) =>
       position: "relative"
     },
     actionArea: {
-      display: 'flex',
-      alignItems: 'flex-start'
+      display: "flex",
+      alignItems: "flex-start"
     },
     cover: {
       width: 200,
@@ -59,25 +60,96 @@ const useStyles = makeStyles((theme: Theme) =>
 const Component: React.FunctionComponent<ComponentProps & AppState> = ({ id }) => {
   const classes = useStyles()
 
-  const { data, loading } = useEstateQuery({ variables: { id } })
+  const { data: estateData, loading: estateLoading } = useEstateQuery({ variables: { id } })
+  const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
 
-  if (data?.estate) {
+  const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null)
+  const [estateTab, setEstateTab] = React.useState<null | Window>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
+
+  const isMenuOpen = Boolean(menuAnchor)
+
+  const openMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setMenuAnchor(event.currentTarget)
+  }
+
+  const closeMenu = () => {
+    setMenuAnchor(null)
+  }
+
+  const openDeleteDialogue = () => {
+    setDeleteDialogOpen(true)
+  }
+
+  const closeDeleteDialogue = () => {
+    setDeleteDialogOpen(false)
+  }
+
+  const onCardClick = () => {
+    if (estateTab && !estateTab.closed) {
+      estateTab.focus()
+    } else {
+      const estateWindow = window.open(`/estates/${id}`)
+      setEstateTab(estateWindow)
+    }
+  }
+
+  const onDelete = async () => {
+    try {
+      await deleteEstate({ variables: { id } })
+      closeDeleteDialogue()
+      closeMenu()
+      geojsonStore.requestUpdate()
+      snackStore.toggle("success", "Nemovitost odstraněna")
+    } catch (err) {
+      console.error(`Could not delete estate id ${id}`, err)
+      snackStore.toggle("error", "Nemovitost se nepodařilo odstranit")
+    }
+  }
+
+  if (estateData?.estate) {
     const {
       estate: {
         images,
+        latitude,
+        longitude,
+        description,
+        advert_price,
+        estimated_price,
+        land_area,
+        usable_area,
+        name,
         street_address,
         city_address,
         postal_code,
-        primary_type: { desc_cz: primaryType },
-        secondary_type: { desc_cz: secondarytype }
+        primary_type: { desc_cz: primaryType, id: primaryTypeId },
+        secondary_type: { desc_cz: secondarytype, id: secondaryTypeId }
       }
-    } = data
+    } = estateData
 
+    const onEdit = () => {
+      estateModalStore.openEditMode(id, {
+        primary_type_id: primaryTypeId,
+        secondary_type_id: secondaryTypeId,
+        coordinates: `${latitude}, ${longitude}`,
+        name: name ?? "",
+        description: description ?? "",
+        advert_price: advert_price ?? ("" as unknown as number),
+        estimated_price: estimated_price ?? ("" as unknown as number),
+        land_area: land_area ?? ("" as unknown as number),
+        usable_area: usable_area ?? ("" as unknown as number),
+        city_address,
+        postal_code,
+        street_address
+      })
+    }
+
+    const fullAddress: string = `${street_address}, ${city_address}`
     const thumbnail = images[0]?.small ?? "/static/images/sidebar/thumbnail-fallback.png"
 
     return (
       <Card className={classes.container} variant='outlined'>
-        <CardActionArea className={classes.actionArea}>
+        <CardActionArea className={classes.actionArea} onClick={onCardClick}>
           <CardMedia className={classes.cover} image={thumbnail} />
           <div className={classes.details}>
             <CardContent className={classes.content}>
@@ -91,10 +163,25 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({ id }) =
           </div>
         </CardActionArea>
         <Tooltip title='Možnosti'>
-          <IconButton className={classes.menuButton} size='small' onClick={() => console.log("you clicked me!")}>
+          <IconButton className={classes.menuButton} size='small' onClick={openMenu}>
             <MoreVertIcon />
           </IconButton>
         </Tooltip>
+        <EstateMenu
+          open={isMenuOpen}
+          menuAnchor={menuAnchor}
+          onClose={closeMenu}
+          onEditClick={onEdit}
+          onDeleteClick={openDeleteDialogue}
+        />
+        <DeleteDialogue
+          open={deleteDialogOpen}
+          loading={deleteLoading}
+          onClose={closeDeleteDialogue}
+          onDelete={onDelete}
+          title='Smazat nemovitost'
+          text={`Opravdu si přejete smazat nemovitost na adrese "${fullAddress}"? Tato akce je nevratná a nemovitost bude permanentně odstraněna.`}
+        />
       </Card>
     )
   } else {
