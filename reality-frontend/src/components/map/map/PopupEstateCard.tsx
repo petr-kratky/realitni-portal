@@ -1,14 +1,7 @@
 import React, { FunctionComponent } from "react"
 
 import {
-  Button,
-  CircularProgress,
   createStyles,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   IconButton,
   ListItem,
   ListItemIcon,
@@ -28,6 +21,8 @@ import { useDeleteEstateMutation, useEstateWithoutMediaQuery } from "../../../gr
 import { estateModalStore, geojsonStore, snackStore } from "src/lib/stores"
 import { CustomPopupProps } from "./CustomPopup"
 import { EstateFeature } from "src/types"
+import DeleteDialogue from "../../utils/DeleteDialogue"
+import EstateMenu from "../../estate/EstateMenu"
 
 type PopupEstateCardProps = {
   id: string
@@ -67,7 +62,7 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
     setMenuAnchor(null)
   }
 
-  const onDeleteConfirmation = async () => {
+  const onDelete = async () => {
     try {
       await deleteEstate({ variables: { id } })
       handleDeleteDialogClose()
@@ -155,51 +150,23 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
                 <MoreVertIcon />
               </IconButton>
             </Tooltip>
-            <Menu
-              anchorEl={menuAnchor}
-              elevation={2}
+            <EstateMenu
               open={isMenuOpen}
+              menuAnchor={menuAnchor}
               onClose={handleMenuClose}
-              transformOrigin={{ vertical: "top", horizontal: "left" }}
-            >
-              <MenuItem onClick={onEditButton}>
-                <ListItemIcon>
-                  <EditIcon />
-                </ListItemIcon>
-                <ListItemText primary='Upravit' />
-              </MenuItem>
-              <MenuItem onClick={handleDeleteDialogOpen}>
-                <ListItemIcon>
-                  <DeleteIcon />
-                </ListItemIcon>
-                <ListItemText primary='Smazat' />
-              </MenuItem>
-            </Menu>
+              onEditClick={onEditButton}
+              onDeleteClick={handleDeleteDialogOpen}
+            />
+            <DeleteDialogue
+              open={deleteDialogOpen}
+              loading={deleteLoading}
+              onClose={handleDeleteDialogClose}
+              onDelete={onDelete}
+              title='Smazat nemovitost'
+              text={`Opravdu si přejete smazat nemovitost na adrese "${fullAddress}"? Tato akce je nevratná a nemovitost bude permanentně odstraněna.`}
+            />
           </ListItemSecondaryAction>
         </ListItem>
-        <Dialog open={deleteDialogOpen} onClose={handleDeleteDialogClose} keepMounted={false}>
-          <DialogTitle>Smazat nemovitost</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Opravdu si přejete smazat nemovitost na adrese {fullAddress}? Tato akce je nevratná a nemovitost bude
-              permanentně odstraněna.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button color='default' onClick={handleDeleteDialogClose}>
-              zavřít
-            </Button>
-            <Button color='secondary' onClick={onDeleteConfirmation} disabled={deleteLoading}>
-              smazat
-              {deleteLoading && (
-                <>
-                  &nbsp;
-                  <CircularProgress size={20} color='primary' />{" "}
-                </>
-              )}
-            </Button>
-          </DialogActions>
-        </Dialog>
       </>
     )
   } else {
