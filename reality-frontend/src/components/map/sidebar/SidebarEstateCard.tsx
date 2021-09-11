@@ -99,7 +99,7 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({ id }) =
       await deleteEstate({ variables: { id } })
       closeDeleteDialogue()
       closeMenu()
-      geojsonStore.requestUpdate()
+      geojsonStore.refetchFeatures()
       snackStore.toggle("success", "Nemovitost odstraněna")
     } catch (err) {
       console.error(`Could not delete estate id ${id}`, err)

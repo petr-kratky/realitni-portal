@@ -1,29 +1,33 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from 'react';
+import React, { FunctionComponent, useEffect, useRef, useState } from "react"
 
-import { GeoJSONSource } from 'mapbox-gl'
-import ReactMapGL, { ExtraState, PointerEvent, ViewportProps } from 'react-map-gl'
-import { FeatureCollection, Point } from 'geojson'
+import { GeoJSONSource } from "mapbox-gl"
+import ReactMapGL, { ExtraState, PointerEvent, ViewportProps } from "react-map-gl"
+import { FeatureCollection, Point } from "geojson"
 
-import { useRouter } from 'next/router'
+import { useRouter } from "next/router"
 
-import { pushViewportToUrl, removeSpaces } from '../../../utils/utils'
-import authFetch from '../../../lib/auth/authFetch';
+import { pushViewportToUrl, removeSpaces } from "../../../utils/utils"
+import authFetch from "../../../lib/auth/authFetch"
 import { viewportStore, snackStore, geojsonStore } from "src/lib/stores"
 import {
   AppState,
   EstateCluster,
   EstateFeature,
   EstateFeatureCollection,
-  EstateFeatureProperties,
   GeoJSONRequestParams,
-  MapComponentProps,
-} from '../../../types'
+  MapComponentProps
+} from "../../../types"
 
-const MAPBOX_MAP_STYLE_URL = 'mapbox://styles/pkratky/ck2dpu35v14ox1co4654rrb9n?optimize=true'
+const MAPBOX_MAP_STYLE_URL = "mapbox://styles/pkratky/ck2dpu35v14ox1co4654rrb9n?optimize=true"
 
-const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
-  const { children, contextMenuProps, setContextMenuProps, popupProps, setPopupProps, appState } = props
-
+const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
+  children,
+  contextMenuProps,
+  setContextMenuProps,
+  popupProps,
+  setPopupProps,
+  appState: { geojson, viewport }
+}) => {
   const router = useRouter()
   const mapRef = useRef<ReactMapGL>(null)
 
@@ -34,13 +38,13 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
       const map = mapRef.current.getMap()
 
       try {
-        map.addSource('estates', {
-          type: 'geojson',
+        map.addSource("estates", {
+          type: "geojson",
           data: geojsonStore.initialState.featureCollection,
           buffer: 0,
           tolerance: 10,
           cluster: true,
-          clusterRadius: 50,
+          clusterRadius: 50
         })
 
         map.addLayer({
@@ -50,23 +54,27 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
           source: "estates",
           filter: ["has", "point_count"],
           paint: {
-            "circle-color": '#c10800',
+            "circle-color": "#c10800",
             "circle-radius": {
-              property: 'point_count',
-              stops: [[5, 10], [10, 13], [15, 18]]
+              property: "point_count",
+              stops: [
+                [5, 10],
+                [10, 13],
+                [15, 18]
+              ]
             },
-            'circle-stroke-width': 1,
-            'circle-stroke-color': '#fff'
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "#fff"
           }
-        });
+        })
 
         map.addLayer({
-          id: 'cluster-count',
-          type: 'symbol',
-          source: 'estates',
-          filter: ['has', 'point_count'],
+          id: "cluster-count",
+          type: "symbol",
+          source: "estates",
+          filter: ["has", "point_count"],
           paint: {
-            'text-color': '#fff'
+            "text-color": "#fff"
           },
           layout: {
             "text-field": "{point_count_abbreviated}",
@@ -76,23 +84,30 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
         })
 
         map.addLayer({
-          id: 'unclustered-point',
-          type: 'circle',
+          id: "unclustered-point",
+          type: "circle",
           interactive: true,
-          source: 'estates',
-          filter: ['!', ['has', 'point_count']],
+          source: "estates",
+          filter: ["!", ["has", "point_count"]],
           paint: {
-            'circle-radius': { stops: [[0, 2], [5, 3], [12, 4], [16, 7]] },
-            'circle-color': '#c10800',
-            'circle-stroke-width': 1,
-            'circle-stroke-color': '#fff'
+            "circle-radius": {
+              stops: [
+                [0, 2],
+                [5, 3],
+                [12, 4],
+                [16, 7]
+              ]
+            },
+            "circle-color": "#c10800",
+            "circle-stroke-width": 1,
+            "circle-stroke-color": "#fff"
           }
         })
         // Get initial viewport 'height' and 'width' to match its container div
         const { clientWidth: width, clientHeight: height } = map.getContainer()
-        viewportStore.setViewport({ ...appState.viewport, width, height })
+        viewportStore.setViewport({ ...viewport, width, height })
         // @ts-ignore
-        pushViewportToUrl(router, {  ...appState.viewport, width, height })
+        pushViewportToUrl(router, { ...viewport, width, height })
         // Refresh geoJSON data source from API
         updateGeojsonSource()
       } catch (err: any) {
@@ -103,59 +118,55 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
 
   useEffect(() => {
     updateGeojsonSource()
-  }, [appState.geojson.updateCounter])
+  }, [geojson.refetchCounter, geojson.filter])
 
-
-  const _onContextMenu = (e: PointerEvent): void => {
+  const __onContextMenu = (e: PointerEvent): void => {
     const [longitude, latitude] = e.lngLat
     const srcEvent: MouseEvent = e.srcEvent
     srcEvent.preventDefault()
     setContextMenuProps({ ...contextMenuProps, longitude, latitude, isVisible: true })
   }
 
-
-  const _onClick = (e: PointerEvent): void => {
+  const __onClick = (e: PointerEvent): void => {
     const srcEvent: MouseEvent = e.srcEvent
     const eventTarget = srcEvent.target as HTMLElement
 
-    if (srcEvent.button === 0 && eventTarget.className === 'overlays') {
+    if (srcEvent.button === 0 && eventTarget.className === "overlays") {
       setContextMenuProps({ ...contextMenuProps, isVisible: false })
       setPopupProps({ ...popupProps, isVisible: false })
     }
     if (isMapLoaded && mapRef.current) {
-      const clickedEstateFeature: EstateFeature = e.features.find(ftr => ftr.layer.id === 'unclustered-point')
-      if (clickedEstateFeature) onEstateClick(clickedEstateFeature)
+      const clickedEstateFeature: EstateFeature = e.features.find(ftr => ftr.layer.id === "unclustered-point")
+      if (clickedEstateFeature) __onEstateClick(clickedEstateFeature)
 
-      const clickedEstateCluster: EstateCluster = e.features.find(ftr => ftr.layer.id === 'clusters')
-      if (clickedEstateCluster) onClusterClick(clickedEstateCluster)
+      const clickedEstateCluster: EstateCluster = e.features.find(ftr => ftr.layer.id === "clusters")
+      if (clickedEstateCluster) __onClusterClick(clickedEstateCluster)
     }
   }
 
-
-  const _onLoad = (): void => {
-    setIsMapLoaded(true) 
+  const __onLoad = (): void => {
+    setIsMapLoaded(true)
   }
 
-
-  const _onViewPortChange = (viewport: ViewportProps) => {
-    viewportStore.setViewport(viewport)
+  const __onViewPortChange = (viewportProps: ViewportProps) => {
+    viewportStore.setViewport(viewportProps)
     setContextMenuProps({ ...contextMenuProps, isVisible: false })
   }
 
-
-  const _onInteractionStateChange = async (interactionState: ExtraState) => {
+  const __onInteractionStateChange = async (interactionState: ExtraState) => {
     const { isZooming, isPanning, inTransition, isDragging } = interactionState
 
     if (!isZooming && !isPanning && !inTransition && !isDragging) {
-      await pushViewportToUrl(router, appState.viewport)
+      await pushViewportToUrl(router, viewport)
       await updateGeojsonSource()
     }
   }
 
-
-  const onClusterClick = async (cluster: EstateCluster) => {
+  const __onClusterClick = async (cluster: EstateCluster) => {
     if (mapRef.current) {
-      const { geometry: { coordinates } } = cluster
+      const {
+        geometry: { coordinates }
+      } = cluster
       const features = await getEstatesFromCluster(cluster)
       setPopupProps({
         markerId: cluster.id.toString(10),
@@ -167,9 +178,11 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
     }
   }
 
-
-  const onEstateClick = (feature: EstateFeature) => {
-    const { properties: { id }, geometry: { coordinates } } = feature
+  const __onEstateClick = (feature: EstateFeature) => {
+    const {
+      properties: { id },
+      geometry: { coordinates }
+    } = feature
     setPopupProps({
       markerId: id,
       isVisible: true,
@@ -182,51 +195,53 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
   const updateGeojsonSource = async () => {
     if (mapRef.current && isMapLoaded) {
       try {
-        const geojsonSource = mapRef.current.getMap().getSource('estates') as GeoJSONSource
+        const geojsonSource = mapRef.current.getMap().getSource("estates") as GeoJSONSource
         const geojsonRequestParams = getGeoJSONRequestParams()
-        const geojsonResponse = await authFetch('/api/gis/geojson/estates', { 
-          method: 'POST',
-          cache: 'no-cache', 
+        const geojsonResponse = await authFetch("/api/gis/geojson/estates", {
+          method: "POST",
+          cache: "no-cache",
           body: JSON.stringify(geojsonRequestParams),
           headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
           }
         })
         const geojsonData: EstateFeatureCollection = await geojsonResponse.json()
-        geojsonStore.updateFeatures(geojsonData)
+        geojsonStore.setFeatures(geojsonData)
         geojsonSource.setData(geojsonData)
       } catch (err: any) {
-        snackStore.toggle('error', 'Nepodařilo se obnovit data na mapě!')
+        snackStore.toggle("error", "Nepodařilo se obnovit data na mapě!")
         console.error(err)
       }
     }
   }
-
 
   const getGeoJSONRequestParams = (): GeoJSONRequestParams => {
     if (mapRef.current && isMapLoaded) {
       const bounds = mapRef.current.getMap().getBounds()
       const sw = bounds.getSouthWest()
       const ne = bounds.getNorthEast()
+      console.log(generateGeoJSONFilters())
       return {
-        columns: ['id'],
-        bounds: [sw.lng, sw.lat, ne.lng, ne.lat]
+        columns: ["id"],
+        bounds: [sw.lng, sw.lat, ne.lng, ne.lat],
+        filter: generateGeoJSONFilters()
       }
     } else {
       return {
-        columns: ['id'],
+        columns: ["id"],
         bounds: [0, 0, 0, 0]
       }
     }
   }
 
-
   const getEstatesFromCluster = async (cluster: EstateCluster): Promise<EstateFeature[]> => {
     return new Promise<EstateFeature[]>((resolve, reject) => {
-
       if (mapRef.current && isMapLoaded) {
-        const { id, properties: { point_count } } = cluster
-        const clusterSource = mapRef.current.getMap().getSource('estates') as GeoJSONSource
+        const {
+          id,
+          properties: { point_count }
+        } = cluster
+        const clusterSource = mapRef.current.getMap().getSource("estates") as GeoJSONSource
 
         clusterSource.getClusterLeaves(id, point_count, 0, (error, features) => {
           if (error) reject(error)
@@ -236,82 +251,40 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = (props) => {
     })
   }
 
-
-  // const getGeojsonSourceUri = (): string => {
-  //   if (mapRef.current !== null && isMapLoaded) {
-  //     const map: Map = mapRef.current.getMap()
-  //     const bbox: LngLatBounds = map.getBounds()
-  //     const ne = bbox.getNorthEast()
-  //     const sw = bbox.getSouthWest()
-
-  //     const parameters = {
-  //       geom_column: 'geom',
-  //       columns: ['id'].join(','),
-  //       bounds: `${sw.lng},${sw.lat},${ne.lng},${ne.lat}`,
-  //       // filter: getGeojsonSourceFilter()
-  //     }
-
-  //     const geojsonEndpointUri: URL = new URL(window.location.origin + `/api/postgis/v1/geojson/estates`)
-  //     Object.entries(parameters).forEach(entry => {
-  //       geojsonEndpointUri.searchParams.append(entry[0], entry[1])
-  //     })
-
-  //     return geojsonEndpointUri.href
-  //   } else {
-  //     return ''
-  //   }
-  // }
-
-
-  const generatePriceFilters = (price_from: string, price_to: string): string => {
-    return [price_from, price_to]
-      .map(price => removeSpaces(price))
-      .map((price, index) => price ? `advertPrice${index ? '<' : '>'}=${price}` : null)
-      .filter(price => price !== null)
-      .join(' AND ')
+  const generateGeoJSONFilters = (): string => {
+    const parseFilters = ([key, value]: string[]): string => {
+      if (value.match(/\d*,\d*/)) {
+        return value
+          .split(",")
+          .map((value, index) => (value ? `${key}${index ? "<" : ">"}=${value}` : null))
+          .filter(value => value !== null)
+          .join(" AND ")
+      } else {
+        return `${key}=${value}`
+      }
+    }
+    return Object.entries(geojson.filter)
+      .filter(entry => !!entry[1])
+      .map(parseFilters)
+      .filter(value => value.length)
+      .join(" AND ")
   }
-
-
-  // const getGeojsonSourceFilter = (): string => {
-  //   const { __typename, price_from, price_to, ...selectFilters } = cachedFilters
-  //   // Generate price filters
-  //   const parsedPriceFilter = generatePriceFilters(price_from, price_to)
-  //   // Generate filters from select fields
-  //   const parsedSelectFilters =
-  //     Object.entries(selectFilters)
-  //       .filter(entry => !!entry[1])
-  //       .map(entry => {
-  //         const key = entry[0]
-  //         const value = entry[1]
-  //         return `(${key}=${value})`
-  //       })
-  //   //TODO adhoc pridani source_id:
-  //   // parsedSelectFilters.push('(source_id=3)')
-  //   // Consolidate filters and join with all with 'AND' operator
-  //   const parsedFinalFilters =
-  //     parsedSelectFilters
-  //       .concat(parsedPriceFilter)
-  //       .filter(value => value.length)
-  //       .join(' AND ')
-
-  //   return parsedFinalFilters
-  // }
 
   return (
     <ReactMapGL
-      {...appState.viewport}
-      onLoad={_onLoad}
-      onClick={_onClick}
-      onContextMenu={_onContextMenu}
-      onViewportChange={_onViewPortChange}
-      onInteractionStateChange={_onInteractionStateChange}
+      {...viewport}
+      onLoad={__onLoad}
+      onClick={__onClick}
+      onContextMenu={__onContextMenu}
+      onViewportChange={__onViewPortChange}
+      onInteractionStateChange={__onInteractionStateChange}
       ref={mapRef}
       doubleClickZoom={false}
-      interactiveLayerIds={['clusters', 'unclustered-point']}
+      interactiveLayerIds={["clusters", "unclustered-point"]}
       mapStyle={MAPBOX_MAP_STYLE_URL}
       mapboxApiAccessToken={process.env.NEXT_PUBLIC_MAPBOX_TOKEN}
-      width="100%"
-      height="100%"
+      width='100%'
+      height='100%'
       maxZoom={18}
       minZoom={6.5}
     >

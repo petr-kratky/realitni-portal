@@ -74,7 +74,7 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
         const updatedFeatures = features.filter(f => f.properties.id !== id)
         setPopupProps({ ...popupProps, features: updatedFeatures })
       }
-      geojsonStore.requestUpdate()
+      geojsonStore.refetchFeatures()
       snackStore.toggle("success", "Nemovitost odstraněna")
     } catch (err) {
       console.error(`Could not delete estate id ${id}`, err)

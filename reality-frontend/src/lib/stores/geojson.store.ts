@@ -1,32 +1,47 @@
-import { GeoJsonTypes } from "geojson"
 import { Subject } from "rxjs"
 
-import { EstateFeature, EstateFeatureCollection } from "../../types"
+import { EstateFeatureCollection } from "../../types"
+
+export type GeojsonFilter = {
+  primary_type: string
+  secondary_type: string
+  usable_area: string
+}
 
 export type GeojsonState = {
   featureCollection: EstateFeatureCollection
-  updateCounter: number
+  refetchCounter: number
+  filter: GeojsonFilter
 }
 
 const subject = new Subject<GeojsonState>()
 
 const initialState: GeojsonState = {
   featureCollection: { type: "FeatureCollection", features: [] },
-  updateCounter: 0
+  refetchCounter: 0,
+  filter: {
+    primary_type: "",
+    secondary_type: "",
+    usable_area: ""
+  }
 }
 
 let state = initialState
 
 export const geojsonStore = {
   subscribe: (setState: React.Dispatch<React.SetStateAction<GeojsonState>>) => subject.subscribe(setState),
-  updateFeatures: (featureCollection: EstateFeatureCollection) => {
+  setFeatures: (featureCollection: EstateFeatureCollection) => {
     state = { ...state, featureCollection }
     subject.next(state)
   },
-  requestUpdate: () => {
+  setFilter: (filter: GeojsonFilter) => {
+    state = { ...state, filter }
+    subject.next(state)
+  },
+  refetchFeatures: () => {
     state = {
       ...state,
-      updateCounter: state.updateCounter++
+      refetchCounter: state.refetchCounter++
     }
   },
   // removeFeature: (id: string) => {

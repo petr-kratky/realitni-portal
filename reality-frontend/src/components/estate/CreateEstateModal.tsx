@@ -164,13 +164,13 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
           ]
         })
         if (response.data) {
-          geojsonStore.requestUpdate()
+          geojsonStore.refetchFeatures()
           snackStore.toggle("success", "Nemovitost uložena")
         }
       } else {
         const response = await createEstate({ variables })
         if (response.data) {
-          geojsonStore.requestUpdate()
+          geojsonStore.refetchFeatures()
           snackStore.toggle("success", "Nemovitost vytvořena")
         }
       }
