@@ -8,7 +8,9 @@ import {
   Theme,
   TextField,
   InputAdornment,
-  IconButton
+  IconButton,
+  Typography,
+  Chip
 } from "@material-ui/core"
 import { Pagination } from "@material-ui/lab"
 import FilterIcon from "@material-ui/icons/FilterList"
@@ -19,8 +21,9 @@ import { AppState } from "src/types"
 import SidebarEstateCard from "./SidebarEstateCard"
 import { useFormik } from "formik"
 import { geocodeLocation } from "../../../lib/api/geocode"
-import { snackStore, viewportStore } from "../../../lib/stores"
+import { filterDictionary, geojsonStore, snackStore, viewportStore } from "../../../lib/stores"
 import { fitBounds, Bounds } from "viewport-mercator-project"
+import FilterModal from "./FilterModal"
 
 type EstatesSidebarProps = {}
 
@@ -37,8 +40,7 @@ const useStyles = makeStyles((theme: Theme) =>
     header: {
       display: "flex",
       width: "100%",
-      alignItems: "center",
-      marginBottom: theme.spacing(1.5)
+      alignItems: "center"
     },
     filterButton: {
       marginLeft: "auto",
@@ -47,16 +49,25 @@ const useStyles = makeStyles((theme: Theme) =>
     search: {
       marginRight: theme.spacing(1)
     },
-    searchIcon: {
-      // opacity: 0.5
-    },
     pagination: {
       width: "100%",
       display: "flex",
       justifyContent: "center"
     },
+    divider: {
+      marginTop: theme.spacing(1.5)
+    },
     content: {
       flexGrow: 1
+    },
+    filterHeader: {
+      marginBottom: theme.spacing(0.5, 0.5, -0.5)
+    },
+    filterContainer: {
+      marginLeft: -theme.spacing(0.5)
+    },
+    filterChip: {
+      margin: theme.spacing(1, 0.5, 0)
     }
   })
 )
@@ -65,7 +76,8 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
   appState,
   appState: {
     geojson: {
-      featureCollection: { features }
+      featureCollection: { features },
+      filter
     },
     viewport
   }
@@ -101,6 +113,7 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
     }
   })
 
+  const [filterModalOpen, setFilterModalOpen] = React.useState<boolean>(true)
   const [currentPage, setCurrentPage] = React.useState<number>(1)
 
   const pageSize = 8
@@ -129,6 +142,16 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
     }
   }
 
+  const openFilterModal = () => setFilterModalOpen(true)
+
+  const closeFilterModal = () => setFilterModalOpen(false)
+
+  const removeFilter = (field: string) => () => {
+    geojsonStore.removeFilter(field)
+  }
+
+  const filterEntries = Object.entries(filter).filter(entry => entry[1].length > 0 && entry[1] !== ",")
+
   return (
     <div className={classes.container}>
       <div className={classes.header}>
@@ -147,17 +170,35 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
             startAdornment: (
               <InputAdornment position='start'>
                 <IconButton size='small' edge='start' disabled={!formik.values.search.length}>
-                  <SearchIcon className={classes.searchIcon} />
+                  <SearchIcon />
                 </IconButton>
               </InputAdornment>
             )
           }}
         />
-        <Button className={classes.filterButton} startIcon={<FilterIcon />}>
+        <Button className={classes.filterButton} startIcon={<FilterIcon />} onClick={openFilterModal}>
           Filtrovat
         </Button>
       </div>
-      <Divider />
+      {!!filterEntries.length && (
+        <span>
+          <Typography variant='body2' color='textSecondary' className={classes.filterHeader}>
+            Aktivní filtry ({filterEntries.length})
+          </Typography>
+          <div className={classes.filterContainer}>
+            {filterEntries.map(([field]) => (
+              <Chip
+                key={field}
+                size='small'
+                label={filterDictionary[field]}
+                className={classes.filterChip}
+                onDelete={removeFilter(field)}
+              />
+            ))}
+          </div>
+        </span>
+      )}
+      <Divider className={classes.divider} />
       <div className={classes.content}>
         {estates.map(id => (
           <SidebarEstateCard key={id} id={id} appState={appState} />
@@ -170,6 +211,7 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
         onChange={onPageChange}
         color='primary'
       />
+      <FilterModal open={filterModalOpen} appState={appState} onClose={closeFilterModal} />
     </div>
   )
 }

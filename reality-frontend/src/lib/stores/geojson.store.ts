@@ -4,14 +4,26 @@ import { EstateFeatureCollection } from "../../types"
 
 export type GeojsonFilter = {
   primary_type: string
-  secondary_type: string
+  secondary_type: string[]
+  advert_price: string
+  estimated_price: string
   usable_area: string
+  land_area: string
 }
 
 export type GeojsonState = {
   featureCollection: EstateFeatureCollection
   refetchCounter: number
   filter: GeojsonFilter
+}
+
+export const filterDictionary = {
+  primary_type: "Typ nemovitosti",
+  secondary_type: "Podtyp nemovitosti",
+  advert_price: "Inzertní cena",
+  estimated_price: "Odhadní cena",
+  usable_area: "Užitná plocha",
+  land_area: "Plocha pozemku"
 }
 
 const subject = new Subject<GeojsonState>()
@@ -21,8 +33,11 @@ const initialState: GeojsonState = {
   refetchCounter: 0,
   filter: {
     primary_type: "",
-    secondary_type: "",
-    usable_area: ""
+    secondary_type: [],
+    advert_price: "",
+    estimated_price: "",
+    usable_area: "",
+    land_area: ""
   }
 }
 
@@ -36,6 +51,16 @@ export const geojsonStore = {
   },
   setFilter: (filter: GeojsonFilter) => {
     state = { ...state, filter }
+    subject.next(state)
+  },
+  removeFilter: (field: string) => {
+    state = {
+      ...state,
+      filter: {
+        ...state.filter,
+        [field]: initialState.filter[field]
+      }
+    }
     subject.next(state)
   },
   refetchFeatures: () => {

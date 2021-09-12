@@ -7,4 +7,8 @@ query EstateTypes {
       desc_cz
     }
   }
+  estateSecondaryTypes {
+    id
+    desc_cz
+  }
 }

@@ -197,6 +197,7 @@ export type Query = {
   estate?: Maybe<Estate>;
   estates: Array<Estate>;
   estatePrimaryTypes: Array<EstatePrimaryType>;
+  estateSecondaryTypes: Array<EstateSecondaryType>;
   currentUser?: Maybe<Account>;
 };
 
@@ -244,14 +245,7 @@ export type DeleteImageMutation = { __typename?: 'Mutation', deleteImage: boolea
 export type EstateTypesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type EstateTypesQuery = { __typename?: 'Query', estatePrimaryTypes: Array<{ __typename?: 'EstatePrimaryType', id: string, desc_cz: string, secondary_types: Array<{ __typename?: 'EstateSecondaryType', id: string, desc_cz: string }> }> };
-
-export type EstateQueryVariables = Exact<{
-  id: Scalars['String'];
-}>;
-
-
-export type EstateQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, images: Array<{ __typename?: 'Image', _id: string, original: string, large: string, mid: string, small: string }>, files: Array<{ __typename?: 'File', _id: string, url: string, size: number }>, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
+export type EstateTypesQuery = { __typename?: 'Query', estatePrimaryTypes: Array<{ __typename?: 'EstatePrimaryType', id: string, desc_cz: string, secondary_types: Array<{ __typename?: 'EstateSecondaryType', id: string, desc_cz: string }> }>, estateSecondaryTypes: Array<{ __typename?: 'EstateSecondaryType', id: string, desc_cz: string }> };
 
 export type EstateWithoutMediaQueryVariables = Exact<{
   id: Scalars['String'];
@@ -259,6 +253,13 @@ export type EstateWithoutMediaQueryVariables = Exact<{
 
 
 export type EstateWithoutMediaQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
+
+export type EstateQueryVariables = Exact<{
+  id: Scalars['String'];
+}>;
+
+
+export type EstateQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, images: Array<{ __typename?: 'Image', _id: string, original: string, large: string, mid: string, small: string }>, files: Array<{ __typename?: 'File', _id: string, url: string, size: number }>, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
 
 export type UpdateEstateMutationVariables = Exact<{
   id: Scalars['String'];
@@ -437,6 +438,10 @@ export const EstateTypesDocument = gql`
       desc_cz
     }
   }
+  estateSecondaryTypes {
+    id
+    desc_cz
+  }
 }
     `;
 
@@ -466,6 +471,66 @@ export function useEstateTypesLazyQuery(baseOptions?: Apollo.LazyQueryHookOption
 export type EstateTypesQueryHookResult = ReturnType<typeof useEstateTypesQuery>;
 export type EstateTypesLazyQueryHookResult = ReturnType<typeof useEstateTypesLazyQuery>;
 export type EstateTypesQueryResult = Apollo.QueryResult<EstateTypesQuery, EstateTypesQueryVariables>;
+export const EstateWithoutMediaDocument = gql`
+    query EstateWithoutMedia($id: String!) {
+  estate(id: $id) {
+    id
+    created_by {
+      id
+      username
+    }
+    name
+    description
+    longitude
+    latitude
+    advert_price
+    estimated_price
+    land_area
+    usable_area
+    primary_type {
+      id
+      desc_cz
+    }
+    secondary_type {
+      id
+      desc_cz
+    }
+    usable_area
+    land_area
+    street_address
+    city_address
+    postal_code
+  }
+}
+    `;
+
+/**
+ * __useEstateWithoutMediaQuery__
+ *
+ * To run a query within a React component, call `useEstateWithoutMediaQuery` and pass it any options that fit your needs.
+ * When your component renders, `useEstateWithoutMediaQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useEstateWithoutMediaQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useEstateWithoutMediaQuery(baseOptions: Apollo.QueryHookOptions<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>(EstateWithoutMediaDocument, options);
+      }
+export function useEstateWithoutMediaLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>(EstateWithoutMediaDocument, options);
+        }
+export type EstateWithoutMediaQueryHookResult = ReturnType<typeof useEstateWithoutMediaQuery>;
+export type EstateWithoutMediaLazyQueryHookResult = ReturnType<typeof useEstateWithoutMediaLazyQuery>;
+export type EstateWithoutMediaQueryResult = Apollo.QueryResult<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>;
 export const EstateDocument = gql`
     query Estate($id: String!) {
   estate(id: $id) {
@@ -538,66 +603,6 @@ export function useEstateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Est
 export type EstateQueryHookResult = ReturnType<typeof useEstateQuery>;
 export type EstateLazyQueryHookResult = ReturnType<typeof useEstateLazyQuery>;
 export type EstateQueryResult = Apollo.QueryResult<EstateQuery, EstateQueryVariables>;
-export const EstateWithoutMediaDocument = gql`
-    query EstateWithoutMedia($id: String!) {
-  estate(id: $id) {
-    id
-    created_by {
-      id
-      username
-    }
-    name
-    description
-    longitude
-    latitude
-    advert_price
-    estimated_price
-    land_area
-    usable_area
-    primary_type {
-      id
-      desc_cz
-    }
-    secondary_type {
-      id
-      desc_cz
-    }
-    usable_area
-    land_area
-    street_address
-    city_address
-    postal_code
-  }
-}
-    `;
-
-/**
- * __useEstateWithoutMediaQuery__
- *
- * To run a query within a React component, call `useEstateWithoutMediaQuery` and pass it any options that fit your needs.
- * When your component renders, `useEstateWithoutMediaQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useEstateWithoutMediaQuery({
- *   variables: {
- *      id: // value for 'id'
- *   },
- * });
- */
-export function useEstateWithoutMediaQuery(baseOptions: Apollo.QueryHookOptions<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>(EstateWithoutMediaDocument, options);
-      }
-export function useEstateWithoutMediaLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>(EstateWithoutMediaDocument, options);
-        }
-export type EstateWithoutMediaQueryHookResult = ReturnType<typeof useEstateWithoutMediaQuery>;
-export type EstateWithoutMediaLazyQueryHookResult = ReturnType<typeof useEstateWithoutMediaLazyQuery>;
-export type EstateWithoutMediaQueryResult = Apollo.QueryResult<EstateWithoutMediaQuery, EstateWithoutMediaQueryVariables>;
 export const UpdateEstateDocument = gql`
     mutation UpdateEstate($id: String!, $estateInput: EstateUpdateInput!) {
   updateEstate(id: $id, estateInput: $estateInput) {

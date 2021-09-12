@@ -209,7 +209,7 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
         geojsonStore.setFeatures(geojsonData)
         geojsonSource.setData(geojsonData)
       } catch (err: any) {
-        snackStore.toggle("error", "Nepodařilo se obnovit data na mapě!")
+        snackStore.toggle("error", "Nepodařilo se obnovit data na mapě")
         console.error(err)
       }
     }
@@ -251,8 +251,10 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
   }
 
   const generateGeoJSONFilters = (): string => {
-    const parseFilters = ([key, value]: string[]): string => {
-      if (value.match(/\d*,\d*/)) {
+    const parseFilters = ([key, value]: Array<string | string[]>): string => {
+      if (value instanceof Array) {
+        return value.length ? "(" + value.map(value => `${key}=${value}`).join(" OR ") + ")" : ""
+      } else if (value.match(/\d*,\d*/)) {
         return value
           .split(",")
           .map((value, index) => (value ? `${key}${index ? "<" : ">"}=${value}` : null))

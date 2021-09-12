@@ -67,6 +67,16 @@ export class EstateResolver implements ResolverInterface<Estate> {
     }
   }
 
+	@Query(returns => [EstateSecondaryType])
+  @RequireAuthentication()
+  async estateSecondaryTypes(): Promise<EstateSecondaryType[]> {
+    try {
+      return await EstateSecondaryType.find()
+    } catch (e) {
+      throw new ApolloError(e.message, "500", e)
+    }
+  }
+
   @Mutation(returns => Boolean)
   @RequireAuthentication()
   async deleteImage(@Arg("estateId") estateId: string, @Arg("imageId") imageId: string): Promise<boolean> {

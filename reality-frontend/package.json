@@ -69,6 +69,7 @@
     "resize-observer-polyfill": "^1.5.1",
     "rxjs": "^7.3.0",
     "viewport-mercator-project": "7.0.1",
+    "ws": "^8.2.2",
     "yup": "^0.32.9"
   }
 }
