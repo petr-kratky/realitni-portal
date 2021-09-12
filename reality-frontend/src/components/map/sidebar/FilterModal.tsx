@@ -188,7 +188,11 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({
                         ?.secondary_types.map(({ id, desc_cz }) => (
                           <MenuItem key={id} value={id}>
                             {/* @ts-ignore */}
-                            <Checkbox size='small' checked={formik.values.secondary_type.indexOf(id) > -1} />
+                            <Checkbox
+                              color='primary'
+                              size='small'
+                              checked={formik.values.secondary_type.indexOf(id) > -1}
+                            />
                             <ListItemText primary={desc_cz} />
                           </MenuItem>
                         ))
