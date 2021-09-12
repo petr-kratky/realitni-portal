@@ -63,6 +63,10 @@ const useStyles = makeStyles((theme: Theme) =>
     selectRoot: {
       textTransform: "capitalize"
     },
+    selectLabel: {
+      backgroundColor: theme.palette.background.paper,
+      padding: theme.spacing(0, 1)
+    },
     smallField: {
       // margin: theme.spacing(1, 0.5, 0.5, 0.5),
       minWidth: "100%"
@@ -238,6 +242,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         margin='none'
                         label='Název nemovitosti'
                         fullWidth
+                        variant='outlined'
+                        size='small'
                       />
                     </Grid>
                   </Grid>
@@ -261,6 +267,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         placeholder='50.003606517, 14.673597798'
                         margin='none'
                         fullWidth={true}
+                        variant='outlined'
+                        size='small'
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -274,6 +282,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         margin='none'
                         autoComplete='off'
                         fullWidth={true}
+                        variant='outlined'
+                        size='small'
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -287,6 +297,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         margin='none'
                         autoComplete='off'
                         fullWidth={true}
+                        variant='outlined'
+                        size='small'
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>
@@ -300,6 +312,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         margin='none'
                         autoComplete='off'
                         fullWidth={true}
+                        variant='outlined'
+                        size='small'
                       />
                     </Grid>
                     <Grid item xs={12}>
@@ -317,7 +331,14 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl className={classes.smallField}>
-                        <InputLabel id='primary_type_id-label'>Typ nemovitosti</InputLabel>
+                        <InputLabel
+                          className={classes.selectLabel}
+                          variant='outlined'
+                          margin='dense'
+                          id='primary_type_id-label'
+                        >
+                          Typ nemovitosti
+                        </InputLabel>
                         <Select
                           name='primary_type_id'
                           labelId='primary_type_id-label'
@@ -325,7 +346,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                           value={values.primary_type_id}
                           error={touched.primary_type_id && !!errors.primary_type_id?.length}
                           classes={{ root: classes.menuItemRoot }}
-                          margin='none'
+                          margin='dense'
+                          variant='outlined'
                         >
                           {estateTypesData?.estatePrimaryTypes.map(({ id, desc_cz }) => (
                             <MenuItem key={id} classes={{ root: classes.menuItemRoot }} value={id}>
@@ -340,7 +362,14 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                     </Grid>
                     <Grid item xs={12} sm={6}>
                       <FormControl className={classes.smallField}>
-                        <InputLabel id='secondary_type_id-label'>Podtyp nemovitosti</InputLabel>
+                        <InputLabel
+                          className={classes.selectLabel}
+                          variant='outlined'
+                          margin='dense'
+                          id='secondary_type_id-label'
+                        >
+                          Podtyp nemovitosti
+                        </InputLabel>
                         <Select
                           name='secondary_type_id'
                           labelId='secondary_type_id-label'
@@ -349,7 +378,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                           error={touched.secondary_type_id && !!errors.secondary_type_id?.length}
                           classes={{ root: classes.menuItemRoot }}
                           disabled={!values.primary_type_id}
-                          margin='none'
+                          margin='dense'
+                          variant='outlined'
                         >
                           {values.primary_type_id
                             ? estateTypesData?.estatePrimaryTypes
@@ -385,6 +415,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         label='Inzertní cena'
                         type='number'
                         margin='none'
+                        variant='outlined'
+                        size='small'
                         InputProps={{
                           startAdornment: <InputAdornment position='start'>Kč</InputAdornment>
                         }}
@@ -402,6 +434,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         label='Odhadovaná cena'
                         type='number'
                         margin='none'
+                        variant='outlined'
+                        size='small'
                         InputProps={{
                           startAdornment: <InputAdornment position='start'>Kč</InputAdornment>
                         }}
@@ -426,6 +460,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         label='Užitná plocha'
                         type='number'
                         margin='none'
+                        variant='outlined'
+                        size='small'
                         InputProps={{
                           startAdornment: <InputAdornment position='start'>m2</InputAdornment>
                         }}
@@ -442,6 +478,8 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         label='Plocha pozemku'
                         type='number'
                         margin='none'
+                        variant='outlined'
+                        size='small'
                         InputProps={{
                           startAdornment: <InputAdornment position='start'>m2</InputAdornment>
                         }}
@@ -465,9 +503,10 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                         margin='none'
                         label='Popis nemovitosti'
                         variant='outlined'
+                        size='small'
                         multiline
                         fullWidth
-                        rows={6}
+                        rows={values.description?.length ? 10 : 4}
                       />
                     </Grid>
                   </Grid>
