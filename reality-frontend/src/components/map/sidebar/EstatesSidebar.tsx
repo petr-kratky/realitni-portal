@@ -41,10 +41,11 @@ const useStyles = makeStyles((theme: Theme) =>
       marginBottom: theme.spacing(1.5)
     },
     filterButton: {
-      marginLeft: "auto"
+      marginLeft: "auto",
+      padding: theme.spacing(1, 3)
     },
     search: {
-      marginRight: theme.spacing(2)
+      marginRight: theme.spacing(1)
     },
     searchIcon: {
       // opacity: 0.5
@@ -79,26 +80,22 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
       const geocodeResults = await geocodeLocation({
         address: values.search
       })
-
       if (!geocodeResults.results.length) {
         snackStore.toggle("error", "Pro uvedenou adresu nebyly nalezeny žádné výsledky")
         return
       }
-
       const {
         formatted_address,
         geometry: {
           viewport: { northeast: ne, southwest: sw }
         }
       } = geocodeResults.results[0]
-
       const bounds: Bounds = [
         [ne.lng, ne.lat],
         [sw.lng, sw.lat]
       ]
       const { width, height } = viewport
       const fittedBounds = fitBounds({ bounds, width, height })
-
       viewportStore.setViewport({ ...viewport, ...fittedBounds }, true)
       formik.setFieldValue("search", formatted_address)
     }

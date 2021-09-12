@@ -91,7 +91,7 @@ const MapPage: NextPage<MapPageProps & AppState> = ({ appState }) => {
         className={classes.drawer}
         classes={{ paper: classes.drawerPaper }}
       >
-        {!sm && <Toolbar variant='dense' />}
+        <Toolbar variant='dense' />
         <EstatesSidebar appState={appState} />
       </Drawer>
     </div>
