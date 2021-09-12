@@ -113,7 +113,7 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
     }
   })
 
-  const [filterModalOpen, setFilterModalOpen] = React.useState<boolean>(true)
+  const [filterModalOpen, setFilterModalOpen] = React.useState<boolean>(false)
   const [currentPage, setCurrentPage] = React.useState<number>(1)
 
   const pageSize = 8
