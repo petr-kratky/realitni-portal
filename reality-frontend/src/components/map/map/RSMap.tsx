@@ -220,7 +220,6 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
       const bounds = mapRef.current.getMap().getBounds()
       const sw = bounds.getSouthWest()
       const ne = bounds.getNorthEast()
-      console.log(generateGeoJSONFilters())
       return {
         columns: ["id"],
         bounds: [sw.lng, sw.lat, ne.lng, ne.lat],
