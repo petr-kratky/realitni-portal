@@ -1,11 +1,26 @@
 import React from "react"
 
-import { createStyles, Divider, makeStyles, Theme, Typography } from "@material-ui/core"
+import {
+  Button,
+  createStyles,
+  Divider,
+  makeStyles,
+  Theme,
+  TextField,
+  InputAdornment,
+  IconButton
+} from "@material-ui/core"
+import { Pagination } from "@material-ui/lab"
+import FilterIcon from "@material-ui/icons/FilterList"
+import SearchIcon from "@material-ui/icons/Search"
 
 import { AppState } from "src/types"
-import { Pagination } from "@material-ui/lab"
 
 import SidebarEstateCard from "./SidebarEstateCard"
+import { useFormik } from "formik"
+import { geocodeLocation } from "../../../lib/api/geocode"
+import { snackStore, viewportStore } from "../../../lib/stores"
+import { fitBounds, Bounds } from "viewport-mercator-project"
 
 type EstatesSidebarProps = {}
 
@@ -18,6 +33,21 @@ const useStyles = makeStyles((theme: Theme) =>
       "& > *": {
         margin: theme.spacing(0.5, 0)
       }
+    },
+    header: {
+      display: "flex",
+      width: "100%",
+      alignItems: "center",
+      marginBottom: theme.spacing(1.5)
+    },
+    filterButton: {
+      marginLeft: "auto"
+    },
+    search: {
+      marginRight: theme.spacing(2)
+    },
+    searchIcon: {
+      // opacity: 0.5
     },
     pagination: {
       width: "100%",
@@ -35,10 +65,44 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
   appState: {
     geojson: {
       featureCollection: { features }
-    }
+    },
+    viewport
   }
 }) => {
   const classes = useStyles()
+
+  const formik = useFormik({
+    initialValues: {
+      search: ""
+    },
+    onSubmit: async values => {
+      const geocodeResults = await geocodeLocation({
+        address: values.search
+      })
+
+      if (!geocodeResults.results.length) {
+        snackStore.toggle("error", "Pro uvedenou adresu nebyly nalezeny žádné výsledky")
+        return
+      }
+
+      const {
+        formatted_address,
+        geometry: {
+          viewport: { northeast: ne, southwest: sw }
+        }
+      } = geocodeResults.results[0]
+
+      const bounds: Bounds = [
+        [ne.lng, ne.lat],
+        [sw.lng, sw.lat]
+      ]
+      const { width, height } = viewport
+      const fittedBounds = fitBounds({ bounds, width, height })
+
+      viewportStore.setViewport({ ...viewport, ...fittedBounds }, true)
+      formik.setFieldValue("search", formatted_address)
+    }
+  })
 
   const [currentPage, setCurrentPage] = React.useState<number>(1)
 
@@ -62,11 +126,40 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
     setCurrentPage(page)
   }
 
+  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = event => {
+    if (formik.values.search.length && event.key === "Enter") {
+      formik.handleSubmit()
+    }
+  }
+
   return (
     <div className={classes.container}>
-      <Typography variant='subtitle1' color='textSecondary'>
-        Nelezené nemovitosti ({features.length})
-      </Typography>
+      <div className={classes.header}>
+        <TextField
+          id='search'
+          fullWidth
+          autoComplete='false'
+          value={formik.values.search}
+          className={classes.search}
+          onKeyDown={onKeyDown}
+          onChange={formik.handleChange}
+          variant='outlined'
+          size='small'
+          placeholder='Vyhledat adresu...'
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position='start'>
+                <IconButton size='small' edge='start' disabled={!formik.values.search.length}>
+                  <SearchIcon className={classes.searchIcon} />
+                </IconButton>
+              </InputAdornment>
+            )
+          }}
+        />
+        <Button className={classes.filterButton} startIcon={<FilterIcon />}>
+          Filtrovat
+        </Button>
+      </div>
       <Divider />
       <div className={classes.content}>
         {estates.map(id => (

@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react"
 
 import { GeoJSONSource } from "mapbox-gl"
-import ReactMapGL, { ExtraState, PointerEvent, ViewportProps } from "react-map-gl"
+import ReactMapGL, { ExtraState, FlyToInterpolator, PointerEvent, ViewportProps } from "react-map-gl"
 import { FeatureCollection, Point } from "geojson"
 
 import { useRouter } from "next/router"
