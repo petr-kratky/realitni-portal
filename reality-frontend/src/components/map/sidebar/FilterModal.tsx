@@ -66,7 +66,7 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({
         : Yup.number().min(0, "Nesmí být záporné číslo")
     )
 
-  const initialValues = {
+  const initialValues = useMemo(() => ({
     primary_type: filter.primary_type,
     secondary_type: filter.secondary_type,
     advert_price_from: filter.advert_price.split(",")[0] ?? "",
@@ -77,7 +77,7 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({
     usable_area_to: filter.usable_area.split(",")[1] ?? "",
     land_area_from: filter.land_area.split(",")[0] ?? "",
     land_area_to: filter.land_area.split(",")[1] ?? ""
-  }
+  }), [filter, open])
 
   const formik = useFormik({
     initialValues,
