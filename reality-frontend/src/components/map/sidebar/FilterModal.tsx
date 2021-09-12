@@ -66,21 +66,18 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({
         : Yup.number().min(0, "Nesmí být záporné číslo")
     )
 
-  const initialValues = useMemo(
-    () => ({
-      primary_type: filter.primary_type,
-      secondary_type: filter.secondary_type,
-      advert_price_from: filter.advert_price.split(",")[0] ?? "",
-      advert_price_to: filter.advert_price.split(",")[1] ?? "",
-      estimated_price_from: filter.estimated_price.split(",")[0] ?? "",
-      estimated_price_to: filter.estimated_price.split(",")[1] ?? "",
-      usable_area_from: filter.usable_area.split(",")[0] ?? "",
-      usable_area_to: filter.usable_area.split(",")[1] ?? "",
-      land_area_from: filter.land_area.split(",")[0] ?? "",
-      land_area_to: filter.land_area.split(",")[1] ?? ""
-    }),
-    [filter]
-  )
+  const initialValues = {
+    primary_type: filter.primary_type,
+    secondary_type: filter.secondary_type,
+    advert_price_from: filter.advert_price.split(",")[0] ?? "",
+    advert_price_to: filter.advert_price.split(",")[1] ?? "",
+    estimated_price_from: filter.estimated_price.split(",")[0] ?? "",
+    estimated_price_to: filter.estimated_price.split(",")[1] ?? "",
+    usable_area_from: filter.usable_area.split(",")[0] ?? "",
+    usable_area_to: filter.usable_area.split(",")[1] ?? "",
+    land_area_from: filter.land_area.split(",")[0] ?? "",
+    land_area_to: filter.land_area.split(",")[1] ?? ""
+  }
 
   const formik = useFormik({
     initialValues,
@@ -109,7 +106,7 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({
 
   React.useEffect(() => {
     formik.setValues(initialValues)
-  }, [filter])
+  }, [filter, open])
 
   const renderSelectedSecondaryTypes = (selected: string[]) => {
     return selected
@@ -130,7 +127,7 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({
   }
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth='xs' fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth='xs' keepMounted={false} fullWidth>
       <DialogTitle>Filtrovat nemovitosti</DialogTitle>
       <DialogContent dividers>
         <Grid container spacing={2}>
