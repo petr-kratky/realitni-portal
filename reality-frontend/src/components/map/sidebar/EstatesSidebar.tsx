@@ -1,7 +1,7 @@
 import React, { useMemo } from "react"
 import { useFormik } from "formik"
 import { fitBounds, Bounds } from "viewport-mercator-project"
-import { usePlacesWidget } from "react-google-autocomplete"
+import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService"
 import {
   Button,
   createStyles,
@@ -13,12 +13,21 @@ import {
   IconButton,
   Typography,
   Chip,
-  Tooltip
+  Tooltip,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  ListItemAvatar,
+  Avatar,
+  ListItemIcon,
+  CircularProgress
 } from "@material-ui/core"
 import { Pagination } from "@material-ui/lab"
 import FilterIcon from "@material-ui/icons/FilterList"
 import SearchIcon from "@material-ui/icons/Search"
 import CloseIcon from "@material-ui/icons/Close"
+import LocationIcon from "@material-ui/icons/Room"
 
 import { AppState } from "src/types"
 import SidebarEstateCard from "./SidebarEstateCard"
@@ -50,9 +59,18 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(1, 3)
     },
     search: {
+      position: "relative",
       marginRight: theme.spacing(1),
-      overflow: "visible"
+      width: "100%"
     },
+    searchPredictions: {
+      position: "absolute",
+      top: 36,
+      left: 0,
+      width: "100%",
+      zIndex: 1250
+    },
+    searchInput: {},
     pagination: {
       width: "100%",
       display: "flex",
@@ -88,17 +106,8 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
 }) => {
   const classes = useStyles()
 
-  const formik = useFormik({
-    initialValues: {
-      search: ""
-    },
-    onSubmit: async values => {
-      const address = await flyToLocation(values.search)
-      formik.setFieldValue("search", address)
-    }
-  })
+  // --- PAGINATION --- //
 
-  const [filterModalOpen, setFilterModalOpen] = React.useState<boolean>(false)
   const [currentPage, setCurrentPage] = React.useState<number>(1)
 
   const pageSize = 8
@@ -111,35 +120,64 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
     [features, currentPage]
   )
 
-  const { ref: searchRef } = usePlacesWidget({
-    apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
-    onPlaceSelected: async place => {
-      if (typeof place !== "undefined") {
-        const address = place.formatted_address ?? place.name ?? ""
-        await formik.setFieldValue("search", address)
-        await formik.submitForm()
-      }
-    },
-    language: "cs",
-    options: {
-      types: "(address)",
-      componentRestrictions: { country: "cz" }
-    }
-  })
-
   React.useEffect(() => {
     if (currentPage > pageCount) {
       setCurrentPage(pageCount)
     }
   }, [features])
 
+  // --- LOCATION --- //
+
+  const [predictionsVisible, setPredictionVisible] = React.useState<boolean>(false)
+
+  const formik = useFormik({
+    initialValues: {
+      search: ""
+    },
+    onSubmit: async values => {
+      const address = await flyToLocation(values.search)
+      formik.setFieldValue("search", address)
+    }
+  })
+
+  const { placePredictions, getPlacePredictions, isPlacePredictionsLoading } = usePlacesService({
+    apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    debounce: 500,
+    language: "cs",
+    options: {
+      componentRestrictions: { country: "cz" }
+    }
+  })
+
+  React.useEffect(() => {
+    getPlacePredictions({ input: formik.values.search })
+  }, [formik.values.search])
+
+  const onPredictionSelect = async (prediction: any) => {
+    await formik.setFieldValue("search", prediction.description)
+    await flyToLocation(prediction.description)
+    setPredictionVisible(false)
+  }
+
   const onPageChange = (_event: any, page: number) => {
     setCurrentPage(page)
   }
 
-  const openFilterModal = () => setFilterModalOpen(true)
+  const onInputFocus = (_event: any) => {
+    setPredictionVisible(true)
+  }
 
-  const closeFilterModal = () => setFilterModalOpen(false)
+  const onInputBlur = (event: any) => {
+    if (event.relatedTarget?.parentNode?.id !== "predictions-list") {
+      setPredictionVisible(false)
+    }
+  }
+
+  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = event => {
+    if (formik.values.search.length && event.key === "Enter") {
+      formik.handleSubmit()
+    }
+  }
 
   const flyToLocation = async (address: string): Promise<string> => {
     if (address.length === 0) {
@@ -172,6 +210,14 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
     return formatted_address
   }
 
+  // --- FILTERS --- //
+
+  const [filterModalOpen, setFilterModalOpen] = React.useState<boolean>(false)
+
+  const openFilterModal = () => setFilterModalOpen(true)
+
+  const closeFilterModal = () => setFilterModalOpen(false)
+
   const removeFilter = (field: string) => () => {
     geojsonStore.removeFilter(field)
   }
@@ -181,45 +227,75 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
   return (
     <div className={classes.container}>
       <div className={classes.header}>
-        <TextField
-          id='search'
-          fullWidth
-          autoComplete='false'
-          value={formik.values.search}
-          className={classes.search}
-          onChange={formik.handleChange}
-          variant='outlined'
-          size='small'
-          placeholder='Vyhledat adresu...'
-          inputRef={searchRef}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <Tooltip title='Vyhledat'>
-                  <div>
-                    <IconButton
-                      size='small'
-                      edge='start'
-                      disabled={!formik.values.search.length}
-                      onClick={() => formik.submitForm()}
-                    >
-                      <SearchIcon />
-                    </IconButton>
-                  </div>
-                </Tooltip>
-              </InputAdornment>
-            ),
-            endAdornment: !!formik.values.search.length && (
-              <InputAdornment position='end'>
-                <Tooltip title='Vymazat'>
-                  <IconButton size='small' edge='start' onClick={() => formik.setFieldValue("search", "")}>
-                    <CloseIcon />
-                  </IconButton>
-                </Tooltip>
-              </InputAdornment>
-            )
-          }}
-        />
+        <div className={classes.search}>
+          <TextField
+            id='search'
+            fullWidth
+            autoComplete='false'
+            value={formik.values.search}
+            className={classes.searchInput}
+            onChange={formik.handleChange}
+            onFocus={onInputFocus}
+            onBlur={onInputBlur}
+            onKeyDown={onKeyDown}
+            variant='outlined'
+            size='small'
+            placeholder='Vyhledat adresu...'
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position='start'>
+                  <Tooltip title='Vyhledat'>
+                    <div>
+                      <IconButton
+                        size='small'
+                        edge='start'
+                        disabled={!formik.values.search.length}
+                        onClick={() => formik.submitForm()}
+                      >
+                        <SearchIcon />
+                      </IconButton>
+                    </div>
+                  </Tooltip>
+                </InputAdornment>
+              ),
+              endAdornment: !!formik.values.search.length && (
+                <InputAdornment position='end'>
+                  {isPlacePredictionsLoading ? (
+                    <CircularProgress size={24} />
+                  ) : (
+                    <Tooltip title='Vymazat'>
+                      <IconButton size='small' edge='start' onClick={() => formik.setFieldValue("search", "")}>
+                        <CloseIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                </InputAdornment>
+              )
+            }}
+          />
+          {predictionsVisible && (
+            <List className={classes.searchPredictions}>
+              <Paper id='predictions-list'>
+                {placePredictions.map((prediction, index, arr) => (
+                  <ListItem
+                    dense
+                    button
+                    divider={index !== arr.length - 1}
+                    onClick={() => onPredictionSelect(prediction)}
+                  >
+                    <ListItemIcon >
+                      <LocationIcon />
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={prediction.structured_formatting.main_text}
+                      secondary={prediction.structured_formatting.secondary_text}
+                    />
+                  </ListItem>
+                ))}
+              </Paper>
+            </List>
+          )}
+        </div>
         <Button className={classes.filterButton} startIcon={<FilterIcon />} onClick={openFilterModal}>
           Filtrovat
         </Button>
