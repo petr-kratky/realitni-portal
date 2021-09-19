@@ -22,6 +22,10 @@ export default class JssDocument extends Document {
               button.thumbnail-button {
                 border-color: transparent; 
               }
+
+							.pac-container {
+								z-index: 1250 !important;
+							}
             `}
           </style>
         </Head>

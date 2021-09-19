@@ -1,5 +1,7 @@
-import React from "react"
-
+import React, { useMemo } from "react"
+import { useFormik } from "formik"
+import { fitBounds, Bounds } from "viewport-mercator-project"
+import { usePlacesWidget } from "react-google-autocomplete"
 import {
   Button,
   createStyles,
@@ -10,20 +12,21 @@ import {
   InputAdornment,
   IconButton,
   Typography,
-  Chip
+  Chip,
+  Tooltip
 } from "@material-ui/core"
 import { Pagination } from "@material-ui/lab"
 import FilterIcon from "@material-ui/icons/FilterList"
 import SearchIcon from "@material-ui/icons/Search"
+import CloseIcon from "@material-ui/icons/Close"
 
 import { AppState } from "src/types"
-
 import SidebarEstateCard from "./SidebarEstateCard"
-import { useFormik } from "formik"
 import { geocodeLocation } from "../../../lib/api/geocode"
 import { filterDictionary, geojsonStore, snackStore, viewportStore } from "../../../lib/stores"
-import { fitBounds, Bounds } from "viewport-mercator-project"
+
 import FilterModal from "./FilterModal"
+import { GeocodeResult } from "../../../types/geocode-result"
 
 type EstatesSidebarProps = {}
 
@@ -47,7 +50,8 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(1, 3)
     },
     search: {
-      marginRight: theme.spacing(1)
+      marginRight: theme.spacing(1),
+      overflow: "visible"
     },
     pagination: {
       width: "100%",
@@ -89,27 +93,8 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
       search: ""
     },
     onSubmit: async values => {
-      const geocodeResults = await geocodeLocation({
-        address: values.search
-      })
-      if (!geocodeResults.results.length) {
-        snackStore.toggle("error", "Pro uvedenou adresu nebyly nalezeny žádné výsledky")
-        return
-      }
-      const {
-        formatted_address,
-        geometry: {
-          viewport: { northeast: ne, southwest: sw }
-        }
-      } = geocodeResults.results[0]
-      const bounds: Bounds = [
-        [ne.lng, ne.lat],
-        [sw.lng, sw.lat]
-      ]
-      const { width, height } = viewport
-      const fittedBounds = fitBounds({ bounds, width, height })
-      viewportStore.setViewport({ ...viewport, ...fittedBounds }, true)
-      formik.setFieldValue("search", formatted_address)
+      const address = await flyToLocation(values.search)
+      formik.setFieldValue("search", address)
     }
   })
 
@@ -126,6 +111,22 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
     [features, currentPage]
   )
 
+  const { ref: searchRef } = usePlacesWidget({
+    apiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
+    onPlaceSelected: async place => {
+      if (typeof place !== "undefined") {
+        const address = place.formatted_address ?? place.name ?? ""
+        await formik.setFieldValue("search", address)
+        await formik.submitForm()
+      }
+    },
+    language: "cs",
+    options: {
+      types: "(address)",
+      componentRestrictions: { country: "cz" }
+    }
+  })
+
   React.useEffect(() => {
     if (currentPage > pageCount) {
       setCurrentPage(pageCount)
@@ -136,15 +137,40 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
     setCurrentPage(page)
   }
 
-  const onKeyDown: React.KeyboardEventHandler<HTMLDivElement> = event => {
-    if (formik.values.search.length && event.key === "Enter") {
-      formik.handleSubmit()
-    }
-  }
-
   const openFilterModal = () => setFilterModalOpen(true)
 
   const closeFilterModal = () => setFilterModalOpen(false)
+
+  const flyToLocation = async (address: string): Promise<string> => {
+    if (address.length === 0) {
+      return address
+    }
+    const { results, error_message } = await geocodeLocation({
+      address
+    })
+    if (error_message) {
+      snackStore.toggle("error", error_message)
+      return address
+    }
+    if (!results.length) {
+      snackStore.toggle("error", "Pro uvedenou adresu nebyly nalezeny žádné výsledky")
+      return address
+    }
+    const {
+      formatted_address,
+      geometry: {
+        viewport: { northeast: ne, southwest: sw }
+      }
+    } = results[0]
+    const bounds: Bounds = [
+      [ne.lng, ne.lat],
+      [sw.lng, sw.lat]
+    ]
+    const { width, height } = viewport
+    const fittedBounds = fitBounds({ bounds, width, height })
+    viewportStore.setViewport({ ...viewport, ...fittedBounds }, true)
+    return formatted_address
+  }
 
   const removeFilter = (field: string) => () => {
     geojsonStore.removeFilter(field)
@@ -161,17 +187,35 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
           autoComplete='false'
           value={formik.values.search}
           className={classes.search}
-          onKeyDown={onKeyDown}
           onChange={formik.handleChange}
           variant='outlined'
           size='small'
           placeholder='Vyhledat adresu...'
+          inputRef={searchRef}
           InputProps={{
             startAdornment: (
               <InputAdornment position='start'>
-                <IconButton size='small' edge='start' disabled={!formik.values.search.length}>
-                  <SearchIcon />
-                </IconButton>
+                <Tooltip title='Vyhledat'>
+                  <div>
+                    <IconButton
+                      size='small'
+                      edge='start'
+                      disabled={!formik.values.search.length}
+                      onClick={() => formik.submitForm()}
+                    >
+                      <SearchIcon />
+                    </IconButton>
+                  </div>
+                </Tooltip>
+              </InputAdornment>
+            ),
+            endAdornment: !!formik.values.search.length && (
+              <InputAdornment position='end'>
+                <Tooltip title='Vymazat'>
+                  <IconButton size='small' edge='start' onClick={() => formik.setFieldValue("search", "")}>
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
               </InputAdornment>
             )
           }}

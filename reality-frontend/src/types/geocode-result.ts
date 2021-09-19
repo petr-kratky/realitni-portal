@@ -1,7 +1,8 @@
 export interface GeocodeResults {
-    plus_code: PlusCode;
-    results:   Result[];
-    status:    string;
+	plus_code: 			PlusCode;
+	results:   			GeocodeResult[];
+	status:    			string;
+	error_message?: string
 }
 
 export interface PlusCode {
@@ -9,7 +10,7 @@ export interface PlusCode {
     global_code:   string;
 }
 
-export interface Result {
+export interface GeocodeResult {
     address_components: AddressComponent[];
     formatted_address:  string;
     geometry:           Geometry;
