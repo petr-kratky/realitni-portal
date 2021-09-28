@@ -1,62 +1,89 @@
-import {
-  Ctx,
-  Arg,
-  Mutation,
-  Query,
-  Resolver,
-  ID,
-} from "type-graphql";
-import { ApolloError, AuthenticationError } from 'apollo-server-express'
-import { Inject } from "typescript-ioc";
-import { hash, compare } from "bcryptjs";
-import { verify } from "jsonwebtoken";
+import { Ctx, Arg, Mutation, Query, Resolver, ID } from "type-graphql"
+import { ApolloError, AuthenticationError } from "apollo-server-express"
+import { Inject } from "typescript-ioc"
+import { hash, compare } from "bcryptjs"
+import { verify } from "jsonwebtoken"
 
-import { Account, AccountUpdateInput, LoginResponse } from "../models";
-import { resolverManager } from "./_resolver-manager";
-import { MyContext } from "../typings";
-import { attachRefreshToken } from "../lib/auth/refreshToken";
-import { RequireAuthentication } from "../decorators/auth-gql";
-import { AccountService } from "../services";
-import { ServiceConfig } from "../config";
+import { Account, AccountUpdateInput, Estate, LoginResponse } from "../models"
+import { resolverManager } from "./_resolver-manager"
+import { MyContext } from "../typings"
+import { attachRefreshToken } from "../lib/auth/refreshToken"
+import { RequireAuthentication } from "../decorators/auth-gql"
+import { AccountService, EstateService } from "../services"
+import { ServiceConfig } from "../config"
 
-
-
-
-@Resolver((of) => Account)
+@Resolver(of => Account)
 export class AccountResolver {
   @Inject
   accountService: AccountService
+  @Inject
+  estateService: EstateService
   @Inject
   config: ServiceConfig
 
   @Query(() => Account, { nullable: true })
   currentUser(@Ctx() context: MyContext) {
-    const authHeader = context.req.headers["authorization"];
+    const authHeader = context.req.headers["authorization"]
     if (!authHeader) {
-      return null;
+      return null
     }
     try {
-      const token = authHeader.split(" ")[1];
-      const payload: any = verify(token, this.config.auth.accessTokenSecret);
+      const token = authHeader.split(" ")[1]
+      const payload: any = verify(token, this.config.auth.accessTokenSecret)
       return this.accountService.getAccountById(payload.id)
-
     } catch (err) {
       throw new AuthenticationError("AUTH_FAILED")
     }
   }
 
-
   @RequireAuthentication()
   @Mutation(() => Boolean)
   async logout(@Ctx() { res }: MyContext) {
     try {
-      attachRefreshToken(res, "", this.config.server.domain);
-      return true;
+      attachRefreshToken(res, "", this.config.server.domain)
+      return true
     } catch (err) {
       throw new ApolloError("LOGOUT_FAILED", "500", { err })
     }
   }
 
+  @RequireAuthentication()
+  @Mutation(() => [Estate])
+  async addRecentEstate(@Ctx() { payload }: MyContext, @Arg("estate_id") estate_id: string): Promise<Estate[]> {
+    const user = await this.accountService.getAccountById(payload.id)
+    const visitedEstate = await this.estateService.getEstateById(estate_id)
+    if (user.recent_estates.some(estate => estate.id === visitedEstate.id)) {
+      return user.recent_estates
+    }
+    if (user.recent_estates.push(visitedEstate) > 10) {
+      user.recent_estates.shift()
+    }
+    await user.save()
+    return user.recent_estates
+  }
+
+  @RequireAuthentication()
+  @Mutation(() => [Estate])
+  async addFavoriteEstate(@Ctx() { payload }: MyContext, @Arg("estate_id") estate_id: string): Promise<Estate[]> {
+    const user = await this.accountService.getAccountById(payload.id)
+    const favoriteEstate = await this.estateService.getEstateById(estate_id)
+		if (user.favorite_estates.some(estate => estate.id === favoriteEstate.id)) {
+      return user.favorite_estates
+    }
+    user.favorite_estates.push(favoriteEstate)
+    await user.save()
+    return user.favorite_estates
+  }
+
+	@RequireAuthentication()
+  @Mutation(() => [Estate])
+  async removeFavoriteEstate(@Ctx() { payload }: MyContext, @Arg("estate_id") estate_id: string): Promise<Estate[]> {
+    const user = await this.accountService.getAccountById(payload.id)
+    const newFavoriteEstates = user.favorite_estates.filter(estate => estate.id !== estate_id)
+		user.favorite_estates = newFavoriteEstates
+    await user.save()
+    return user.favorite_estates
+  }
 
   @Mutation(() => LoginResponse)
   async login(
@@ -64,24 +91,23 @@ export class AccountResolver {
     @Arg("password") password: string,
     @Ctx() { res }: MyContext
   ): Promise<LoginResponse> {
-    const account = await Account.findOne({ where: { email } });
+    const account = await Account.findOne({ where: { email } })
     if (!account) {
-      throw new ApolloError('LOGIN_INVALID_ACCOUNT', "400")
+      throw new ApolloError("LOGIN_INVALID_ACCOUNT", "400")
     }
 
-    const valid = await compare(password, account.password);
+    const valid = await compare(password, account.password)
     if (!valid) {
-      throw new ApolloError('LOGIN_INVALID_PASSWORD', "400")
+      throw new ApolloError("LOGIN_INVALID_PASSWORD", "400")
     }
 
-    attachRefreshToken(res, this.accountService.createRefreshToken(account), this.config.server.domain);
+    attachRefreshToken(res, this.accountService.createRefreshToken(account), this.config.server.domain)
 
     return {
       accessToken: this.accountService.createAccessToken(account),
-      account,
+      account
     }
   }
-
 
   @Mutation(() => Account)
   @RequireAuthentication()
@@ -107,7 +133,6 @@ export class AccountResolver {
     }
   }
 
-  
   @Mutation(() => ID)
   @RequireAuthentication()
   async deleteAccount(@Ctx() { payload }: MyContext): Promise<string> {
@@ -121,14 +146,9 @@ export class AccountResolver {
     }
   }
 
-
   @Mutation(() => Account)
   @RequireAuthentication()
-  async register(
-    @Arg("username") username: string,
-    @Arg("email") email: string,
-    @Arg("password") password: string
-  ) {
+  async register(@Arg("username") username: string, @Arg("email") email: string, @Arg("password") password: string) {
     const newAccount = Account.merge(new Account(), {
       username,
       email,
@@ -153,4 +173,4 @@ export class AccountResolver {
   }
 }
 
-resolverManager.registerResolver(AccountResolver);
+resolverManager.registerResolver(AccountResolver)

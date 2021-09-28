@@ -62,6 +62,34 @@ export class Estate extends BaseEntity {
   @Column("character varying", { nullable: true, length: 4096 })
   description: string
 
+  @Field(() => Boolean, { nullable: true })
+  @Column("boolean", { nullable: true })
+  terrace: boolean
+
+  @Field(() => Boolean, { nullable: true })
+  @Column("boolean", { nullable: true })
+  parking: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  @Column("boolean", { nullable: true })
+  garage: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  @Column("boolean", { nullable: true })
+  swimming_pool: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  @Column("boolean", { nullable: true })
+  elevator: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  @Column("boolean", { nullable: true })
+  cellar: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  @Column("boolean", { nullable: true })
+  furnished: boolean
+
   @Field(() => Float)
   @Column("numeric", {
     name: "longitude",
@@ -123,22 +151,22 @@ export class Estate extends BaseEntity {
   secondary_type: EstateSecondaryType
 
   @Field(() => AccountPublicInfo)
-  @ManyToOne(() => Account, account => account.estates, { nullable: false, lazy: true, eager: true })
+  @ManyToOne(() => Account, account => account.created_estates, { nullable: false, lazy: true, eager: true })
   @JoinColumn({ name: "created_by", referencedColumnName: "id" })
   created_by: Account
 
-	@Field(() => Date)
+  @Field(() => Date)
   @Column("timestamp with time zone", { name: "created_on", default: "now()" })
-  created_on: Date;
+  created_on: Date
 
   @Field(() => AccountPublicInfo)
-  @ManyToOne(() => Account, account => account.estates, { nullable: false, lazy: true, eager: true })
+  @ManyToOne(() => Account, account => account.created_estates, { nullable: false, lazy: true, eager: true })
   @JoinColumn({ name: "last_modified_by", referencedColumnName: "id" })
   last_modified_by: Account
 
-	@Field(() => Date)
+  @Field(() => Date)
   @Column("timestamp with time zone", { name: "last_modified_on", default: "now()" })
-  last_modified_on: Date;
+  last_modified_on: Date
 
   @Field(() => [Image])
   images: Image[]
@@ -181,6 +209,27 @@ export class EstateUpdateInput implements Partial<Estate> {
 
   @Field(() => Int, { nullable: true })
   land_area: number
+
+	@Field(() => Boolean, { nullable: true })
+  terrace: boolean
+
+  @Field(() => Boolean, { nullable: true })
+  parking: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  garage: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  swimming_pool: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  elevator: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  cellar: boolean
+
+	@Field(() => Boolean, { nullable: true })
+  furnished: boolean
 
   @Field(() => Int, { nullable: true })
   primary_type_id: number

@@ -29,7 +29,7 @@ export class AccountService {
 
   public async getAccountById(id: string): Promise<Account> {
     try {
-      const account = await Account.findOne(id)
+      const account = await Account.findOne(id, { relations: ["recent_estates", "favorite_estates"] })
       if (!account) throw new ApolloError("ACCOUNT_NOT_FOUND", "404")
       return account
     } catch (err) {
