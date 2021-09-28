@@ -22,10 +22,12 @@ export type Account = {
   username: Scalars['String'];
   password: Scalars['String'];
   email: Scalars['String'];
-  createdOn: Scalars['DateTime'];
-  lastLogin?: Maybe<Scalars['DateTime']>;
+  created_on: Scalars['DateTime'];
+  last_login?: Maybe<Scalars['DateTime']>;
   tokenVersion: Scalars['Int'];
-  estates?: Maybe<Array<Estate>>;
+  created_estates?: Maybe<Array<Estate>>;
+  recent_estates?: Maybe<Array<Estate>>;
+  favorite_estates?: Maybe<Array<Estate>>;
 };
 
 export type AccountPublicInfo = {
@@ -46,6 +48,13 @@ export type Estate = {
   geom: Scalars['String'];
   name?: Maybe<Scalars['String']>;
   description?: Maybe<Scalars['String']>;
+  terrace?: Maybe<Scalars['Boolean']>;
+  parking?: Maybe<Scalars['Boolean']>;
+  garage?: Maybe<Scalars['Boolean']>;
+  swimming_pool?: Maybe<Scalars['Boolean']>;
+  elevator?: Maybe<Scalars['Boolean']>;
+  cellar?: Maybe<Scalars['Boolean']>;
+  furnished?: Maybe<Scalars['Boolean']>;
   longitude: Scalars['Float'];
   latitude: Scalars['Float'];
   advert_price?: Maybe<Scalars['Int']>;
@@ -58,6 +67,9 @@ export type Estate = {
   primary_type: EstatePrimaryType;
   secondary_type: EstateSecondaryType;
   created_by: AccountPublicInfo;
+  created_on: Scalars['DateTime'];
+  last_modified_by: AccountPublicInfo;
+  last_modified_on: Scalars['DateTime'];
   images: Array<Image>;
   files: Array<File>;
 };
@@ -74,6 +86,13 @@ export type EstateCreateInput = {
   postal_code: Scalars['String'];
   usable_area?: Maybe<Scalars['Int']>;
   land_area?: Maybe<Scalars['Int']>;
+  terrace?: Maybe<Scalars['Boolean']>;
+  parking?: Maybe<Scalars['Boolean']>;
+  garage?: Maybe<Scalars['Boolean']>;
+  swimming_pool?: Maybe<Scalars['Boolean']>;
+  elevator?: Maybe<Scalars['Boolean']>;
+  cellar?: Maybe<Scalars['Boolean']>;
+  furnished?: Maybe<Scalars['Boolean']>;
   primary_type_id: Scalars['Int'];
   secondary_type_id: Scalars['Int'];
 };
@@ -106,6 +125,13 @@ export type EstateUpdateInput = {
   postal_code?: Maybe<Scalars['String']>;
   usable_area?: Maybe<Scalars['Int']>;
   land_area?: Maybe<Scalars['Int']>;
+  terrace?: Maybe<Scalars['Boolean']>;
+  parking?: Maybe<Scalars['Boolean']>;
+  garage?: Maybe<Scalars['Boolean']>;
+  swimming_pool?: Maybe<Scalars['Boolean']>;
+  elevator?: Maybe<Scalars['Boolean']>;
+  cellar?: Maybe<Scalars['Boolean']>;
+  furnished?: Maybe<Scalars['Boolean']>;
   primary_type_id?: Maybe<Scalars['Int']>;
   secondary_type_id?: Maybe<Scalars['Int']>;
 };
@@ -140,6 +166,9 @@ export type Mutation = {
   createEstate: Estate;
   updateEstate: Estate;
   logout: Scalars['Boolean'];
+  addRecentEstate: Array<Estate>;
+  addFavoriteEstate: Array<Estate>;
+  removeFavoriteEstate: Array<Estate>;
   login: LoginResponse;
   updateAccount: Account;
   deleteAccount: Scalars['ID'];
@@ -172,6 +201,21 @@ export type MutationCreateEstateArgs = {
 export type MutationUpdateEstateArgs = {
   estateInput: EstateUpdateInput;
   id: Scalars['String'];
+};
+
+
+export type MutationAddRecentEstateArgs = {
+  estate_id: Scalars['String'];
+};
+
+
+export type MutationAddFavoriteEstateArgs = {
+  estate_id: Scalars['String'];
+};
+
+
+export type MutationRemoveFavoriteEstateArgs = {
+  estate_id: Scalars['String'];
 };
 
 
@@ -252,14 +296,14 @@ export type EstateWithoutMediaQueryVariables = Exact<{
 }>;
 
 
-export type EstateWithoutMediaQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
+export type EstateWithoutMediaQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, created_on: any, last_modified_on: any, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, terrace?: Maybe<boolean>, parking?: Maybe<boolean>, garage?: Maybe<boolean>, swimming_pool?: Maybe<boolean>, elevator?: Maybe<boolean>, cellar?: Maybe<boolean>, furnished?: Maybe<boolean>, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, last_modified_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
 
 export type EstateQueryVariables = Exact<{
   id: Scalars['String'];
 }>;
 
 
-export type EstateQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, images: Array<{ __typename?: 'Image', _id: string, original: string, large: string, mid: string, small: string }>, files: Array<{ __typename?: 'File', _id: string, url: string, size: number }>, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
+export type EstateQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, created_on: any, last_modified_on: any, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, terrace?: Maybe<boolean>, parking?: Maybe<boolean>, garage?: Maybe<boolean>, swimming_pool?: Maybe<boolean>, elevator?: Maybe<boolean>, cellar?: Maybe<boolean>, furnished?: Maybe<boolean>, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, last_modified_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, images: Array<{ __typename?: 'Image', _id: string, original: string, large: string, mid: string, small: string }>, files: Array<{ __typename?: 'File', _id: string, url: string, size: number }>, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
 
 export type UpdateEstateMutationVariables = Exact<{
   id: Scalars['String'];
@@ -272,7 +316,7 @@ export type UpdateEstateMutation = { __typename?: 'Mutation', updateEstate: { __
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CurrentUserQuery = { __typename?: 'Query', currentUser?: Maybe<{ __typename?: 'Account', id: string, username: string, email: string }> };
+export type CurrentUserQuery = { __typename?: 'Query', currentUser?: Maybe<{ __typename?: 'Account', id: string, username: string, email: string, favorite_estates?: Maybe<Array<{ __typename?: 'Estate', id: string }>>, recent_estates?: Maybe<Array<{ __typename?: 'Estate', id: string }>> }> };
 
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
@@ -294,7 +338,7 @@ export type RegisterMutationVariables = Exact<{
 }>;
 
 
-export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'Account', id: string, createdOn: any } };
+export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'Account', id: string, created_on: any } };
 
 
 export const CreateEstateDocument = gql`
@@ -479,6 +523,12 @@ export const EstateWithoutMediaDocument = gql`
       id
       username
     }
+    created_on
+    last_modified_by {
+      id
+      username
+    }
+    last_modified_on
     name
     description
     longitude
@@ -500,6 +550,13 @@ export const EstateWithoutMediaDocument = gql`
     street_address
     city_address
     postal_code
+    terrace
+    parking
+    garage
+    swimming_pool
+    elevator
+    cellar
+    furnished
   }
 }
     `;
@@ -539,6 +596,12 @@ export const EstateDocument = gql`
       id
       username
     }
+    created_on
+    last_modified_by {
+      id
+      username
+    }
+    last_modified_on
     name
     description
     longitude
@@ -572,6 +635,13 @@ export const EstateDocument = gql`
     street_address
     city_address
     postal_code
+    terrace
+    parking
+    garage
+    swimming_pool
+    elevator
+    cellar
+    furnished
   }
 }
     `;
@@ -646,6 +716,12 @@ export const CurrentUserDocument = gql`
     id
     username
     email
+    favorite_estates {
+      id
+    }
+    recent_estates {
+      id
+    }
   }
 }
     `;
@@ -749,7 +825,7 @@ export const RegisterDocument = gql`
     mutation Register($email: String!, $usermane: String!, $password: String!) {
   register(email: $email, username: $usermane, password: $password) {
     id
-    createdOn
+    created_on
   }
 }
     `;

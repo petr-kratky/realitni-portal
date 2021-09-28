@@ -1,6 +1,6 @@
 mutation Register($email: String!, $usermane:String!, $password: String!) {
   register(email: $email, username: $usermane, password: $password) {
     id
-    createdOn
+    created_on
   }
 }

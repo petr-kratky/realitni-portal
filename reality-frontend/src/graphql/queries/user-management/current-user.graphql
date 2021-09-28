@@ -3,5 +3,11 @@ query CurrentUser {
     id
     username
     email
+    favorite_estates {
+      id
+    }
+    recent_estates {
+      id
+    }
   }
 }

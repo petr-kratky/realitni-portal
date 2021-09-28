@@ -5,6 +5,12 @@ query Estate($id: String!) {
       id
       username
     }
+    created_on
+    last_modified_by {
+      id
+      username
+    }
+    last_modified_on
     name
     description
     longitude
@@ -38,5 +44,12 @@ query Estate($id: String!) {
     street_address
     city_address
     postal_code
+		terrace
+		parking
+		garage
+		swimming_pool
+		elevator
+		cellar
+		furnished
   }
 }
