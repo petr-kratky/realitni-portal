@@ -155,8 +155,8 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
 
   const onPredictionSelect = async (prediction: any) => {
     await formik.setFieldValue("search", prediction.description)
-    await flyToLocation(prediction.description)
     setPredictionVisible(false)
+    await flyToLocation(prediction.description)
   }
 
   const onPageChange = (_event: any, page: number) => {
@@ -278,6 +278,7 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
               <Paper id='predictions-list'>
                 {placePredictions.map((prediction, index, arr) => (
                   <ListItem
+										key={prediction.description}
                     dense
                     button
                     divider={index !== arr.length - 1}
