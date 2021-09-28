@@ -180,7 +180,7 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({ id }) =
           onClose={closeDeleteDialogue}
           onDelete={onDelete}
           title='Smazat nemovitost'
-          text={`Opravdu si přejete smazat nemovitost na adrese "${fullAddress}"? Tato akce je nevratná a nemovitost bude permanentně odstraněna.`}
+          text={`Opravdu si přejete smazat nemovitost na adrese "${fullAddress}"? Tato akce je nevratná a nemovitost bude permanentně odstraněna společně se všemi přílohami a fotografiemi.`}
         />
       </Card>
     )

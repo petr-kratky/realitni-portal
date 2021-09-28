@@ -29,17 +29,18 @@ import EditIcon from "@material-ui/icons/Edit"
 import CityIcon from "@material-ui/icons/LocationCity"
 import ImageLibraryIcon from "@material-ui/icons/PhotoLibrary"
 import FileLibraryIcon from "@material-ui/icons/AttachFile"
+import DeleteIcon from "@material-ui/icons/Delete"
 
 import { Photo } from "react-bnb-gallery"
 
-import { useEstateQuery } from "src/graphql/queries/generated/graphql"
-import { capitalize } from "src/utils/capitalize"
+import { useDeleteEstateMutation, useEstateQuery } from "src/graphql/queries/generated/graphql"
 import { formatNumber } from "src/utils/number-formatter"
 import ImageCarousel from "src/components/estate/ImageCarousel"
 import { AppState } from "src/types"
-import { estateModalStore } from "src/lib/stores"
+import { estateModalStore, snackStore } from "src/lib/stores"
 import ImageLibrary from "../../components/estate/ImageLibrary"
 import FileLibrary from "../../components/estate/FileLibrary"
+import DeleteDialogue from "../../components/utils/DeleteDialogue"
 
 type ParameterListItemProps = {
   icon: React.ReactNode
@@ -71,9 +72,25 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     loading: estateLoading,
     error: estateError
   } = useEstateQuery({ variables: { id: estate as string } })
+  const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
 
   const [imageLibraryOpen, setImageLibraryOpen] = React.useState<boolean>(false)
   const [fileLibraryOpen, setFileLibraryOpen] = React.useState<boolean>(false)
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
+
+  const onDelete = async () => {
+    try {
+      if (typeof estate === "string") {
+        await deleteEstate({ variables: { id: estate } })
+        closeDeleteDialogue()
+        router.push(`/map?longitude=${estateData?.estate?.longitude}&latitude=${estateData?.estate?.latitude}&zoom=17`)
+        snackStore.toggle("success", "Nemovitost odstraněna")
+      }
+    } catch (err) {
+      console.error(`Could not delete estate id ${estate}`, err)
+      snackStore.toggle("error", "Nemovitost se nepodařilo odstranit")
+    }
+  }
 
   const openImageLibrary = () => {
     setImageLibraryOpen(true)
@@ -89,6 +106,14 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
 
   const closeFileLibrary = () => {
     setFileLibraryOpen(false)
+  }
+
+  const openDeleteDialogue = () => {
+    setDeleteDialogOpen(true)
+  }
+
+  const closeDeleteDialogue = () => {
+    setDeleteDialogOpen(false)
   }
 
   if (estateLoading) {
@@ -146,6 +171,8 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
       thumbnail: img.small
     }))
 
+    const fullAddress: string = `${street_address}, ${city_address}`
+
     return (
       <Grid container justifyContent='center'>
         {estateData?.estate && (
@@ -154,7 +181,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
               <Grid container direction='row'>
                 <Grid item xs={12}>
                   <Typography variant='h4'>
-                    {capitalize(primary_type.desc_cz)}, {secondary_type.desc_cz}
+                    {primary_type.desc_cz}, {secondary_type.desc_cz}
                   </Typography>
                   <Typography variant='h6' color='textSecondary'>
                     {street_address}, {city_address}, {postal_code}
@@ -179,6 +206,11 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                   <Tooltip title='Nahrát přílohy'>
                     <IconButton onClick={openFileLibrary}>
                       <FileLibraryIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title='Odstranit'>
+                    <IconButton onClick={openDeleteDialogue}>
+                      <DeleteIcon />
                     </IconButton>
                   </Tooltip>
                 </Grid>
@@ -247,6 +279,14 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
             </Paper>
           </Grid>
         )}
+        <DeleteDialogue
+          open={deleteDialogOpen}
+          loading={deleteLoading}
+          onClose={closeDeleteDialogue}
+          onDelete={onDelete}
+          title='Smazat nemovitost'
+          text={`Opravdu si přejete smazat nemovitost na adrese "${fullAddress}"? Tato akce je nevratná a nemovitost bude permanentně odstraněna společně se všemi přílohami a fotografiemi.`}
+        />
       </Grid>
     )
   } else {
