@@ -23,11 +23,11 @@ export class Account extends BaseEntity {
 
   @Field(() => Date)
   @Column("timestamp with time zone", { name: "created_on", default: "now()" })
-  createdOn: Date;
+  created_on: Date;
 
   @Field(() => Date, { nullable: true })
   @Column("timestamp with time zone", { name: "last_login", nullable: true })
-  lastLogin: Date;
+  last_login: Date;
 
   @Field(() => Int)
   @Column("integer", {

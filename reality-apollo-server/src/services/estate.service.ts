@@ -8,6 +8,8 @@ export class EstateService {
   public async createEstate(createdBy: string, estateInput: EstateCreateInput): Promise<Estate> {
     const { latitude, longitude } = estateInput
 
+		const activeUser = Account.create({ id: createdBy })
+
     const isLocationValid = EstateService.validateCoordinates(latitude, longitude)
     if (!isLocationValid) throw new ApolloError('ESTATE_INVALID_LOCATION_RANGE')
 
@@ -21,7 +23,8 @@ export class EstateService {
 
     const newEstate = Estate.create({
       ...estateInput,
-      created_by: Account.create({ id: createdBy }),
+      created_by: activeUser,
+			last_modified_by: activeUser,
       primary_type: estatePrimaryType,
       secondary_type: estateSecondaryType
     })

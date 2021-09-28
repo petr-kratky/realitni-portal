@@ -1,3 +1,6 @@
+import * as path from 'path'
+import * as dotenv from 'dotenv'
+
 import { AuthConfig, DatabaseConfig, GoogleAPIConfig, S3Config, ServerConfig } from '../typings'
 import { Estate, Account, EstatePrimaryType, EstateSecondaryType } from '../models/'
 import { Singleton } from 'typescript-ioc'
@@ -14,6 +17,7 @@ export class ServiceConfig {
   dev: boolean
 
   constructor() {
+		this.loadEnv()
     this.dev = getEnv('NODE_ENV', 'development') !== 'production'
     this.database = this.getDatabaseConfig()
     this.server = this.getServerConfig()
@@ -21,6 +25,14 @@ export class ServiceConfig {
     this.auth = this.getAuthConfig()
     this.google = this.getGoogleAPIConfig()
   }
+
+	private loadEnv(): void {
+		if (process.env.NODE_ENV !== 'production') {
+			const envFile: string = path.resolve('.env.local')
+			console.log(`Loading environment variables from "${envFile}"`);
+			dotenv.config({ path: envFile })
+		}
+	}
 
   private getAuthConfig(): AuthConfig {
     return {

@@ -127,6 +127,19 @@ export class Estate extends BaseEntity {
   @JoinColumn({ name: "created_by", referencedColumnName: "id" })
   created_by: Account
 
+	@Field(() => Date)
+  @Column("timestamp with time zone", { name: "created_on", default: "now()" })
+  created_on: Date;
+
+  @Field(() => AccountPublicInfo)
+  @ManyToOne(() => Account, account => account.estates, { nullable: false, lazy: true, eager: true })
+  @JoinColumn({ name: "last_modified_by", referencedColumnName: "id" })
+  last_modified_by: Account
+
+	@Field(() => Date)
+  @Column("timestamp with time zone", { name: "last_modified_on", default: "now()" })
+  last_modified_on: Date;
+
   @Field(() => [Image])
   images: Image[]
 

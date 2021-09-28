@@ -9,7 +9,8 @@ import {
   EstateSecondaryType,
   EstateUpdateInput,
   Image,
-  File
+  File,
+  Account
 } from "../models"
 import { RequireAuthentication } from "../decorators/auth-gql"
 import { resolverManager } from "./_resolver-manager"
@@ -67,7 +68,7 @@ export class EstateResolver implements ResolverInterface<Estate> {
     }
   }
 
-	@Query(returns => [EstateSecondaryType])
+  @Query(returns => [EstateSecondaryType])
   @RequireAuthentication()
   async estateSecondaryTypes(): Promise<EstateSecondaryType[]> {
     try {
@@ -138,13 +139,19 @@ export class EstateResolver implements ResolverInterface<Estate> {
 
   @Mutation(returns => Estate)
   @RequireAuthentication()
-  async updateEstate(@Arg("id") id: string, @Arg("estateInput") estateInput: EstateUpdateInput): Promise<Estate> {
+  async updateEstate(
+    @Ctx() { payload }: MyContext,
+    @Arg("id") id: string,
+    @Arg("estateInput") estateInput: EstateUpdateInput
+  ): Promise<Estate> {
     const existingEstate = await this.estateService.getEstateById(id)
 
     const inputEstate = Estate.create({
       ...estateInput,
       primary_type: EstatePrimaryType.create({ id: estateInput.primary_type_id }),
-      secondary_type: EstateSecondaryType.create({ id: estateInput.secondary_type_id })
+      secondary_type: EstateSecondaryType.create({ id: estateInput.secondary_type_id }),
+      last_modified_by: Account.create({ id: payload.id }),
+			last_modified_on: new Date().toISOString()
     })
 
     try {
