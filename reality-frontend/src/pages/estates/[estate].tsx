@@ -198,12 +198,12 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                       <EditIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title='Nahrát fotografie'>
+                  <Tooltip title='Fotografie'>
                     <IconButton onClick={openImageLibrary}>
                       <ImageLibraryIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title='Nahrát přílohy'>
+                  <Tooltip title='Přílohy'>
                     <IconButton onClick={openFileLibrary}>
                       <FileLibraryIcon />
                     </IconButton>
