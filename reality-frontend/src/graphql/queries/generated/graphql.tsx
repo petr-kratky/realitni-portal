@@ -256,6 +256,20 @@ export type QueryEstatesArgs = {
   skip: Scalars['Float'];
 };
 
+export type AddFavoriteEstateMutationVariables = Exact<{
+  estate_id: Scalars['String'];
+}>;
+
+
+export type AddFavoriteEstateMutation = { __typename?: 'Mutation', addFavoriteEstate: Array<{ __typename?: 'Estate', id: string }> };
+
+export type AddRecentEstateMutationVariables = Exact<{
+  estate_id: Scalars['String'];
+}>;
+
+
+export type AddRecentEstateMutation = { __typename?: 'Mutation', addRecentEstate: Array<{ __typename?: 'Estate', id: string }> };
+
 export type CreateEstateMutationVariables = Exact<{
   estateInput: EstateCreateInput;
 }>;
@@ -305,6 +319,13 @@ export type EstateQueryVariables = Exact<{
 
 export type EstateQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, created_on: any, last_modified_on: any, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, terrace?: Maybe<boolean>, parking?: Maybe<boolean>, garage?: Maybe<boolean>, swimming_pool?: Maybe<boolean>, elevator?: Maybe<boolean>, cellar?: Maybe<boolean>, furnished?: Maybe<boolean>, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, last_modified_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, images: Array<{ __typename?: 'Image', _id: string, original: string, large: string, mid: string, small: string }>, files: Array<{ __typename?: 'File', _id: string, url: string, size: number }>, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
 
+export type RemoveFavoriteEstateMutationVariables = Exact<{
+  estate_id: Scalars['String'];
+}>;
+
+
+export type RemoveFavoriteEstateMutation = { __typename?: 'Mutation', removeFavoriteEstate: Array<{ __typename?: 'Estate', id: string }> };
+
 export type UpdateEstateMutationVariables = Exact<{
   id: Scalars['String'];
   estateInput: EstateUpdateInput;
@@ -316,7 +337,7 @@ export type UpdateEstateMutation = { __typename?: 'Mutation', updateEstate: { __
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CurrentUserQuery = { __typename?: 'Query', currentUser?: Maybe<{ __typename?: 'Account', id: string, username: string, email: string, favorite_estates?: Maybe<Array<{ __typename?: 'Estate', id: string }>>, recent_estates?: Maybe<Array<{ __typename?: 'Estate', id: string }>> }> };
+export type CurrentUserQuery = { __typename?: 'Query', currentUser?: Maybe<{ __typename?: 'Account', id: string, username: string, email: string, favorite_estates?: Maybe<Array<{ __typename?: 'Estate', id: string }>>, recent_estates?: Maybe<Array<{ __typename?: 'Estate', id: string, street_address: string, city_address: string, postal_code: string, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }>> }> };
 
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
@@ -341,6 +362,72 @@ export type RegisterMutationVariables = Exact<{
 export type RegisterMutation = { __typename?: 'Mutation', register: { __typename?: 'Account', id: string, created_on: any } };
 
 
+export const AddFavoriteEstateDocument = gql`
+    mutation AddFavoriteEstate($estate_id: String!) {
+  addFavoriteEstate(estate_id: $estate_id) {
+    id
+  }
+}
+    `;
+export type AddFavoriteEstateMutationFn = Apollo.MutationFunction<AddFavoriteEstateMutation, AddFavoriteEstateMutationVariables>;
+
+/**
+ * __useAddFavoriteEstateMutation__
+ *
+ * To run a mutation, you first call `useAddFavoriteEstateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddFavoriteEstateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addFavoriteEstateMutation, { data, loading, error }] = useAddFavoriteEstateMutation({
+ *   variables: {
+ *      estate_id: // value for 'estate_id'
+ *   },
+ * });
+ */
+export function useAddFavoriteEstateMutation(baseOptions?: Apollo.MutationHookOptions<AddFavoriteEstateMutation, AddFavoriteEstateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddFavoriteEstateMutation, AddFavoriteEstateMutationVariables>(AddFavoriteEstateDocument, options);
+      }
+export type AddFavoriteEstateMutationHookResult = ReturnType<typeof useAddFavoriteEstateMutation>;
+export type AddFavoriteEstateMutationResult = Apollo.MutationResult<AddFavoriteEstateMutation>;
+export type AddFavoriteEstateMutationOptions = Apollo.BaseMutationOptions<AddFavoriteEstateMutation, AddFavoriteEstateMutationVariables>;
+export const AddRecentEstateDocument = gql`
+    mutation AddRecentEstate($estate_id: String!) {
+  addRecentEstate(estate_id: $estate_id) {
+    id
+  }
+}
+    `;
+export type AddRecentEstateMutationFn = Apollo.MutationFunction<AddRecentEstateMutation, AddRecentEstateMutationVariables>;
+
+/**
+ * __useAddRecentEstateMutation__
+ *
+ * To run a mutation, you first call `useAddRecentEstateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useAddRecentEstateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [addRecentEstateMutation, { data, loading, error }] = useAddRecentEstateMutation({
+ *   variables: {
+ *      estate_id: // value for 'estate_id'
+ *   },
+ * });
+ */
+export function useAddRecentEstateMutation(baseOptions?: Apollo.MutationHookOptions<AddRecentEstateMutation, AddRecentEstateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<AddRecentEstateMutation, AddRecentEstateMutationVariables>(AddRecentEstateDocument, options);
+      }
+export type AddRecentEstateMutationHookResult = ReturnType<typeof useAddRecentEstateMutation>;
+export type AddRecentEstateMutationResult = Apollo.MutationResult<AddRecentEstateMutation>;
+export type AddRecentEstateMutationOptions = Apollo.BaseMutationOptions<AddRecentEstateMutation, AddRecentEstateMutationVariables>;
 export const CreateEstateDocument = gql`
     mutation CreateEstate($estateInput: EstateCreateInput!) {
   createEstate(estateInput: $estateInput) {
@@ -673,6 +760,39 @@ export function useEstateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Est
 export type EstateQueryHookResult = ReturnType<typeof useEstateQuery>;
 export type EstateLazyQueryHookResult = ReturnType<typeof useEstateLazyQuery>;
 export type EstateQueryResult = Apollo.QueryResult<EstateQuery, EstateQueryVariables>;
+export const RemoveFavoriteEstateDocument = gql`
+    mutation RemoveFavoriteEstate($estate_id: String!) {
+  removeFavoriteEstate(estate_id: $estate_id) {
+    id
+  }
+}
+    `;
+export type RemoveFavoriteEstateMutationFn = Apollo.MutationFunction<RemoveFavoriteEstateMutation, RemoveFavoriteEstateMutationVariables>;
+
+/**
+ * __useRemoveFavoriteEstateMutation__
+ *
+ * To run a mutation, you first call `useRemoveFavoriteEstateMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useRemoveFavoriteEstateMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [removeFavoriteEstateMutation, { data, loading, error }] = useRemoveFavoriteEstateMutation({
+ *   variables: {
+ *      estate_id: // value for 'estate_id'
+ *   },
+ * });
+ */
+export function useRemoveFavoriteEstateMutation(baseOptions?: Apollo.MutationHookOptions<RemoveFavoriteEstateMutation, RemoveFavoriteEstateMutationVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useMutation<RemoveFavoriteEstateMutation, RemoveFavoriteEstateMutationVariables>(RemoveFavoriteEstateDocument, options);
+      }
+export type RemoveFavoriteEstateMutationHookResult = ReturnType<typeof useRemoveFavoriteEstateMutation>;
+export type RemoveFavoriteEstateMutationResult = Apollo.MutationResult<RemoveFavoriteEstateMutation>;
+export type RemoveFavoriteEstateMutationOptions = Apollo.BaseMutationOptions<RemoveFavoriteEstateMutation, RemoveFavoriteEstateMutationVariables>;
 export const UpdateEstateDocument = gql`
     mutation UpdateEstate($id: String!, $estateInput: EstateUpdateInput!) {
   updateEstate(id: $id, estateInput: $estateInput) {
@@ -721,6 +841,17 @@ export const CurrentUserDocument = gql`
     }
     recent_estates {
       id
+      street_address
+      city_address
+      postal_code
+      primary_type {
+        id
+        desc_cz
+      }
+      secondary_type {
+        id
+        desc_cz
+      }
     }
   }
 }

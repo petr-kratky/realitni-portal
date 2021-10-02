@@ -1,0 +1,5 @@
+mutation RemoveFavoriteEstate($estate_id: String!) {
+  removeFavoriteEstate(estate_id: $estate_id) {
+    id
+  }
+}

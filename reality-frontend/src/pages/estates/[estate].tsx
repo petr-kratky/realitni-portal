@@ -33,7 +33,12 @@ import DeleteIcon from "@material-ui/icons/Delete"
 
 import { Photo } from "react-bnb-gallery"
 
-import { useDeleteEstateMutation, useEstateQuery } from "src/graphql/queries/generated/graphql"
+import {
+  CurrentUserDocument,
+  useAddRecentEstateMutation,
+  useDeleteEstateMutation,
+  useEstateQuery
+} from "src/graphql/queries/generated/graphql"
 import { formatNumber } from "src/utils/number-formatter"
 import ImageCarousel from "src/components/estate/ImageCarousel"
 import { AppState } from "src/types"
@@ -74,9 +79,22 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
   } = useEstateQuery({ variables: { id: estate as string } })
   const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
 
+  const [addRecentEstate] = useAddRecentEstateMutation()
+
   const [imageLibraryOpen, setImageLibraryOpen] = React.useState<boolean>(false)
   const [fileLibraryOpen, setFileLibraryOpen] = React.useState<boolean>(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    try {
+      addRecentEstate({
+        variables: { estate_id: estate as string },
+        refetchQueries: [{ query: CurrentUserDocument }]
+      })
+    } catch (err) {
+      console.error(`Could not add estate ${estate} to recently visited!`, err)
+    }
+  }, [estate])
 
   const onDelete = async () => {
     try {

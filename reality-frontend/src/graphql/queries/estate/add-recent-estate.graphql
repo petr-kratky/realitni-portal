@@ -1,0 +1,5 @@
+mutation AddRecentEstate($estate_id: String!) {
+  addRecentEstate(estate_id: $estate_id) {
+    id
+  }
+}

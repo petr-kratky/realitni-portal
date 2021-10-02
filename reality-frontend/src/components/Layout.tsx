@@ -4,6 +4,7 @@ import { setCookie } from "nookies"
 import { createStyles } from "@material-ui/styles"
 import {
   AppBar,
+  Collapse,
   Divider,
   Drawer,
   IconButton,
@@ -12,6 +13,7 @@ import {
   ListItemIcon,
   ListItemText,
   makeStyles,
+  NoSsr,
   Theme,
   Toolbar,
   Tooltip,
@@ -24,7 +26,11 @@ import AddIcon from "@material-ui/icons/Add"
 import ExitIcon from "@material-ui/icons/ExitToApp"
 import MapIcon from "@material-ui/icons/Map"
 
-import { useCurrentUserQuery, useLogoutMutation } from "../graphql/queries/generated/graphql"
+import {
+  useCurrentUserQuery,
+  useEstateWithoutMediaQuery,
+  useLogoutMutation
+} from "../graphql/queries/generated/graphql"
 
 import LoginForm from "src/components/login/LoginForm"
 import SnackBar from "src/components/utils/SnackBar"
@@ -32,13 +38,14 @@ import EstateModal from "./estate/CreateEstateModal"
 import { setAccessToken } from "src/lib/auth/accessToken"
 import { estateModalStore } from "src/lib/stores"
 import { AppState } from "../types"
+import { AccessTime, ExpandLess, ExpandMore, Home } from "@material-ui/icons"
 
 type LayoutProps = {
   pageProps: any
   drawer: boolean
 }
 
-const DRAWER_WIDTH = 240
+const DRAWER_WIDTH = 260
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -54,6 +61,9 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     drawerPaper: {
       width: DRAWER_WIDTH
+    },
+    nestedListItem: {
+      paddingLeft: theme.spacing(4)
     },
     content: {
       flexGrow: 1,
@@ -82,12 +92,16 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
 
   const sm = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true })
 
-  const { data: currentUserData, loading: currentUserLoading } = useCurrentUserQuery({ fetchPolicy: "network-only" })
+  const { data: currentUserData, loading: currentUserLoading } = useCurrentUserQuery({
+    fetchPolicy: "network-only",
+    pollInterval: 1000 * 5
+  })
   const [logout, { client }] = useLogoutMutation()
 
   const isAuth = !!currentUserData?.currentUser?.id
 
   const [isDrawerOpen, setDrawerOpen] = React.useState<boolean>(drawer && !sm)
+  const [isRecentOpen, setRecentOpen] = React.useState<boolean>(true)
 
   React.useEffect(() => {
     setCookie(null, "drawer", `${isDrawerOpen}`)
@@ -117,6 +131,10 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
     }
   ]
 
+  const onEstateClick = (id: string) => () => {
+    window.open(`/estates/${id}`, "_blank")
+  }
+
   const handleLogout = async () => {
     try {
       await logout()
@@ -135,6 +153,10 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
 
   const toggleDrawer = () => {
     setDrawerOpen(!isDrawerOpen)
+  }
+
+  const toggleRecent = () => {
+    setRecentOpen(!isRecentOpen)
   }
 
   return (
@@ -168,6 +190,23 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
               </ListItem>
             ))}
             <Divider />
+            <ListItem button onClick={toggleRecent}>
+              <ListItemIcon>
+                <AccessTime />
+              </ListItemIcon>
+              <ListItemText primary='Historie' />
+              {isRecentOpen ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <NoSsr>
+              <Collapse in={isRecentOpen}>
+                <List component='div' disablePadding>
+                  {currentUserData.currentUser?.recent_estates
+                    ?.map(estate => <RecentEstateCard id={estate.id} onClick={onEstateClick} />)
+                    .reverse()}
+                </List>
+              </Collapse>
+            </NoSsr>
+            <Divider />
             <ListItem button onClick={handleLogout}>
               <ListItemIcon>
                 <ExitIcon />
@@ -185,6 +224,37 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
       </main>
     </div>
   )
+}
+
+const RecentEstateCard: React.FunctionComponent<{
+  id: string
+  onClick: (id: string) => () => void
+}> = ({ id, onClick }) => {
+  const classes = useStyles()
+  const {
+    data: estateData,
+    loading: estateLoading,
+    error: estateError
+  } = useEstateWithoutMediaQuery({ variables: { id } })
+
+  if (estateData?.estate) {
+    const { primary_type, secondary_type, street_address, city_address } = estateData.estate
+    return (
+      <ListItem button key={id} className={classes.nestedListItem} onClick={onClick(id)}>
+        <ListItemIcon>
+          <Home />
+        </ListItemIcon>
+        <ListItemText
+          primary={`${primary_type.desc_cz}, ${secondary_type.desc_cz}`}
+          secondary={`${street_address}, ${city_address}`}
+          primaryTypographyProps={{ noWrap: true }}
+          secondaryTypographyProps={{ noWrap: true }}
+        />
+      </ListItem>
+    )
+  } else {
+    return null
+  }
 }
 
 export default Layout
