@@ -94,7 +94,7 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
 
   const { data: currentUserData, loading: currentUserLoading } = useCurrentUserQuery({
     fetchPolicy: "network-only",
-    pollInterval: 1000 * 5
+    pollInterval: 1000 * 10
   })
   const [logout, { client }] = useLogoutMutation()
 
@@ -141,7 +141,7 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
       setAccessToken("")
       await client!.resetStore()
     } catch (err) {
-      console.log(err)
+      console.error(err)
     }
   }
 
@@ -201,7 +201,7 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
               <Collapse in={isRecentOpen}>
                 <List component='div' disablePadding>
                   {currentUserData.currentUser?.recent_estates
-                    ?.map(estate => <RecentEstateCard id={estate.id} onClick={onEstateClick} />)
+                    ?.map(estate => <RecentEstateCard key={estate.id} id={estate.id} onClick={onEstateClick} />)
                     .reverse()
                     .splice(0, 5)}
                 </List>
@@ -241,7 +241,7 @@ const RecentEstateCard: React.FunctionComponent<{
   if (estateData?.estate) {
     const { primary_type, secondary_type, street_address, city_address } = estateData.estate
     return (
-      <ListItem button key={id} className={classes.nestedListItem} onClick={onClick(id)}>
+      <ListItem button className={classes.nestedListItem} onClick={onClick(id)}>
         <ListItemIcon>
           <Home />
         </ListItemIcon>
