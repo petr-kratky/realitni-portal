@@ -202,7 +202,8 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
                 <List component='div' disablePadding>
                   {currentUserData.currentUser?.recent_estates
                     ?.map(estate => <RecentEstateCard id={estate.id} onClick={onEstateClick} />)
-                    .reverse()}
+                    .reverse()
+                    .splice(0, 5)}
                 </List>
               </Collapse>
             </NoSsr>
