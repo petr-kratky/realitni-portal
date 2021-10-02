@@ -1,12 +1,12 @@
 import React, { FunctionComponent, useEffect, useRef, useState } from "react"
-
-import { GeoJSONSource } from "mapbox-gl"
-import ReactMapGL, { ExtraState, FlyToInterpolator, PointerEvent, ViewportProps } from "react-map-gl"
-import { FeatureCollection, Point } from "geojson"
-
 import { useRouter } from "next/router"
+import { GeoJSONSource } from "mapbox-gl"
+import ReactMapGL, { ExtraState, PointerEvent, ViewportProps } from "react-map-gl"
+import { easeCubic } from "d3-ease"
+import { createStyles, Fab, makeStyles, Theme, Tooltip } from "@material-ui/core"
+import { Remove, Add } from "@material-ui/icons"
 
-import { pushViewportToUrl, removeSpaces } from "../../../utils/utils"
+import { pushViewportToUrl } from "../../../utils/utils"
 import authFetch from "../../../lib/auth/authFetch"
 import { viewportStore, snackStore, geojsonStore } from "src/lib/stores"
 import {
@@ -20,6 +20,29 @@ import {
 
 const MAPBOX_MAP_STYLE_URL = "mapbox://styles/pkratky/ck2dpu35v14ox1co4654rrb9n?optimize=true"
 
+const FAB_BOTTOM_OFFSET = 5
+const FAB_RIGHT_OFFSET = 2
+
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    mapContainer: {
+      height: "calc(100vh - 48px)",
+      width: "100%",
+      position: "relative"
+    },
+    fabZoomIn: {
+      position: "absolute",
+      bottom: theme.spacing(FAB_BOTTOM_OFFSET + 6),
+      right: theme.spacing(FAB_RIGHT_OFFSET)
+    },
+    fabZoomOut: {
+      position: "absolute",
+      bottom: theme.spacing(FAB_BOTTOM_OFFSET),
+      right: theme.spacing(FAB_RIGHT_OFFSET)
+    }
+  })
+)
+
 const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
   children,
   contextMenuProps,
@@ -28,6 +51,7 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
   setPopupProps,
   appState: { geojson, viewport }
 }) => {
+  const classes = useStyles()
   const router = useRouter()
   const mapRef = useRef<ReactMapGL>(null)
 
@@ -119,6 +143,14 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
   useEffect(() => {
     updateGeojsonSource()
   }, [geojson.refetchCounter, geojson.filter])
+
+  const zoomIn = () => {
+    viewportStore.setViewport({ ...viewport, zoom: viewport.zoom + 1 }, true, 300)
+  }
+
+  const zoomOut = () => {
+    viewportStore.setViewport({ ...viewport, zoom: viewport.zoom - 1 }, true, 300)
+  }
 
   const __onContextMenu = (e: PointerEvent): void => {
     const [longitude, latitude] = e.lngLat
@@ -290,6 +322,16 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
       minZoom={6.5}
     >
       {children}
+      <Tooltip placement='left' title='Přiblížit' enterDelay={1250}>
+        <Fab variant='circular' color='default' size='small' classes={{ root: classes.fabZoomIn }} onClick={zoomIn}>
+          <Add />
+        </Fab>
+      </Tooltip>
+      <Tooltip placement='left' title='Oddálit' enterDelay={1250}>
+        <Fab variant='circular' color='default' size='small' classes={{ root: classes.fabZoomOut }} onClick={zoomOut}>
+          <Remove />
+        </Fab>
+      </Tooltip>
     </ReactMapGL>
   )
 }

@@ -1,5 +1,5 @@
 import React, { Dispatch, FunctionComponent, SetStateAction, useState } from "react"
-import { createStyles, Fab, makeStyles, Theme, Tooltip } from "@material-ui/core"
+import { createStyles, Fab, makeStyles, Theme, Tooltip, useMediaQuery, useTheme } from "@material-ui/core"
 import AddIcon from "@material-ui/icons/Add"
 
 import { estateModalStore } from "src/lib/stores"
@@ -7,8 +7,14 @@ import CustomPopup, { CustomPopupProps } from "./CustomPopup"
 import ContextMenu, { ContextMenuProps } from "./ContextMenu"
 import RSMap from "./RSMap"
 import { AppState } from "src/types"
+import Search from "@material-ui/icons/Search"
 
-type MapContainerProps = {}
+type MapContainerProps = {
+  toggleSidebar: () => void
+}
+
+const TOP_OFFSET = 2
+const RIGHT_OFFSET = 2
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -17,16 +23,19 @@ const useStyles = makeStyles((theme: Theme) =>
       width: "100%",
       position: "relative"
     },
-    fabRoot: {
+    searchFab: {
       position: "absolute",
-      bottom: theme.spacing(5),
-      right: theme.spacing(4)
+      top: theme.spacing(TOP_OFFSET),
+      right: theme.spacing(RIGHT_OFFSET)
     }
   })
 )
 
-const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ appState }) => {
+const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ appState, toggleSidebar }) => {
   const classes = useStyles()
+	const theme = useTheme()
+
+	const sm = useMediaQuery(theme.breakpoints.down("sm"))
 
   const [contextMenuProps, setContextMenuProps] = useState<ContextMenuProps>(
     ContextMenu.defaultProps as ContextMenuProps
@@ -58,9 +67,9 @@ const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ appStat
           <ContextMenu {...contextMenuProps} appState={appState} handleClose={_handleContextMenuClose} />
         )}
       </RSMap>
-      <Tooltip title='Přidat nemovitost'>
-        <Fab color='primary' onClick={() => estateModalStore.openCreateMode()} classes={{ root: classes.fabRoot }}>
-          <AddIcon />
+      <Tooltip title='Vyhledávání'>
+        <Fab variant='extended' color='default' size={sm ? 'medium' : 'large'} onClick={toggleSidebar} classes={{ root: classes.searchFab }}>
+          <Search />
         </Fab>
       </Tooltip>
     </div>

@@ -55,15 +55,15 @@ const useStyles = makeStyles((theme: Theme) =>
     appBar: {
       zIndex: theme.zIndex.drawer + 1
     },
+		nestedListItem: {
+			paddingLeft: theme.spacing(4)
+		},
     drawer: {
       width: DRAWER_WIDTH,
       flexShrink: 0
     },
     drawerPaper: {
       width: DRAWER_WIDTH
-    },
-    nestedListItem: {
-      paddingLeft: theme.spacing(4)
     },
     content: {
       flexGrow: 1,
@@ -199,11 +199,10 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
             </ListItem>
             <NoSsr>
               <Collapse in={isRecentOpen}>
-                <List component='div' disablePadding>
+                <List dense component='div' disablePadding>
                   {currentUserData.currentUser?.recent_estates
                     ?.map(estate => <RecentEstateCard key={estate.id} id={estate.id} onClick={onEstateClick} />)
-                    .reverse()
-                    .splice(0, 5)}
+                    .reverse()}
                 </List>
               </Collapse>
             </NoSsr>

@@ -1,4 +1,4 @@
-import React, { useMemo } from "react"
+import React from "react"
 import { useFormik } from "formik"
 import { fitBounds, Bounds } from "viewport-mercator-project"
 import usePlacesService from "react-google-autocomplete/lib/usePlacesAutocompleteService"
@@ -18,10 +18,10 @@ import {
   ListItem,
   ListItemText,
   Paper,
-  ListItemAvatar,
-  Avatar,
   ListItemIcon,
-  CircularProgress
+  CircularProgress,
+  useMediaQuery,
+  useTheme
 } from "@material-ui/core"
 import { Pagination } from "@material-ui/lab"
 import FilterIcon from "@material-ui/icons/FilterList"
@@ -35,9 +35,11 @@ import { geocodeLocation } from "../../../lib/api/geocode"
 import { filterDictionary, geojsonStore, snackStore, viewportStore } from "../../../lib/stores"
 
 import FilterModal from "./FilterModal"
-import { GeocodeResult } from "../../../types/geocode-result"
+import { ChevronRight } from "@material-ui/icons"
 
-type EstatesSidebarProps = {}
+type EstatesSidebarProps = {
+  toggle: () => void
+}
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -48,6 +50,15 @@ const useStyles = makeStyles((theme: Theme) =>
       "& > *": {
         margin: theme.spacing(0.5, 0)
       }
+    },
+    headerControls: {
+      display: "flex",
+      width: "100%",
+      alignItems: "center",
+      marginTop: theme.spacing(1)
+    },
+    close: {
+      marginLeft: "auto"
     },
     header: {
       display: "flex",
@@ -95,6 +106,7 @@ const useStyles = makeStyles((theme: Theme) =>
 )
 
 const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = ({
+  toggle,
   appState,
   appState: {
     geojson: {
@@ -105,6 +117,10 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
   }
 }) => {
   const classes = useStyles()
+  const theme = useTheme()
+
+  const xs = useMediaQuery(theme.breakpoints.down("xs"))
+	const sm = useMediaQuery(theme.breakpoints.down("sm"))
 
   // --- PAGINATION --- //
 
@@ -183,6 +199,9 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
     if (address.length === 0) {
       return address
     }
+		if (sm) {
+			toggle()
+		}
     const { results, error_message } = await geocodeLocation({
       address
     })
@@ -226,6 +245,14 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
 
   return (
     <div className={classes.container}>
+      <div className={classes.headerControls}>
+        <Typography variant='h5'>Vyhledat nemovitost</Typography>
+        <Tooltip title='Zavřít'>
+          <IconButton size='medium' className={classes.close} onClick={toggle}>
+            <ChevronRight />
+          </IconButton>
+        </Tooltip>
+      </div>
       <div className={classes.header}>
         <div className={classes.search}>
           <TextField
@@ -278,13 +305,13 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
               <Paper id='predictions-list'>
                 {placePredictions.map((prediction, index, arr) => (
                   <ListItem
-										key={prediction.description}
+                    key={prediction.reference}
                     dense
                     button
                     divider={index !== arr.length - 1}
                     onClick={() => onPredictionSelect(prediction)}
                   >
-                    <ListItemIcon >
+                    <ListItemIcon>
                       <LocationIcon />
                     </ListItemIcon>
                     <ListItemText
@@ -297,9 +324,15 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
             </List>
           )}
         </div>
-        <Button className={classes.filterButton} startIcon={<FilterIcon />} onClick={openFilterModal}>
-          Filtrovat
-        </Button>
+        {xs ? (
+          <IconButton size='medium' onClick={openFilterModal}>
+            <FilterIcon />
+          </IconButton>
+        ) : (
+          <Button className={classes.filterButton} startIcon={<FilterIcon />} onClick={openFilterModal}>
+            Filtrovat
+          </Button>
+        )}
       </div>
       {!!filterEntries.length && (
         <span>

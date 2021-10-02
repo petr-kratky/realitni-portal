@@ -36,12 +36,13 @@ let state = initialState
 
 export const viewportStore = {
   subscribe: (setState: React.Dispatch<React.SetStateAction<ViewportState>>) => subject.subscribe(setState),
-  setViewport: (viewport: ViewportState, fly = false) => {
+  setViewport: (viewport: ViewportState, fly = false, transitionDuration = transition.transitionDuration) => {
     if (fly) {
       state = {
         ...state,
         ...viewport,
-        ...transition
+        ...transition,
+				transitionDuration
       }
     } else {
       state = {

@@ -34,8 +34,14 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     drawerPaper: {
       backgroundColor: theme.palette.grey[50],
-      padding: theme.spacing(2),
-      width: DRAWER_WIDTH
+      padding: theme.spacing(0, 2, 2),
+      width: DRAWER_WIDTH,
+      [theme.breakpoints.down("sm")]: {
+        width: "600px"
+      },
+      [theme.breakpoints.down("xs")]: {
+        width: "100%"
+      }
     },
     content: {
       flexGrow: 1,
@@ -62,14 +68,20 @@ const MapPage: NextPage<MapPageProps & AppState> = ({ appState }) => {
   const router = useRouter()
   const theme = useTheme()
 
-  const sm = useMediaQuery(theme.breakpoints.down("sm"))
+  const sm = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true })
 
-  const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(true)
+  const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(false)
 
   React.useEffect(() => {
     const initViewport = { ...appState.viewport, ...getQueryViewport(router.query) }
     viewportStore.setViewport(initViewport)
     pushViewportToUrl(router, initViewport)
+  }, [])
+
+  React.useEffect(() => {
+    if (!sm) {
+      setSidebarOpen(true)
+    }
   }, [])
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
@@ -81,18 +93,18 @@ const MapPage: NextPage<MapPageProps & AppState> = ({ appState }) => {
         <link href='https://api.mapbox.com/mapbox-gl-js/v1.13.1/mapbox-gl.css' rel='stylesheet' />
       </Head>
       <div className={`${classes.content} ${sidebarOpen ? classes.contentShift : ""}`}>
-        <MapContainer appState={appState} />
+        <MapContainer appState={appState} toggleSidebar={toggleSidebar} />
       </div>
       <Drawer
         anchor='right'
-        variant='persistent'
+        variant={sm ? "temporary" : "persistent"}
         open={sidebarOpen}
         onClose={toggleSidebar}
         className={classes.drawer}
         classes={{ paper: classes.drawerPaper }}
       >
-        <Toolbar variant='dense' />
-        <EstatesSidebar appState={appState} />
+        {!sm && <Toolbar variant='dense' />}
+        <EstatesSidebar toggle={toggleSidebar} appState={appState} />
       </Drawer>
     </div>
   )
