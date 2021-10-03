@@ -51,6 +51,7 @@ RUN npm install --production
 
 COPY --from=builder --chown=$USER:$USER $HOME/$APP/dist dist
 COPY --from=builder --chown=$USER:$USER $HOME/$APP/.next .next
+COPY --from=builder --chown=$USER:$USER $HOME/$APP/public public
 
 ENV HOST=0.0.0.0
 
