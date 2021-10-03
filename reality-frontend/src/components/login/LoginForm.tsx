@@ -1,15 +1,15 @@
-import React, { FunctionComponent, useEffect, useState } from "react"
+import React, { FunctionComponent } from "react"
 import { Formik } from "formik"
 import * as Yup from "yup"
+import Head from "next/head"
 import { useRouter } from "next/router"
 
 import { Button, TextField, Theme, makeStyles, createStyles } from "@material-ui/core"
 
 import { useLoginMutation, CurrentUserDocument, CurrentUserQuery } from "src/graphql/queries/generated/graphql"
 import { setAccessToken } from "src/lib/auth/accessToken"
-import { AppState, FormikSubmitFunction } from "../../types"
 import { snackStore } from "src/lib/stores"
-import Head from "next/head"
+import { AppState, FormikSubmitFunction } from "../../types"
 
 type LoginFormProps = AppState & {}
 
@@ -22,7 +22,8 @@ const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     loginFormContainer: {
       display: "flex",
-      height: "100vh",
+      height: "calc(100vh - 48px)",
+			flexDirection: 'column',
       justifyContent: "center",
       alignItems: "center"
     },
@@ -38,7 +39,6 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const LoginForm: FunctionComponent<LoginFormProps> = ({ appState }) => {
   const classes = useStyles()
-  const router = useRouter()
 
   const [login] = useLoginMutation()
 
@@ -56,7 +56,7 @@ const LoginForm: FunctionComponent<LoginFormProps> = ({ appState }) => {
     const { email, password } = values
 
     try {
-      const response = await login({
+      await login({
         variables: {
           email,
           password
