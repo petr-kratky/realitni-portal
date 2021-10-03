@@ -30,6 +30,7 @@ const Component: React.FunctionComponent<ComponentProps> = ({
       open={open}
       onClose={onClose}
       transformOrigin={{ vertical: "top", horizontal: "left" }}
+      MenuListProps={{ dense: true }}
     >
       <MenuItem onClick={onEditClick}>
         <ListItemIcon>
