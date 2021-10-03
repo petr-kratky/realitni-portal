@@ -243,6 +243,8 @@ export type Query = {
   estatePrimaryTypes: Array<EstatePrimaryType>;
   estateSecondaryTypes: Array<EstateSecondaryType>;
   currentUser?: Maybe<Account>;
+  recentEstates: Array<Estate>;
+  favoriteEstates: Array<Estate>;
 };
 
 
@@ -319,6 +321,16 @@ export type EstateQueryVariables = Exact<{
 
 export type EstateQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 'Estate', id: string, created_on: any, last_modified_on: any, name?: Maybe<string>, description?: Maybe<string>, longitude: number, latitude: number, advert_price?: Maybe<number>, estimated_price?: Maybe<number>, land_area?: Maybe<number>, usable_area?: Maybe<number>, street_address: string, city_address: string, postal_code: string, terrace?: Maybe<boolean>, parking?: Maybe<boolean>, garage?: Maybe<boolean>, swimming_pool?: Maybe<boolean>, elevator?: Maybe<boolean>, cellar?: Maybe<boolean>, furnished?: Maybe<boolean>, created_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, last_modified_by: { __typename?: 'AccountPublicInfo', id: string, username: string }, images: Array<{ __typename?: 'Image', _id: string, original: string, large: string, mid: string, small: string }>, files: Array<{ __typename?: 'File', _id: string, url: string, size: number }>, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
 
+export type FavoriteEstatesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type FavoriteEstatesQuery = { __typename?: 'Query', favoriteEstates: Array<{ __typename?: 'Estate', id: string }> };
+
+export type RecentEstatesQueryVariables = Exact<{ [key: string]: never; }>;
+
+
+export type RecentEstatesQuery = { __typename?: 'Query', recentEstates: Array<{ __typename?: 'Estate', id: string, street_address: string, city_address: string, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
+
 export type RemoveFavoriteEstateMutationVariables = Exact<{
   estate_id: Scalars['String'];
 }>;
@@ -337,7 +349,7 @@ export type UpdateEstateMutation = { __typename?: 'Mutation', updateEstate: { __
 export type CurrentUserQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type CurrentUserQuery = { __typename?: 'Query', currentUser?: Maybe<{ __typename?: 'Account', id: string, username: string, email: string, favorite_estates?: Maybe<Array<{ __typename?: 'Estate', id: string }>>, recent_estates?: Maybe<Array<{ __typename?: 'Estate', id: string, street_address: string, city_address: string, postal_code: string, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }>> }> };
+export type CurrentUserQuery = { __typename?: 'Query', currentUser?: Maybe<{ __typename?: 'Account', id: string, username: string, email: string }> };
 
 export type LoginMutationVariables = Exact<{
   email: Scalars['String'];
@@ -760,6 +772,84 @@ export function useEstateLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Est
 export type EstateQueryHookResult = ReturnType<typeof useEstateQuery>;
 export type EstateLazyQueryHookResult = ReturnType<typeof useEstateLazyQuery>;
 export type EstateQueryResult = Apollo.QueryResult<EstateQuery, EstateQueryVariables>;
+export const FavoriteEstatesDocument = gql`
+    query FavoriteEstates {
+  favoriteEstates {
+    id
+  }
+}
+    `;
+
+/**
+ * __useFavoriteEstatesQuery__
+ *
+ * To run a query within a React component, call `useFavoriteEstatesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useFavoriteEstatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useFavoriteEstatesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useFavoriteEstatesQuery(baseOptions?: Apollo.QueryHookOptions<FavoriteEstatesQuery, FavoriteEstatesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<FavoriteEstatesQuery, FavoriteEstatesQueryVariables>(FavoriteEstatesDocument, options);
+      }
+export function useFavoriteEstatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<FavoriteEstatesQuery, FavoriteEstatesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<FavoriteEstatesQuery, FavoriteEstatesQueryVariables>(FavoriteEstatesDocument, options);
+        }
+export type FavoriteEstatesQueryHookResult = ReturnType<typeof useFavoriteEstatesQuery>;
+export type FavoriteEstatesLazyQueryHookResult = ReturnType<typeof useFavoriteEstatesLazyQuery>;
+export type FavoriteEstatesQueryResult = Apollo.QueryResult<FavoriteEstatesQuery, FavoriteEstatesQueryVariables>;
+export const RecentEstatesDocument = gql`
+    query RecentEstates {
+  recentEstates {
+    id
+    street_address
+    city_address
+    primary_type {
+      id
+      desc_cz
+    }
+    secondary_type {
+      id
+      desc_cz
+    }
+  }
+}
+    `;
+
+/**
+ * __useRecentEstatesQuery__
+ *
+ * To run a query within a React component, call `useRecentEstatesQuery` and pass it any options that fit your needs.
+ * When your component renders, `useRecentEstatesQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useRecentEstatesQuery({
+ *   variables: {
+ *   },
+ * });
+ */
+export function useRecentEstatesQuery(baseOptions?: Apollo.QueryHookOptions<RecentEstatesQuery, RecentEstatesQueryVariables>) {
+        const options = {...defaultOptions, ...baseOptions}
+        return Apollo.useQuery<RecentEstatesQuery, RecentEstatesQueryVariables>(RecentEstatesDocument, options);
+      }
+export function useRecentEstatesLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<RecentEstatesQuery, RecentEstatesQueryVariables>) {
+          const options = {...defaultOptions, ...baseOptions}
+          return Apollo.useLazyQuery<RecentEstatesQuery, RecentEstatesQueryVariables>(RecentEstatesDocument, options);
+        }
+export type RecentEstatesQueryHookResult = ReturnType<typeof useRecentEstatesQuery>;
+export type RecentEstatesLazyQueryHookResult = ReturnType<typeof useRecentEstatesLazyQuery>;
+export type RecentEstatesQueryResult = Apollo.QueryResult<RecentEstatesQuery, RecentEstatesQueryVariables>;
 export const RemoveFavoriteEstateDocument = gql`
     mutation RemoveFavoriteEstate($estate_id: String!) {
   removeFavoriteEstate(estate_id: $estate_id) {
@@ -836,23 +926,6 @@ export const CurrentUserDocument = gql`
     id
     username
     email
-    favorite_estates {
-      id
-    }
-    recent_estates {
-      id
-      street_address
-      city_address
-      postal_code
-      primary_type {
-        id
-        desc_cz
-      }
-      secondary_type {
-        id
-        desc_cz
-      }
-    }
   }
 }
     `;

@@ -36,9 +36,10 @@ import {
 } from "@material-ui/icons"
 
 import {
+  Estate,
   useCurrentUserQuery,
-  useEstateWithoutMediaQuery,
-  useLogoutMutation
+  useLogoutMutation,
+  useRecentEstatesQuery
 } from "../graphql/queries/generated/graphql"
 
 import LoginForm from "src/components/login/LoginForm"
@@ -88,10 +89,14 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
 
   const sm = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true })
 
-  const { data: currentUserData, refetch: refetchCurrentUser } = useCurrentUserQuery({
+  const [logout, { client }] = useLogoutMutation()
+  const { data: recentEstatesData, refetch: refetchRecentEstates } = useRecentEstatesQuery({
+    ssr: false,
+    fetchPolicy: "no-cache"
+  })
+  const { data: currentUserData } = useCurrentUserQuery({
     fetchPolicy: "network-only"
   })
-  const [logout, { client }] = useLogoutMutation()
 
   const isAuth = !!currentUserData?.currentUser?.id
 
@@ -142,14 +147,14 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
 
   const toggleDrawer = () => {
     if (!isDrawerOpen) {
-      refetchCurrentUser()
+      refetchRecentEstates()
     }
     setDrawerOpen(!isDrawerOpen)
   }
 
   const toggleRecent = () => {
     if (!isRecentOpen) {
-      refetchCurrentUser()
+      refetchRecentEstates()
     }
     setRecentOpen(!isRecentOpen)
   }
@@ -162,8 +167,9 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
     setProfileMenuAnchor(null)
   }
 
-  const openRecentsMenu = event => {
-    refetchCurrentUser().then(() => setRecentsMenuAnchor(event.currentTarget))
+  const openRecentsMenu = async event => {
+    refetchRecentEstates()
+    setRecentsMenuAnchor(event.currentTarget)
   }
 
   const closeRecentsMenu = () => {
@@ -201,47 +207,56 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
         </Toolbar>
       </AppBar>
       {isAuth && (
-        <Drawer
-          anchor='left'
-          variant='temporary'
-          open={isDrawerOpen}
-          onClose={toggleDrawer}
-          className={classes.drawer}
-          classes={{ paper: classes.drawerPaper }}
-        >
-          <List>
-            {navigationOptions.map(({ text, onClick, icon }) => (
-              <ListItem button onClick={onClick} key={text}>
-                <ListItemIcon>{icon}</ListItemIcon>
-                <ListItemText primary={text} />
+        <NoSsr>
+          <Drawer
+            anchor='left'
+            variant='temporary'
+            open={isDrawerOpen}
+            onClose={toggleDrawer}
+            className={classes.drawer}
+            classes={{ paper: classes.drawerPaper }}
+          >
+            <List>
+              {navigationOptions.map(({ text, onClick, icon }) => (
+                <ListItem button onClick={onClick} key={text}>
+                  <ListItemIcon>{icon}</ListItemIcon>
+                  <ListItemText primary={text} />
+                </ListItem>
+              ))}
+              <Divider />
+              <ListItem button onClick={toggleRecent}>
+                <ListItemIcon>
+                  <History />
+                </ListItemIcon>
+                <ListItemText primary='Historie' />
+                {isRecentOpen ? <ExpandLess /> : <ExpandMore />}
               </ListItem>
-            ))}
-            <Divider />
-            <ListItem button onClick={toggleRecent}>
-              <ListItemIcon>
-                <History />
-              </ListItemIcon>
-              <ListItemText primary='Historie' />
-              {isRecentOpen ? <ExpandLess /> : <ExpandMore />}
-            </ListItem>
-            <NoSsr>
+
               <Collapse in={isRecentOpen}>
                 <List dense component='div' disablePadding>
-                  {currentUserData.currentUser?.recent_estates
-                    ?.map(estate => <RecentEstateCard key={estate.id} id={estate.id} />)
+                  {recentEstatesData?.recentEstates
+                    // @ts-ignore
+                    ?.map(estate => <RecentEstateCard key={estate.id} estate={estate} />)
                     .reverse()}
+                  {!recentEstatesData?.recentEstates.length && (
+                    <ListItem>
+                      <Typography variant='caption' color='textSecondary'>
+                        Dosud jste nezobrazil(a) žádnou nemovitost.
+                      </Typography>
+                    </ListItem>
+                  )}
                 </List>
               </Collapse>
-            </NoSsr>
-            <Divider />
-            <ListItem button onClick={handleLogout}>
-              <ListItemIcon>
-                <ExitToApp />
-              </ListItemIcon>
-              <ListItemText primary='Odhlásit' />
-            </ListItem>
-          </List>
-        </Drawer>
+              <Divider />
+              <ListItem button onClick={handleLogout}>
+                <ListItemIcon>
+                  <ExitToApp />
+                </ListItemIcon>
+                <ListItemText primary='Odhlásit' />
+              </ListItem>
+            </List>
+          </Drawer>
+        </NoSsr>
       )}
       <main className={classes.content}>
         <Toolbar variant='dense' />
@@ -260,7 +275,8 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
             <RecentsMenu
               menuAnchor={recentsMenuAnchor}
               open={isRecentsMenuOpen}
-              recents={currentUserData?.currentUser?.recent_estates?.map(({ id }) => id) ?? []}
+              // @ts-ignore
+              recents={recentEstatesData?.recentEstates ?? []}
               onClose={closeRecentsMenu}
             />
           </>
@@ -308,7 +324,7 @@ const ProfileMenu: React.FunctionComponent<{
 
 const RecentsMenu: React.FunctionComponent<{
   open: boolean
-  recents: Array<string>
+  recents: Array<Estate>
   menuAnchor: null | HTMLElement
   onClose: () => void
 }> = ({ open, menuAnchor, recents, onClose }) => {
@@ -323,7 +339,7 @@ const RecentsMenu: React.FunctionComponent<{
       MenuListProps={{ dense: true }}
     >
       <ListSubheader>Poslední zobrazené</ListSubheader>
-      {recents.map(id => <RecentEstateCard key={id} id={id} />).reverse()}
+      {recents.map(estate => <RecentEstateCard key={estate.id} estate={estate} />).reverse()}
       {!recents.length && (
         <ListItem>
           <Typography variant='caption' color='textSecondary'>
@@ -335,33 +351,24 @@ const RecentsMenu: React.FunctionComponent<{
   )
 }
 
-const RecentEstateCard: React.FunctionComponent<{ id: string }> = ({ id }) => {
+const RecentEstateCard: React.FunctionComponent<{ estate: Estate }> = ({
+  estate: { id, primary_type, secondary_type, street_address, city_address }
+}) => {
   const classes = useStyles()
-
-  const { data: estateData } = useEstateWithoutMediaQuery({ variables: { id } })
-
-  const onClick = (id: string) => () => {
-    window.open(`/estates/${id}`, "_blank")
-  }
-
-  if (estateData?.estate) {
-    const { primary_type, secondary_type, street_address, city_address } = estateData.estate
-    return (
-      <ListItem button className={classes.nestedListItem} onClick={onClick(id)}>
-        <ListItemIcon>
-          <Home />
-        </ListItemIcon>
-        <ListItemText
-          primary={`${primary_type.desc_cz}, ${secondary_type.desc_cz}`}
-          secondary={`${street_address}, ${city_address}`}
-          primaryTypographyProps={{ noWrap: true }}
-          secondaryTypographyProps={{ noWrap: true }}
-        />
-      </ListItem>
-    )
-  } else {
-    return null
-  }
+  const onClick = (id: string) => () => window.open(`/estates/${id}`, "_blank")
+  return (
+    <ListItem button className={classes.nestedListItem} onClick={onClick(id)}>
+      <ListItemIcon>
+        <Home />
+      </ListItemIcon>
+      <ListItemText
+        primary={`${primary_type.desc_cz}, ${secondary_type.desc_cz}`}
+        secondary={`${street_address}, ${city_address}`}
+        primaryTypographyProps={{ noWrap: true }}
+        secondaryTypographyProps={{ noWrap: true }}
+      />
+    </ListItem>
+  )
 }
 
 export default Layout

@@ -1,0 +1,15 @@
+query RecentEstates {
+  recentEstates {
+    id
+    street_address
+    city_address
+    primary_type {
+      id
+      desc_cz
+    }
+    secondary_type {
+      id
+      desc_cz
+    }
+  }
+}

@@ -37,6 +37,20 @@ export class AccountResolver {
   }
 
   @RequireAuthentication()
+  @Query(() => [Estate])
+  async recentEstates(@Ctx() { payload }: MyContext): Promise<Estate[]> {
+    const user = await this.accountService.getAccountById(payload.id, ["recent_estates"])
+    return user.recent_estates
+  }
+
+  @RequireAuthentication()
+  @Query(() => [Estate])
+  async favoriteEstates(@Ctx() { payload }: MyContext): Promise<Estate[]> {
+    const user = await this.accountService.getAccountById(payload.id, ["favorite_estates"])
+    return user.favorite_estates
+  }
+
+  @RequireAuthentication()
   @Mutation(() => Boolean)
   async logout(@Ctx() { res }: MyContext) {
     try {
@@ -50,8 +64,8 @@ export class AccountResolver {
   @RequireAuthentication()
   @Mutation(() => [Estate])
   async addRecentEstate(@Ctx() { payload }: MyContext, @Arg("estate_id") estate_id: string): Promise<Estate[]> {
-    const user = await this.accountService.getAccountById(payload.id)
-    const visitedEstate = await this.estateService.getEstateById(estate_id)
+    const user = await this.accountService.getAccountById(payload.id, ["recent_estates"])
+    const visitedEstate = Estate.create({ id: estate_id })
     user.recent_estates = user.recent_estates.filter(estate => estate.id !== visitedEstate.id)
 		await user.save()
     if (user.recent_estates.push(visitedEstate) > 5) {
@@ -64,8 +78,8 @@ export class AccountResolver {
   @RequireAuthentication()
   @Mutation(() => [Estate])
   async addFavoriteEstate(@Ctx() { payload }: MyContext, @Arg("estate_id") estate_id: string): Promise<Estate[]> {
-    const user = await this.accountService.getAccountById(payload.id)
-    const favoriteEstate = await this.estateService.getEstateById(estate_id)
+    const user = await this.accountService.getAccountById(payload.id, ["favorite_estates"])
+    const favoriteEstate = Estate.create({ id: estate_id })
     if (user.favorite_estates.some(estate => estate.id === favoriteEstate.id)) {
       return user.favorite_estates
     }
@@ -77,7 +91,7 @@ export class AccountResolver {
   @RequireAuthentication()
   @Mutation(() => [Estate])
   async removeFavoriteEstate(@Ctx() { payload }: MyContext, @Arg("estate_id") estate_id: string): Promise<Estate[]> {
-    const user = await this.accountService.getAccountById(payload.id)
+    const user = await this.accountService.getAccountById(payload.id, ["favorite_estates"])
     const newFavoriteEstates = user.favorite_estates.filter(estate => estate.id !== estate_id)
     user.favorite_estates = newFavoriteEstates
     await user.save()
