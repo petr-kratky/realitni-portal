@@ -23,13 +23,13 @@ import {
 } from "src/lib/stores"
 
 type AppCustomProps = {
-  drawer: boolean
+  // drawer: boolean
 }
 
 const useStyles = makeStyles((theme: Theme) => createStyles({}))
 
 // https://github.com/mui-org/material-ui/blob/master/examples/nextjs/pages/_app.js
-function Application({ Component, apolloClient, pageProps, drawer }: AppProps & AppRoot & AppCustomProps) {
+function Application({ Component, apolloClient, pageProps }: AppProps & AppRoot & AppCustomProps) {
   const [estateModalState, setEstateModalState] = React.useState<EstateModalState>(estateModalStore.initialState)
   const [snackState, setSnackState] = React.useState<SnackState>(snackStore.initialState)
   const [viewportState, setViewportState] = React.useState<ViewportState>(viewportStore.initialState)
@@ -65,7 +65,7 @@ function Application({ Component, apolloClient, pageProps, drawer }: AppProps & 
   return (
     <ThemeProvider theme={theme}>
       <ApolloProvider client={apolloClient}>
-        <Layout pageProps={pageProps} appState={appState} drawer={drawer}>
+        <Layout pageProps={pageProps} appState={appState}>
           <Component {...pageProps} appState={appState} />
         </Layout>
       </ApolloProvider>
@@ -78,7 +78,7 @@ Application.getInitialProps = async (ctx: NextPageContextApp) => {
   if (!process.browser) {
     const cookies = parseCookies(ctx.ctx)
     return {
-      drawer: cookies.drawer === "true" || typeof cookies.drawer === "undefined"
+      // drawer: cookies.drawer === "true" || typeof cookies.drawer === "undefined"
     }
   }
 }
