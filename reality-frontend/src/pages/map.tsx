@@ -3,7 +3,7 @@ import { ParsedUrlQuery } from "querystring"
 import { NextPage } from "next"
 import Head from "next/head"
 import { useRouter } from "next/router"
-import { makeStyles, useMediaQuery, useTheme, Drawer, Toolbar, createStyles, Theme } from "@material-ui/core"
+import { makeStyles, useMediaQuery, useTheme, Drawer, Toolbar, createStyles, Theme, NoSsr } from "@material-ui/core"
 
 import MapContainer from "../components/map/map/MapContainer"
 import EstatesSidebar from "../components/map/sidebar/EstatesSidebar"
@@ -87,26 +87,30 @@ const MapPage: NextPage<MapPageProps & AppState> = ({ appState }) => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen)
 
   return (
-    <div className={classes.root}>
+    <>
       <Head>
-        <title>Realitní Portál | Mapa</title>
+        <title>Mapa | Realitní Portál</title>
         <link href='https://api.mapbox.com/mapbox-gl-js/v1.13.1/mapbox-gl.css' rel='stylesheet' />
       </Head>
-      <div className={`${classes.content} ${sidebarOpen ? classes.contentShift : ""}`}>
-        <MapContainer appState={appState} toggleSidebar={toggleSidebar} />
+      <div className={classes.root}>
+        <div className={`${classes.content} ${sidebarOpen ? classes.contentShift : ""}`}>
+          <MapContainer appState={appState} toggleSidebar={toggleSidebar} />
+        </div>
+        <NoSsr>
+          <Drawer
+            anchor='right'
+            variant={sm ? "temporary" : "persistent"}
+            open={sidebarOpen}
+            onClose={toggleSidebar}
+            className={classes.drawer}
+            classes={{ paper: classes.drawerPaper }}
+          >
+            {!sm && <Toolbar variant='dense' />}
+            <EstatesSidebar toggle={toggleSidebar} appState={appState} />
+          </Drawer>
+        </NoSsr>
       </div>
-      <Drawer
-        anchor='right'
-        variant={sm ? "temporary" : "persistent"}
-        open={sidebarOpen}
-        onClose={toggleSidebar}
-        className={classes.drawer}
-        classes={{ paper: classes.drawerPaper }}
-      >
-        {!sm && <Toolbar variant='dense' />}
-        <EstatesSidebar toggle={toggleSidebar} appState={appState} />
-      </Drawer>
-    </div>
+    </>
   )
 }
 

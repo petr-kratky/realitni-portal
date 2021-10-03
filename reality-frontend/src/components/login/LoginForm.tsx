@@ -9,6 +9,7 @@ import { useLoginMutation, CurrentUserDocument, CurrentUserQuery } from "src/gra
 import { setAccessToken } from "src/lib/auth/accessToken"
 import { AppState, FormikSubmitFunction } from "../../types"
 import { snackStore } from "src/lib/stores"
+import Head from "next/head"
 
 type LoginFormProps = AppState & {}
 
@@ -82,41 +83,46 @@ const LoginForm: FunctionComponent<LoginFormProps> = ({ appState }) => {
   }
 
   return (
-    <div className={classes.loginFormContainer}>
-      <Formik initialValues={initialValues} onSubmit={onFormSubmit} validationSchema={formSchema}>
-        {formikProps => {
-          const { values, errors, touched, handleChange, handleSubmit, isSubmitting, submitForm } = formikProps
+    <>
+			<Head>
+				<title>Přihlášení | Realitní Portál</title>
+			</Head>
+      <div className={classes.loginFormContainer}>
+        <Formik initialValues={initialValues} onSubmit={onFormSubmit} validationSchema={formSchema}>
+          {formikProps => {
+            const { values, errors, touched, handleChange, handleSubmit, isSubmitting, submitForm } = formikProps
 
-          return (
-            <form onSubmit={handleSubmit} className={classes.loginForm}>
-              <TextField
-                id='email'
-                onChange={handleChange}
-                value={values.email}
-                error={touched.email && !!errors.email?.length}
-                helperText={(touched.email && errors.email) ?? ""}
-                label='E-mail'
-                variant='outlined'
-              />
-              <TextField
-                id='password'
-                onChange={handleChange}
-                value={values.password}
-                error={touched.password && !!errors.password?.length}
-                helperText={(touched.password && errors.password) ?? ""}
-                label='Heslo'
-                variant='outlined'
-                type='password'
-                autoComplete='current-password'
-              />
-              <Button onClick={submitForm} disabled={isSubmitting} color='primary' variant='contained'>
-                Přihlásit
-              </Button>
-            </form>
-          )
-        }}
-      </Formik>
-    </div>
+            return (
+              <form onSubmit={handleSubmit} className={classes.loginForm}>
+                <TextField
+                  id='email'
+                  onChange={handleChange}
+                  value={values.email}
+                  error={touched.email && !!errors.email?.length}
+                  helperText={(touched.email && errors.email) ?? ""}
+                  label='E-mail'
+                  variant='outlined'
+                />
+                <TextField
+                  id='password'
+                  onChange={handleChange}
+                  value={values.password}
+                  error={touched.password && !!errors.password?.length}
+                  helperText={(touched.password && errors.password) ?? ""}
+                  label='Heslo'
+                  variant='outlined'
+                  type='password'
+                  autoComplete='current-password'
+                />
+                <Button onClick={submitForm} disabled={isSubmitting} color='primary' variant='contained'>
+                  Přihlásit
+                </Button>
+              </form>
+            )
+          }}
+        </Formik>
+      </div>
+    </>
   )
 }
 

@@ -141,12 +141,16 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
   }
 
   const toggleDrawer = () => {
-    refetchCurrentUser()
+    if (!isDrawerOpen) {
+      refetchCurrentUser()
+    }
     setDrawerOpen(!isDrawerOpen)
   }
 
   const toggleRecent = () => {
-    refetchCurrentUser()
+    if (!isRecentOpen) {
+      refetchCurrentUser()
+    }
     setRecentOpen(!isRecentOpen)
   }
 
@@ -158,9 +162,8 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
     setProfileMenuAnchor(null)
   }
 
-  const openRecentsMenu = async event => {
-    refetchCurrentUser()
-    setRecentsMenuAnchor(event.currentTarget)
+  const openRecentsMenu = event => {
+    refetchCurrentUser().then(() => setRecentsMenuAnchor(event.currentTarget))
   }
 
   const closeRecentsMenu = () => {

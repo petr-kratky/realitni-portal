@@ -46,6 +46,7 @@ import { estateModalStore, snackStore } from "src/lib/stores"
 import ImageLibrary from "../../components/estate/ImageLibrary"
 import FileLibrary from "../../components/estate/FileLibrary"
 import DeleteDialogue from "../../components/utils/DeleteDialogue"
+import Head from "next/head"
 
 type ParameterListItemProps = {
   icon: React.ReactNode
@@ -134,19 +135,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     setDeleteDialogOpen(false)
   }
 
-  if (estateLoading) {
-    return (
-      <Grid container justifyContent='center' alignItems='center'>
-        <CircularProgress color='primary' size={50} />
-      </Grid>
-    )
-  } else if (estateError) {
-    return (
-      <Grid container justifyContent='center' alignItems='center'>
-        <Typography variant='h4'>{estateError.message}</Typography>
-      </Grid>
-    )
-  } else if (estateData?.estate) {
+  if (estateData?.estate) {
     const {
       id,
       name,
@@ -192,120 +181,125 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     const fullAddress: string = `${street_address}, ${city_address}`
 
     return (
-      <Grid container justifyContent='center'>
-        {estateData?.estate && (
-          <Grid item xs={12} sm={9} lg={7} xl={6}>
-            <Paper style={{ padding: theme.spacing(2) }} variant='outlined'>
-              <Grid container direction='row'>
-                <Grid item xs={12}>
-                  <Typography variant='h4'>
-                    {primary_type.desc_cz}, {secondary_type.desc_cz}
-                  </Typography>
-                  <Typography variant='h6' color='textSecondary'>
-                    {street_address}, {city_address}, {postal_code}
-                  </Typography>
-                </Grid>
-
-                <ImageLibrary estateId={id} images={images} onClose={closeImageLibrary} open={imageLibraryOpen} />
-
-                <FileLibrary estateId={id} files={files} onClose={closeFileLibrary} open={fileLibraryOpen} />
-
-                <Grid item xs={12} container>
-                  <Tooltip title='Upravit'>
-                    <IconButton edge='start' onClick={onEstateEditButton}>
-                      <EditIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title='Fotografie'>
-                    <IconButton onClick={openImageLibrary}>
-                      <ImageLibraryIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title='Přílohy'>
-                    <IconButton onClick={openFileLibrary}>
-                      <FileLibraryIcon />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title='Odstranit'>
-                    <IconButton onClick={openDeleteDialogue}>
-                      <DeleteIcon />
-                    </IconButton>
-                  </Tooltip>
-                </Grid>
-
-                {!!galleryPhotos.length && <ImageCarousel images={galleryPhotos} />}
-
-                {!!description && (
-                  <Grid item md={6}>
-                    <Typography variant='h6'>Popis</Typography>
-                    <Typography variant='body1' paragraph style={{ whiteSpace: "pre-line" }}>
-                      {description}
+      <>
+        <Head>
+          <title>{primary_type.desc_cz}, {secondary_type.desc_cz} - {fullAddress} | Realitní Portál</title>
+        </Head>
+        <Grid container justifyContent='center'>
+          {estateData?.estate && (
+            <Grid item xs={12} sm={9} lg={7} xl={6}>
+              <Paper style={{ padding: theme.spacing(2) }} variant='outlined'>
+                <Grid container direction='row'>
+                  <Grid item xs={12}>
+                    <Typography variant='h4'>
+                      {primary_type.desc_cz}, {secondary_type.desc_cz}
+                    </Typography>
+                    <Typography variant='h6' color='textSecondary'>
+                      {street_address}, {city_address}, {postal_code}
                     </Typography>
                   </Grid>
-                )}
 
-                <Grid item md={6}>
-                  <Typography variant='h6'>Parametry</Typography>
-                  <List dense classes={{ root: classes.list }}>
-                    {land_area && (
+                  <ImageLibrary estateId={id} images={images} onClose={closeImageLibrary} open={imageLibraryOpen} />
+
+                  <FileLibrary estateId={id} files={files} onClose={closeFileLibrary} open={fileLibraryOpen} />
+
+                  <Grid item xs={12} container>
+                    <Tooltip title='Upravit'>
+                      <IconButton edge='start' onClick={onEstateEditButton}>
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title='Fotografie'>
+                      <IconButton onClick={openImageLibrary}>
+                        <ImageLibraryIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title='Přílohy'>
+                      <IconButton onClick={openFileLibrary}>
+                        <FileLibraryIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title='Odstranit'>
+                      <IconButton onClick={openDeleteDialogue}>
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </Grid>
+
+                  {!!galleryPhotos.length && <ImageCarousel images={galleryPhotos} />}
+
+                  {!!description && (
+                    <Grid item md={6}>
+                      <Typography variant='h6'>Popis</Typography>
+                      <Typography variant='body1' paragraph style={{ whiteSpace: "pre-line" }}>
+                        {description}
+                      </Typography>
+                    </Grid>
+                  )}
+
+                  <Grid item md={6}>
+                    <Typography variant='h6'>Parametry</Typography>
+                    <List dense classes={{ root: classes.list }}>
+                      {land_area && (
+                        <ParameterListItem
+                          icon={<MapIcon />}
+                          value={`${formatNumber(land_area)} m2`}
+                          parameter='Plocha pozemku'
+                        />
+                      )}
+                      {usable_area && (
+                        <ParameterListItem
+                          icon={<HomeIcon />}
+                          value={`${formatNumber(usable_area)} m2`}
+                          parameter='Užitná plocha'
+                        />
+                      )}
+                      {advert_price && (
+                        <ParameterListItem
+                          icon={<MoneyIcon />}
+                          value={formatNumber(advert_price, {
+                            style: "currency",
+                            currency: "CZK",
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                          })}
+                          parameter='Inzertní cena'
+                        />
+                      )}
+                      {estimated_price && (
+                        <ParameterListItem
+                          icon={<BankIcon />}
+                          value={formatNumber(estimated_price, {
+                            style: "currency",
+                            currency: "CZK",
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0
+                          })}
+                          parameter='Odhadní cena'
+                        />
+                      )}
                       <ParameterListItem
-                        icon={<MapIcon />}
-                        value={`${formatNumber(land_area)} m2`}
-                        parameter='Plocha pozemku'
+                        icon={<RoomIcon />}
+                        value={`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}
+                        parameter='Souřadnice'
                       />
-                    )}
-                    {usable_area && (
-                      <ParameterListItem
-                        icon={<HomeIcon />}
-                        value={`${formatNumber(usable_area)} m2`}
-                        parameter='Užitná plocha'
-                      />
-                    )}
-                    {advert_price && (
-                      <ParameterListItem
-                        icon={<MoneyIcon />}
-                        value={formatNumber(advert_price, {
-                          style: "currency",
-                          currency: "CZK",
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0
-                        })}
-                        parameter='Inzertní cena'
-                      />
-                    )}
-                    {estimated_price && (
-                      <ParameterListItem
-                        icon={<BankIcon />}
-                        value={formatNumber(estimated_price, {
-                          style: "currency",
-                          currency: "CZK",
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0
-                        })}
-                        parameter='Odhadní cena'
-                      />
-                    )}
-                    <ParameterListItem
-                      icon={<RoomIcon />}
-                      value={`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}
-                      parameter='Souřadnice'
-                    />
-                    <ParameterListItem icon={<CityIcon />} value={city_address} parameter='Lokalita' />
-                  </List>
+                      <ParameterListItem icon={<CityIcon />} value={city_address} parameter='Lokalita' />
+                    </List>
+                  </Grid>
                 </Grid>
-              </Grid>
-            </Paper>
-          </Grid>
-        )}
-        <DeleteDialogue
-          open={deleteDialogOpen}
-          loading={deleteLoading}
-          onClose={closeDeleteDialogue}
-          onDelete={onDelete}
-          title='Smazat nemovitost'
-          text={`Opravdu si přejete smazat nemovitost na adrese "${fullAddress}"? Tato akce je nevratná a nemovitost bude permanentně odstraněna společně se všemi přílohami a fotografiemi.`}
-        />
-      </Grid>
+              </Paper>
+            </Grid>
+          )}
+          <DeleteDialogue
+            open={deleteDialogOpen}
+            loading={deleteLoading}
+            onClose={closeDeleteDialogue}
+            onDelete={onDelete}
+            title='Smazat nemovitost'
+            text={`Opravdu si přejete smazat nemovitost na adrese "${fullAddress}"? Tato akce je nevratná a nemovitost bude permanentně odstraněna společně se všemi přílohami a fotografiemi.`}
+          />
+        </Grid>
+      </>
     )
   } else {
     return null
