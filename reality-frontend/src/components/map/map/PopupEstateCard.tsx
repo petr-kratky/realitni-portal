@@ -4,25 +4,30 @@ import {
   createStyles,
   IconButton,
   ListItem,
-  ListItemIcon,
   ListItemSecondaryAction,
   ListItemText,
   makeStyles,
-  Menu,
-  MenuItem,
   Theme,
-  Tooltip
+  Tooltip,
+  useMediaQuery,
+  useTheme
 } from "@material-ui/core"
 import MoreVertIcon from "@material-ui/icons/MoreVert"
-import EditIcon from "@material-ui/icons/Edit"
-import DeleteIcon from "@material-ui/icons/Delete"
 
-import { useDeleteEstateMutation, useEstateWithoutMediaQuery } from "../../../graphql/queries/generated/graphql"
+import {
+  FavoriteEstatesDocument,
+  useAddFavoriteEstateMutation,
+  useDeleteEstateMutation,
+  useEstateWithoutMediaQuery,
+  useFavoriteEstatesQuery,
+  useRemoveFavoriteEstateMutation
+} from "../../../graphql/queries/generated/graphql"
 import { estateModalStore, geojsonStore, snackStore } from "src/lib/stores"
 import { CustomPopupProps } from "./CustomPopup"
 import { EstateFeature } from "src/types"
 import DeleteDialogue from "../../utils/DeleteDialogue"
 import EstateMenu from "../../estate/EstateMenu"
+import { Star, StarOutline } from "@material-ui/icons"
 
 type PopupEstateCardProps = {
   id: string
@@ -44,15 +49,26 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features, setPopupProps, popupProps }) => {
   const classes = useStyles()
+  const theme = useTheme()
+
+  const xs = useMediaQuery(theme.breakpoints.down("xs"), { noSsr: true })
 
   const { data: estateData, loading: estateLoading } = useEstateWithoutMediaQuery({ variables: { id } })
+  const { data: favoriteEstatesData } = useFavoriteEstatesQuery()
+
   const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
+  const [addFavoriteEstate] = useAddFavoriteEstateMutation()
+  const [removeFavoriteEstate] = useRemoveFavoriteEstateMutation()
 
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null)
   const [estateTab, setEstateTab] = React.useState<null | Window>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
 
   const isMenuOpen = Boolean(menuAnchor)
+  const isFavorite = React.useMemo(
+    () => favoriteEstatesData?.favoriteEstates.some(fav => fav.id === id),
+    [favoriteEstatesData, id]
+  )
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchor(event.currentTarget)
@@ -60,6 +76,30 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
 
   const handleMenuClose = () => {
     setMenuAnchor(null)
+  }
+
+  const onFavorite = async () => {
+    if (isFavorite) {
+      try {
+        await removeFavoriteEstate({
+          variables: { estate_id: id },
+          refetchQueries: [{ query: FavoriteEstatesDocument }]
+        })
+      } catch (err) {
+        console.log(`Failed to remove estate ${id} from favorites`, err)
+        snackStore.toggle("error", "Nemovitost se nepodařilo odstranit ze seznamu oblíbených")
+      }
+    } else {
+      try {
+        await addFavoriteEstate({
+          variables: { estate_id: id },
+          refetchQueries: [{ query: FavoriteEstatesDocument }]
+        })
+      } catch (err) {
+        console.log(`Failed to add estate ${id} to favorites`, err)
+        snackStore.toggle("error", "Nemovitost se nepodařilo přidat do seznamu oblíbených")
+      }
+    }
   }
 
   const onDelete = async () => {
@@ -138,24 +178,22 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
 
     return (
       <>
-        <ListItem style={{ width: 350 }} button onClick={handleItemClick}>
-          <ListItemText
-            style={{ textTransform: "capitalize" }}
-            primary={`${primary_type?.desc_cz} | ${secondary_type?.desc_cz}`}
-            secondary={fullAddress}
-          />
+        <ListItem style={{ width: xs ? "100%" : 350 }} button onClick={handleItemClick}>
+          <ListItemText primary={`${primary_type?.desc_cz} | ${secondary_type?.desc_cz}`} secondary={fullAddress} />
           <ListItemSecondaryAction>
             <Tooltip title='Možnosti'>
-              <IconButton size='small' onClick={handleMenuOpen}>
+              <IconButton size='small' edge='end' onClick={handleMenuOpen}>
                 <MoreVertIcon />
               </IconButton>
             </Tooltip>
             <EstateMenu
               open={isMenuOpen}
               menuAnchor={menuAnchor}
+							favorite={!!isFavorite}
               onClose={handleMenuClose}
               onEditClick={onEditButton}
               onDeleteClick={handleDeleteDialogOpen}
+							onFavoriteClick={onFavorite}
             />
             <DeleteDialogue
               open={deleteDialogOpen}

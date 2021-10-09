@@ -18,7 +18,7 @@ import { AppState } from "../../../types"
 import EstateMenu from "../../estate/EstateMenu"
 import DeleteDialogue from "../../utils/DeleteDialogue"
 import { estateModalStore, geojsonStore, snackStore } from "../../../lib/stores"
-import { useDeleteEstateMutation, useEstateQuery } from "../../../graphql/queries/generated/graphql"
+import { FavoriteEstatesDocument, useAddFavoriteEstateMutation, useDeleteEstateMutation, useEstateQuery, useFavoriteEstatesQuery, useRemoveFavoriteEstateMutation } from "../../../graphql/queries/generated/graphql"
 
 type ComponentProps = {
   id: string
@@ -61,13 +61,21 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({ id }) =
   const classes = useStyles()
 
   const { data: estateData, loading: estateLoading } = useEstateQuery({ variables: { id } })
+  const { data: favoriteEstatesData } = useFavoriteEstatesQuery()
+
   const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
+  const [addFavoriteEstate] = useAddFavoriteEstateMutation()
+  const [removeFavoriteEstate] = useRemoveFavoriteEstateMutation()
 
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null)
   const [estateTab, setEstateTab] = React.useState<null | Window>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
 
   const isMenuOpen = Boolean(menuAnchor)
+	const isFavorite = React.useMemo(
+    () => favoriteEstatesData?.favoriteEstates.some(fav => fav.id === id),
+    [favoriteEstatesData, id]
+  )
 
   const openMenu = (event: React.MouseEvent<HTMLElement>) => {
     setMenuAnchor(event.currentTarget)
@@ -104,6 +112,30 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({ id }) =
     } catch (err) {
       console.error(`Could not delete estate id ${id}`, err)
       snackStore.toggle("error", "Nemovitost se nepodařilo odstranit")
+    }
+  }
+
+	const onFavorite = async () => {
+    if (isFavorite) {
+      try {
+        await removeFavoriteEstate({
+          variables: { estate_id: id },
+          refetchQueries: [{ query: FavoriteEstatesDocument }]
+        })
+      } catch (err) {
+        console.log(`Failed to remove estate ${id} from favorites`, err)
+        snackStore.toggle("error", "Nemovitost se nepodařilo odstranit ze seznamu oblíbených")
+      }
+    } else {
+      try {
+        await addFavoriteEstate({
+          variables: { estate_id: id },
+          refetchQueries: [{ query: FavoriteEstatesDocument }]
+        })
+      } catch (err) {
+        console.log(`Failed to add estate ${id} to favorites`, err)
+        snackStore.toggle("error", "Nemovitost se nepodařilo přidat do seznamu oblíbených")
+      }
     }
   }
 
@@ -170,9 +202,11 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({ id }) =
         <EstateMenu
           open={isMenuOpen}
           menuAnchor={menuAnchor}
+					favorite={!!isFavorite}
           onClose={closeMenu}
           onEditClick={onEdit}
           onDeleteClick={openDeleteDialogue}
+					onFavoriteClick={onFavorite}
         />
         <DeleteDialogue
           open={deleteDialogOpen}

@@ -5,14 +5,21 @@ import InfiniteScroll from "react-infinite-scroll-component"
 import { EstateFeature } from "../../../types"
 import PopupEstateCard from "./PopupEstateCard"
 import {
+  Button,
   CircularProgress,
   createStyles,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Divider,
   Grid,
   List,
   makeStyles,
   Theme,
   Typography,
+  useMediaQuery,
   useTheme
 } from "@material-ui/core"
 
@@ -68,51 +75,101 @@ const CustomPopup: React.FunctionComponent<CustomPopupProps> = ({
   popupProps
 }) => {
   const classes = useStyles()
+  const theme = useTheme()
 
-  const [visibleFeatures, setVisibleFeatures] = React.useState<EstateFeature[]>(features.slice(0, 4))
+  const xs = useMediaQuery(theme.breakpoints.down("xs"), { noSsr: true })
+
+  const [visibleFeatures, setVisibleFeatures] = React.useState<EstateFeature[]>(features.slice(0, xs ? 25 : 4))
+  const [isModalOpen, setModalOpen] = React.useState<boolean>(false)
+
+  React.useEffect(() => {
+    if (isVisible) {
+      setTimeout(() => setModalOpen(true), 50)
+    } else {
+      setModalOpen(false)
+    }
+  }, [isVisible])
+
+  React.useEffect(() => {
+    setVisibleFeatures(features.slice(0, xs ? 25 : 4))
+  }, [features])
 
   const displayMoreFeatures = () => {
     setVisibleFeatures(features.slice(0, visibleFeatures.length + 4))
   }
 
-  React.useEffect(() => {
-    setVisibleFeatures(features.slice(0, 4))
-  }, [features])
+  const onClose = () => {
+    // @ts-ignore
+    setPopupProps({ ...popupProps, isVisible: false })
+  }
 
-  return isVisible ? (
-    <Popup
-      className={`${classes.popup}`}
-      latitude={latitude}
-      longitude={longitude}
-      closeButton={false}
-      captureScroll={true}
-      anchor='left'
-      closeOnClick={false}
-      dynamicPosition={false}
-      onClose={handleClose}
-    >
-      <Grid container direction='column' alignItems='center'>
-        <List>
-          <InfiniteScroll
-            hasMore={features.length > visibleFeatures.length}
-            next={displayMoreFeatures}
-            dataLength={visibleFeatures.length}
-            loader={<Typography>Načítám...</Typography>}
-            scrollThreshold={0.8}
-            style={{ maxHeight: 280 }}
-            height={"100%"}
-          >
-            {visibleFeatures.map(({ properties: { id } }, index, array) => (
-              <React.Fragment key={id}>
-                <PopupEstateCard id={id} popupProps={popupProps!} setPopupProps={setPopupProps!} features={array} />
-                {index !== array.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
-          </InfiniteScroll>
-        </List>
-      </Grid>
-    </Popup>
-  ) : null
+  return (
+    <>
+      {isVisible && !xs && (
+        <Popup
+          className={`${classes.popup}`}
+          latitude={latitude}
+          longitude={longitude}
+          closeButton={false}
+          captureScroll={true}
+          anchor='left'
+          closeOnClick={false}
+          dynamicPosition={false}
+          onClose={handleClose}
+        >
+          <Grid container direction='column' alignItems='center'>
+            <List>
+              <InfiniteScroll
+                hasMore={features.length > visibleFeatures.length}
+                next={displayMoreFeatures}
+                dataLength={visibleFeatures.length}
+                loader={<Typography>Načítám...</Typography>}
+                scrollThreshold={0.8}
+                style={{ maxHeight: 280 }}
+                height={"100%"}
+              >
+                {visibleFeatures.map(({ properties: { id } }, index, array) => (
+                  <React.Fragment key={id}>
+                    <PopupEstateCard id={id} popupProps={popupProps!} setPopupProps={setPopupProps!} features={array} />
+                    {index !== array.length - 1 && <Divider />}
+                  </React.Fragment>
+                ))}
+              </InfiniteScroll>
+            </List>
+          </Grid>
+        </Popup>
+      )}
+      {xs && (
+        <Dialog fullScreen keepMounted={false} open={isModalOpen} onClose={onClose}>
+          <DialogTitle>Nemovitosti v lokalitě ({features.length})</DialogTitle>
+          <DialogContent dividers>
+            <List>
+              {visibleFeatures.map(({ properties: { id } }, index, array) => (
+                <React.Fragment key={id}>
+                  <PopupEstateCard id={id} popupProps={popupProps!} setPopupProps={setPopupProps!} features={array} />
+                  {index !== array.length - 1 && <Divider />}
+                  {xs && index === visibleFeatures.length - 1 && visibleFeatures.length < features.length && (
+                    <Divider />
+                  )}
+                </React.Fragment>
+              ))}
+            </List>
+            {visibleFeatures.length < features.length && (
+              <DialogContentText align='center' variant='body2' style={{ marginTop: 12 }}>
+                Zobrazeno pouze prvních 25 nemovitostí. Zužte prosím vybraný shluk nemovistí přiblížením na konkrétní
+                místo na mapě.
+              </DialogContentText>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button color='primary' onClick={onClose}>
+              zavřít
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+    </>
+  )
 }
 
 CustomPopup.defaultProps = {
