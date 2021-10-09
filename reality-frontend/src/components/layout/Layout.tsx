@@ -6,6 +6,7 @@ import {
   Collapse,
   Divider,
   Drawer,
+  Icon,
   IconButton,
   List,
   ListItem,
@@ -34,7 +35,8 @@ import {
   Add,
   Map,
   Star,
-  StarOutline
+  StarOutline,
+  HomeOutlined
 } from "@material-ui/icons"
 
 import {
@@ -51,6 +53,7 @@ import { setAccessToken } from "src/lib/auth/accessToken"
 import { estateModalStore } from "src/lib/stores"
 import { AppState } from "../../types"
 import FavoriteEstates from "./FavoriteEstates"
+import EstateIcon from "../estate/EstateIcon"
 
 type LayoutProps = {
   pageProps: any
@@ -67,7 +70,8 @@ const useStyles = makeStyles((theme: Theme) =>
       zIndex: theme.zIndex.drawer + 1
     },
     title: {
-      flexGrow: 1
+      flexGrow: 1,
+      marginLeft: theme.spacing(1)
     },
     nestedListItem: {
       paddingLeft: theme.spacing(4)
@@ -207,6 +211,11 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
                 <MenuIcon />
               </IconButton>
             </Tooltip>
+          )}
+          {!isAuth && (
+            <IconButton edge='start' color='inherit' >
+              <Home />
+            </IconButton>
           )}
           <Typography variant='h6' className={classes.title}>
             Realitní portál
@@ -386,7 +395,7 @@ const RecentEstateCard: React.FunctionComponent<{ estate: Estate }> = ({
   return (
     <ListItem button className={classes.nestedListItem} onClick={onClick(id)}>
       <ListItemIcon>
-        <Home />
+        <EstateIcon primaryType={primary_type.id} />
       </ListItemIcon>
       <ListItemText
         primary={`${primary_type.desc_cz}, ${secondary_type.desc_cz}`}

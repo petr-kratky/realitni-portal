@@ -39,14 +39,14 @@ export class AccountResolver {
   @RequireAuthentication()
   @Query(() => [Estate])
   async recentEstates(@Ctx() { payload }: MyContext): Promise<Estate[]> {
-    const user = await this.accountService.getAccountById(payload.id, ["recent_estates"])
+    const user = await this.accountService.getAccountById(payload.id, ["recent_estates"], true)
     return user.recent_estates
   }
 
   @RequireAuthentication()
   @Query(() => [Estate])
   async favoriteEstates(@Ctx() { payload }: MyContext): Promise<Estate[]> {
-    const user = await this.accountService.getAccountById(payload.id, ["favorite_estates"])
+    const user = await this.accountService.getAccountById(payload.id, ["favorite_estates"], true)
     return user.favorite_estates
   }
 

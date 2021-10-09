@@ -18,7 +18,8 @@ import {
   useTheme,
   useMediaQuery,
   Divider,
-  DialogContentText
+  DialogContentText,
+  ListItemIcon
 } from "@material-ui/core"
 import { Star } from "@material-ui/icons"
 
@@ -28,6 +29,7 @@ import {
   useRemoveFavoriteEstateMutation
 } from "../../graphql/queries/generated/graphql"
 import { snackStore } from "../../lib/stores"
+import EstateIcon from "../estate/EstateIcon"
 
 type ComponentProps = {
   open: boolean
@@ -43,10 +45,17 @@ const Component: React.FunctionComponent<ComponentProps> = ({ onClose, open }) =
   const xs = useMediaQuery(theme.breakpoints.down("xs"))
 
   const { data: favoriteEstatesData, refetch: refetchFavoriteEstates } = useFavoriteEstatesQuery({
-    ssr: false
+    ssr: false,
+    fetchPolicy: "cache-and-network"
   })
 
   const [removeFavoriteEstate] = useRemoveFavoriteEstateMutation()
+
+  React.useEffect(() => {
+    if (open) {
+      refetchFavoriteEstates()
+    }
+  }, [open])
 
   const removeFavorite = (estate: string) => async () => {
     try {
@@ -70,26 +79,27 @@ const Component: React.FunctionComponent<ComponentProps> = ({ onClose, open }) =
       <DialogContent>
         {!!favoriteEstatesData?.favoriteEstates.length ? (
           <List>
-            {favoriteEstatesData.favoriteEstates
-              .map((fav, index, array) => (
-                <>
-                  <ListItem key={fav.id} dense={!xs} button onClick={onClick(fav.id)}>
-                    <ListItemText
-                      primary={`${fav.primary_type.desc_cz}, ${fav.secondary_type.desc_cz}`}
-                      secondary={`${fav.street_address}, ${fav.city_address}, ${fav.postal_code}`}
-                    />
-                    <ListItemSecondaryAction>
-                      <Tooltip title='Odstranit z oblíbených'>
-                        <IconButton edge='end' onClick={removeFavorite(fav.id)}>
-                          <Star />
-                        </IconButton>
-                      </Tooltip>
-                    </ListItemSecondaryAction>
-                  </ListItem>
-                  {index !== array.length - 1 && <Divider />}
-                </>
-              ))
-              .reverse()}
+            {favoriteEstatesData.favoriteEstates.map((fav, index, array) => (
+              <React.Fragment key={fav.id}>
+                <ListItem dense={!xs} button onClick={onClick(fav.id)}>
+                  <ListItemIcon>
+                    <EstateIcon primaryType={fav.primary_type.id} />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary={`${fav.primary_type.desc_cz}, ${fav.secondary_type.desc_cz}`}
+                    secondary={`${fav.street_address}, ${fav.city_address}, ${fav.postal_code}`}
+                  />
+                  <ListItemSecondaryAction>
+                    <Tooltip title='Odstranit z oblíbených'>
+                      <IconButton edge='end' onClick={removeFavorite(fav.id)}>
+                        <Star />
+                      </IconButton>
+                    </Tooltip>
+                  </ListItemSecondaryAction>
+                </ListItem>
+                {index !== array.length - 1 && <Divider />}
+              </React.Fragment>
+            ))}
           </List>
         ) : (
           <DialogContentText>Zatím jste neuložili žádné oblíbené nemovitosti.</DialogContentText>
