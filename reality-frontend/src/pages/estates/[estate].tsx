@@ -2,10 +2,10 @@ import React from "react"
 
 import { NextPage } from "next"
 import { useRouter } from "next/router"
+import Head from "next/head"
 
 import {
   Avatar,
-  CircularProgress,
   createStyles,
   Grid,
   IconButton,
@@ -30,14 +30,19 @@ import CityIcon from "@material-ui/icons/LocationCity"
 import ImageLibraryIcon from "@material-ui/icons/PhotoLibrary"
 import FileLibraryIcon from "@material-ui/icons/AttachFile"
 import DeleteIcon from "@material-ui/icons/Delete"
+import { Star, StarOutline } from "@material-ui/icons"
 
 import { Photo } from "react-bnb-gallery"
 
 import {
-  CurrentUserDocument,
+  FavoriteEstatesDocument,
+  RecentEstatesDocument,
+  useAddFavoriteEstateMutation,
   useAddRecentEstateMutation,
   useDeleteEstateMutation,
-  useEstateQuery
+  useEstateQuery,
+  useFavoriteEstatesQuery,
+  useRemoveFavoriteEstateMutation
 } from "src/graphql/queries/generated/graphql"
 import { formatNumber } from "src/utils/number-formatter"
 import ImageCarousel from "src/components/estate/ImageCarousel"
@@ -46,7 +51,6 @@ import { estateModalStore, snackStore } from "src/lib/stores"
 import ImageLibrary from "../../components/estate/ImageLibrary"
 import FileLibrary from "../../components/estate/FileLibrary"
 import DeleteDialogue from "../../components/utils/DeleteDialogue"
-import Head from "next/head"
 
 type ParameterListItemProps = {
   icon: React.ReactNode
@@ -62,6 +66,12 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     listItem: {
       width: 230
+    },
+    menuButtonDivider: {
+      width: 1,
+      height: "60%",
+      margin: theme.spacing(0, 0.5),
+      backgroundColor: theme.palette.grey[400]
     }
   })
 )
@@ -78,19 +88,31 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     loading: estateLoading,
     error: estateError
   } = useEstateQuery({ variables: { id: estate as string } })
-  const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
+  const {
+    data: favoriteEstatesData,
+    loading: favoriteEstatesLoading,
+    error: favoriteEstatesError
+  } = useFavoriteEstatesQuery()
 
+  const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
   const [addRecentEstate] = useAddRecentEstateMutation()
+  const [addFavoriteEstate] = useAddFavoriteEstateMutation()
+  const [removeFavoriteEstate] = useRemoveFavoriteEstateMutation()
 
   const [imageLibraryOpen, setImageLibraryOpen] = React.useState<boolean>(false)
   const [fileLibraryOpen, setFileLibraryOpen] = React.useState<boolean>(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
 
+  const isFavorite = React.useMemo(
+    () => favoriteEstatesData?.favoriteEstates.some(fav => fav.id === estate),
+    [favoriteEstatesData, estate]
+  )
+
   React.useEffect(() => {
     try {
       addRecentEstate({
         variables: { estate_id: estate as string },
-        refetchQueries: [{ query: CurrentUserDocument }]
+        refetchQueries: [{ query: RecentEstatesDocument }]
       })
     } catch (err) {
       console.error(`Could not add estate ${estate} to recently visited!`, err)
@@ -108,6 +130,30 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     } catch (err) {
       console.error(`Could not delete estate id ${estate}`, err)
       snackStore.toggle("error", "Nemovitost se nepodařilo odstranit")
+    }
+  }
+
+  const onFavorite = async () => {
+    if (isFavorite) {
+      try {
+        await removeFavoriteEstate({
+          variables: { estate_id: estate as string },
+          refetchQueries: [{ query: FavoriteEstatesDocument }]
+        })
+      } catch (err) {
+        console.log(`Failed to remove estate ${estate} from favorites`, err)
+        snackStore.toggle("error", "Nemovitost se nepodařilo odstranit ze seznamu oblíbených")
+      }
+    } else {
+      try {
+        await addFavoriteEstate({
+          variables: { estate_id: estate as string },
+          refetchQueries: [{ query: FavoriteEstatesDocument }]
+        })
+      } catch (err) {
+        console.log(`Failed to add estate ${estate} to favorites`, err)
+        snackStore.toggle("error", "Nemovitost se nepodařilo přidat do seznamu oblíbených")
+      }
     }
   }
 
@@ -183,17 +229,26 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     return (
       <>
         <Head>
-          <title>{primary_type.desc_cz}, {secondary_type.desc_cz} - {fullAddress} | Realitní Portál</title>
+          <title>
+            {primary_type.desc_cz}, {secondary_type.desc_cz} - {fullAddress} | Realitní Portál
+          </title>
         </Head>
         <Grid container justifyContent='center'>
           {estateData?.estate && (
             <Grid item xs={12} sm={9} lg={7} xl={6}>
               <Paper style={{ padding: theme.spacing(2) }} variant='outlined'>
                 <Grid container direction='row'>
-                  <Grid item xs={12}>
-                    <Typography variant='h4'>
-                      {primary_type.desc_cz}, {secondary_type.desc_cz}
-                    </Typography>
+                  <Grid container item xs={12} direction='column'>
+                    <Grid container item direction='row' alignItems='center'>
+                      <Tooltip title={isFavorite ? "Odstranit z oblíbených" : "Přidat do oblíbených"}>
+                        <IconButton edge='start' onClick={onFavorite}>
+                          {isFavorite ? <Star /> : <StarOutline />}
+                        </IconButton>
+                      </Tooltip>
+                      <Typography variant='h4'>
+                        {primary_type.desc_cz}, {secondary_type.desc_cz}
+                      </Typography>
+                    </Grid>
                     <Typography variant='h6' color='textSecondary'>
                       {street_address}, {city_address}, {postal_code}
                     </Typography>
@@ -203,7 +258,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
 
                   <FileLibrary estateId={id} files={files} onClose={closeFileLibrary} open={fileLibraryOpen} />
 
-                  <Grid item xs={12} container>
+                  <Grid item xs={12} container alignItems='center'>
                     <Tooltip title='Upravit'>
                       <IconButton edge='start' onClick={onEstateEditButton}>
                         <EditIcon />
@@ -219,6 +274,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                         <FileLibraryIcon />
                       </IconButton>
                     </Tooltip>
+                    <div className={classes.menuButtonDivider} />
                     <Tooltip title='Odstranit'>
                       <IconButton onClick={openDeleteDialogue}>
                         <DeleteIcon />
