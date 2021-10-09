@@ -83,16 +83,8 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
 
   const { estate } = router.query
 
-  const {
-    data: estateData,
-    loading: estateLoading,
-    error: estateError
-  } = useEstateQuery({ variables: { id: estate as string } })
-  const {
-    data: favoriteEstatesData,
-    loading: favoriteEstatesLoading,
-    error: favoriteEstatesError
-  } = useFavoriteEstatesQuery()
+  const { data: estateData } = useEstateQuery({ variables: { id: estate as string } })
+  const { data: favoriteEstatesData } = useFavoriteEstatesQuery()
 
   const [deleteEstate, { loading: deleteLoading }] = useDeleteEstateMutation()
   const [addRecentEstate] = useAddRecentEstateMutation()
