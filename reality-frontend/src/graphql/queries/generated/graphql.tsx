@@ -324,7 +324,7 @@ export type EstateQuery = { __typename?: 'Query', estate?: Maybe<{ __typename?: 
 export type FavoriteEstatesQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type FavoriteEstatesQuery = { __typename?: 'Query', favoriteEstates: Array<{ __typename?: 'Estate', id: string }> };
+export type FavoriteEstatesQuery = { __typename?: 'Query', favoriteEstates: Array<{ __typename?: 'Estate', id: string, street_address: string, city_address: string, postal_code: string, primary_type: { __typename?: 'EstatePrimaryType', id: string, desc_cz: string }, secondary_type: { __typename?: 'EstateSecondaryType', id: string, desc_cz: string } }> };
 
 export type RecentEstatesQueryVariables = Exact<{ [key: string]: never; }>;
 
@@ -776,6 +776,17 @@ export const FavoriteEstatesDocument = gql`
     query FavoriteEstates {
   favoriteEstates {
     id
+    street_address
+    city_address
+    postal_code
+    primary_type {
+      id
+      desc_cz
+    }
+    secondary_type {
+      id
+      desc_cz
+    }
   }
 }
     `;

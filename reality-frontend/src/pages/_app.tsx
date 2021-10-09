@@ -9,7 +9,7 @@ import { makeStyles, Theme, CssBaseline } from "@material-ui/core"
 
 import { withApollo } from "../graphql/apollo-client/withApolloClient"
 import { theme } from "../lib/styles/mui-theme"
-import Layout from "src/components/Layout"
+import Layout from "src/components/layout/Layout"
 import { AppRoot, NextPageContextApp } from "src/types"
 import {
   estateModalStore,

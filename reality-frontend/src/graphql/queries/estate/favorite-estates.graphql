@@ -1,5 +1,16 @@
 query FavoriteEstates {
   favoriteEstates {
     id
+    street_address
+    city_address
+    postal_code
+    primary_type {
+      id
+      desc_cz
+    }
+    secondary_type {
+      id
+      desc_cz
+    }
   }
 }

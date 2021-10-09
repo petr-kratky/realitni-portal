@@ -220,10 +220,6 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
               </DialogTitle>
               <form onSubmit={handleSubmit}>
                 <DialogContent dividers>
-                  <DialogContentText>
-                    To subscribe to this website, please enter your email address here. We will send updates
-                    occasionally.
-                  </DialogContentText>
 
                   <Grid container spacing={2}>
                     <Grid item xs={12}>

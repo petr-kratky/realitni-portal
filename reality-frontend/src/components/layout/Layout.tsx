@@ -32,7 +32,9 @@ import {
   Menu as MenuIcon,
   Search,
   Add,
-  Map
+  Map,
+  Star,
+  StarOutline
 } from "@material-ui/icons"
 
 import {
@@ -40,14 +42,15 @@ import {
   useCurrentUserQuery,
   useLogoutMutation,
   useRecentEstatesQuery
-} from "../graphql/queries/generated/graphql"
+} from "../../graphql/queries/generated/graphql"
 
 import LoginForm from "src/components/login/LoginForm"
 import SnackBar from "src/components/utils/SnackBar"
-import EstateModal from "./estate/CreateEstateModal"
+import EstateModal from "../estate/CreateEstateModal"
 import { setAccessToken } from "src/lib/auth/accessToken"
 import { estateModalStore } from "src/lib/stores"
-import { AppState } from "../types"
+import { AppState } from "../../types"
+import FavoriteEstates from "./FavoriteEstates"
 
 type LayoutProps = {
   pageProps: any
@@ -90,6 +93,7 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
   const sm = useMediaQuery(theme.breakpoints.down("sm"), { noSsr: true })
 
   const [logout, { client }] = useLogoutMutation()
+
   const { data: recentEstatesData, refetch: refetchRecentEstates } = useRecentEstatesQuery({
     ssr: false,
     fetchPolicy: "no-cache"
@@ -102,6 +106,7 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
 
   const [isDrawerOpen, setDrawerOpen] = React.useState<boolean>(false)
   const [isRecentOpen, setRecentOpen] = React.useState<boolean>(true)
+  const [isFavoritesOpen, setFavoritesOpen] = React.useState<boolean>(false)
   const [profileMenuAnchor, setProfileMenuAnchor] = React.useState<null | HTMLElement>(null)
   const [recentsMenuAnchor, setRecentsMenuAnchor] = React.useState<null | HTMLElement>(null)
 
@@ -126,7 +131,15 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
       }
     },
     {
-      text: "Přidat nemovitost",
+      text: "Oblíbené",
+      icon: <StarOutline />,
+      onClick: () => {
+        toggleDrawer()
+        openFavorites()
+      }
+    },
+    {
+      text: "Nová nemovitost",
       icon: <Add />,
       onClick: () => {
         toggleDrawer()
@@ -176,6 +189,14 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
     setRecentsMenuAnchor(null)
   }
 
+  const openFavorites = () => {
+    setFavoritesOpen(true)
+  }
+
+  const closeFavorites = () => {
+    setFavoritesOpen(false)
+  }
+
   return (
     <div className={classes.root}>
       <AppBar position='fixed' className={classes.appBar}>
@@ -192,6 +213,11 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
           </Typography>
           {isAuth && (
             <>
+              <Tooltip title='Oblíbené'>
+                <IconButton onClick={openFavorites} color='inherit'>
+                  <StarOutline />
+                </IconButton>
+              </Tooltip>
               <Tooltip title='Historie'>
                 <IconButton onClick={openRecentsMenu} color='inherit'>
                   <History />
@@ -279,6 +305,7 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
               recents={recentEstatesData?.recentEstates ?? []}
               onClose={closeRecentsMenu}
             />
+            <FavoriteEstates onClose={closeFavorites} open={isFavoritesOpen} />
           </>
         )}
       </main>
