@@ -18,6 +18,7 @@ import {
   Theme,
   Tooltip,
   Typography,
+  useMediaQuery,
   useTheme
 } from "@material-ui/core"
 import RoomIcon from "@material-ui/icons/Room"
@@ -69,19 +70,20 @@ type ParameterListItemProps = {
   value: string
 }
 
-const LIST_ITEM_W = 230
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     list: {
       display: "flex",
       flexFlow: "row wrap",
       [theme.breakpoints.up("xl")]: {
-        maxWidth: LIST_ITEM_W * 2
+        maxWidth: 210 * 2
       }
     },
     listItem: {
-      width: LIST_ITEM_W
+      width: 210,
+			[theme.breakpoints.down('xs')]: {
+				maxWidth: 160
+			}
     },
     menuButtonDivider: {
       width: 1,
@@ -352,7 +354,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                       )}
                       <ParameterListItem
                         icon={<RoomIcon />}
-                        value={`${latitude.toFixed(5)}, ${longitude.toFixed(5)}`}
+                        value={`${latitude.toFixed(4)}, ${longitude.toFixed(4)}`}
                         parameter='Souřadnice'
                       />
                       <ParameterListItem icon={<CityIcon />} value={city_address} parameter='Lokalita' />
@@ -387,12 +389,17 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
 
 const ParameterListItem: React.FunctionComponent<ParameterListItemProps> = ({ parameter, value, icon }) => {
   const classes = useStyles()
+  const theme = useTheme()
+
+  const xs = useMediaQuery(theme.breakpoints.down("xs"), { noSsr: true })
 
   return (
     <ListItem classes={{ root: classes.listItem }}>
-      <ListItemAvatar>
-        <Avatar>{icon}</Avatar>
-      </ListItemAvatar>
+      {!xs && (
+        <ListItemAvatar>
+          <Avatar>{icon}</Avatar>
+        </ListItemAvatar>
+      )}
       <ListItemText primary={value} secondary={parameter} />
     </ListItem>
   )
