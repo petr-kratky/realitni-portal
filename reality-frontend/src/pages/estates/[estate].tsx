@@ -30,7 +30,18 @@ import CityIcon from "@material-ui/icons/LocationCity"
 import ImageLibraryIcon from "@material-ui/icons/PhotoLibrary"
 import FileLibraryIcon from "@material-ui/icons/AttachFile"
 import DeleteIcon from "@material-ui/icons/Delete"
-import { Star, StarOutline } from "@material-ui/icons"
+import {
+  Deck,
+  DirectionsCar,
+  Map,
+  LocalParking,
+  Pool,
+  Star,
+  StarOutline,
+  SwapVert,
+  Weekend,
+  ZoomOutMap
+} from "@material-ui/icons"
 
 import { Photo } from "react-bnb-gallery"
 
@@ -58,19 +69,25 @@ type ParameterListItemProps = {
   value: string
 }
 
+const LIST_ITEM_W = 230
+
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     list: {
       display: "flex",
-      flexFlow: "row wrap"
+      flexFlow: "row wrap",
+      justifyContent: "space-between",
+      [theme.breakpoints.up("xl")]: {
+        maxWidth: LIST_ITEM_W * 2
+      }
     },
     listItem: {
-      width: 230
+      width: LIST_ITEM_W
     },
     menuButtonDivider: {
       width: 1,
       height: "60%",
-      margin: theme.spacing(0, 0.5),
+      margin: theme.spacing(0, 0.6),
       backgroundColor: theme.palette.grey[400]
     }
   })
@@ -111,12 +128,16 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
     }
   }, [estate])
 
+  const goToLocation = () => {
+    router.push(`/map?longitude=${estateData?.estate?.longitude}&latitude=${estateData?.estate?.latitude}&zoom=18`)
+  }
+
   const onDelete = async () => {
     try {
       if (typeof estate === "string") {
         await deleteEstate({ variables: { id: estate } })
         closeDeleteDialogue()
-        router.push(`/map?longitude=${estateData?.estate?.longitude}&latitude=${estateData?.estate?.latitude}&zoom=17`)
+        goToLocation()
         snackStore.toggle("success", "Nemovitost odstraněna")
       }
     } catch (err) {
@@ -179,6 +200,9 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
       name,
       description,
       created_by,
+      created_on,
+      last_modified_by,
+      last_modified_on,
       images,
       files,
       latitude,
@@ -191,7 +215,14 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
       city_address,
       postal_code,
       primary_type,
-      secondary_type
+      secondary_type,
+      terrace,
+      garage,
+      swimming_pool,
+      elevator,
+      cellar,
+      furnished,
+      parking
     } = estateData.estate
 
     const onEstateEditButton = () => {
@@ -229,7 +260,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
           {estateData?.estate && (
             <Grid item xs={12} sm={9} lg={7} xl={6}>
               <Paper style={{ padding: theme.spacing(2) }} variant='outlined'>
-                <Grid container direction='row'>
+                <Grid container direction='row' justifyContent='space-between'>
                   <Grid container item xs={12} direction='column'>
                     <Grid container item direction='row' alignItems='center'>
                       <Tooltip title={isFavorite ? "Odstranit z oblíbených" : "Přidat do oblíbených"}>
@@ -241,13 +272,14 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                         {primary_type.desc_cz}, {secondary_type.desc_cz}
                       </Typography>
                     </Grid>
-                    <Typography variant='h6' color='textSecondary'>
-                      {street_address}, {city_address}, {postal_code}
-                    </Typography>
+                    <Grid container item direction='row' alignItems='center'>
+                      <Typography variant='h6' color='textSecondary'>
+                        {street_address}, {city_address}, {postal_code}
+                      </Typography>
+                    </Grid>
                   </Grid>
 
                   <ImageLibrary estateId={id} images={images} onClose={closeImageLibrary} open={imageLibraryOpen} />
-
                   <FileLibrary estateId={id} files={files} onClose={closeFileLibrary} open={fileLibraryOpen} />
 
                   <Grid item xs={12} container alignItems='center'>
@@ -266,7 +298,11 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                         <FileLibraryIcon />
                       </IconButton>
                     </Tooltip>
-                    <div className={classes.menuButtonDivider} />
+                    <Tooltip title='Zobrazit na mapě'>
+                      <IconButton onClick={goToLocation}>
+                        <Map />
+                      </IconButton>
+                    </Tooltip>
                     <Tooltip title='Odstranit'>
                       <IconButton onClick={openDeleteDialogue}>
                         <DeleteIcon />
@@ -277,16 +313,18 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                   {!!galleryPhotos.length && <ImageCarousel images={galleryPhotos} />}
 
                   {!!description && (
-                    <Grid item md={6}>
-                      <Typography variant='h6'>Popis</Typography>
+                    <Grid item xl={6}>
+                      <Typography variant='h5' style={{ margin: "8px 0" }}>
+                        Popis nemovitosti
+                      </Typography>
                       <Typography variant='body1' paragraph style={{ whiteSpace: "pre-line" }}>
                         {description}
                       </Typography>
                     </Grid>
                   )}
 
-                  <Grid item md={6}>
-                    <Typography variant='h6'>Parametry</Typography>
+                  <Grid item>
+                    <Typography variant='h5'>Parametry</Typography>
                     <List dense classes={{ root: classes.list }}>
                       {land_area && (
                         <ParameterListItem
@@ -332,6 +370,13 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                         parameter='Souřadnice'
                       />
                       <ParameterListItem icon={<CityIcon />} value={city_address} parameter='Lokalita' />
+                      {terrace && <ParameterListItem icon={<Deck />} value='Terasa' parameter='Ano' />}
+                      {garage && <ParameterListItem icon={<DirectionsCar />} value='Garáž' parameter='Ano' />}
+                      {swimming_pool && <ParameterListItem icon={<Pool />} value='Bazén' parameter='Ano' />}
+                      {elevator && <ParameterListItem icon={<SwapVert />} value='Výtah' parameter='Ano' />}
+                      {cellar && <ParameterListItem icon={<ZoomOutMap />} value='Sklepení' parameter='Ano' />}
+                      {furnished && <ParameterListItem icon={<Weekend />} value='Vybavení' parameter='Ano' />}
+                      {parking && <ParameterListItem icon={<LocalParking />} value='Parkování' parameter='Ano' />}
                     </List>
                   </Grid>
                 </Grid>
