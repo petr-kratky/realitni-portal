@@ -160,20 +160,7 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({ id }) =
     } = estateData
 
     const onEdit = () => {
-      estateModalStore.openEditMode(id, {
-        primary_type_id: primaryTypeId,
-        secondary_type_id: secondaryTypeId,
-        coordinates: `${latitude}, ${longitude}`,
-        name: name ?? "",
-        description: description ?? "",
-        advert_price: advert_price ?? ("" as unknown as number),
-        estimated_price: estimated_price ?? ("" as unknown as number),
-        land_area: land_area ?? ("" as unknown as number),
-        usable_area: usable_area ?? ("" as unknown as number),
-        city_address,
-        postal_code,
-        street_address
-      })
+      estateModalStore.openEditMode(id, estateData.estate)
     }
 
     const fullAddress: string = `${street_address}, ${city_address}`

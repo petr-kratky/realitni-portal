@@ -160,20 +160,7 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
     const fullAddress: string = `${street_address}, ${city_address}`
 
     const onEditButton = () => {
-      estateModalStore.openEditMode(id, {
-        primary_type_id: primary_type.id,
-        secondary_type_id: secondary_type.id,
-        coordinates: `${latitude}, ${longitude}`,
-        name: name ?? "",
-        description: description ?? "",
-        advert_price: advert_price ?? ("" as unknown as number),
-        estimated_price: estimated_price ?? ("" as unknown as number),
-        land_area: land_area ?? ("" as unknown as number),
-        usable_area: usable_area ?? ("" as unknown as number),
-        city_address,
-        postal_code,
-        street_address
-      })
+      estateModalStore.openEditMode(id, estateData.estate)
     }
 
     return (

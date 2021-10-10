@@ -1,5 +1,7 @@
-import React, { FunctionComponent, useState, useEffect } from "react"
+import React, { FunctionComponent, useEffect } from "react"
 import { Formik } from "formik"
+import * as Yup from "yup"
+
 import {
   Button,
   TextField,
@@ -10,7 +12,6 @@ import {
   DialogActions,
   DialogTitle,
   DialogContent,
-  DialogContentText,
   CircularProgress,
   Select,
   MenuItem,
@@ -21,21 +22,20 @@ import {
   InputAdornment,
   Typography,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Checkbox,
+  FormControlLabel
 } from "@material-ui/core"
-import * as Yup from "yup"
 
-import { estateModalStore, geojsonStore, snackStore } from "src/lib/stores"
 import {
-  CreateEstateMutationResult,
   CreateEstateMutationVariables,
   EstateDocument,
   EstateWithoutMediaDocument,
-  UpdateEstateMutationResult,
   useCreateEstateMutation,
   useEstateTypesQuery,
   useUpdateEstateMutation
 } from "src/graphql/queries/generated/graphql"
+import { estateModalStore, geojsonStore, snackStore } from "src/lib/stores"
 import { AppState, FormikSubmitFunction } from "../../types"
 import { removeEmptyStrings } from "src/utils/utils"
 import { geocodeLocation } from "../../lib/api/geocode"
@@ -53,6 +53,13 @@ export type EstateFormValues = {
   land_area?: number
   primary_type_id: string
   secondary_type_id: string
+  terrace?: boolean
+  parking?: boolean
+  garage?: boolean
+  swimming_pool?: boolean
+  elevator?: boolean
+  cellar?: boolean
+  furnished?: boolean
 }
 
 const useStyles = makeStyles((theme: Theme) =>
@@ -68,7 +75,6 @@ const useStyles = makeStyles((theme: Theme) =>
       padding: theme.spacing(0, 1)
     },
     smallField: {
-      // margin: theme.spacing(1, 0.5, 0.5, 0.5),
       minWidth: "100%"
     },
     formLabel: {
@@ -78,7 +84,10 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     errorLabel: {
       color: theme.palette.secondary.main
-    }
+    },
+		checkbox: {
+			width: 125
+		}
   })
 )
 
@@ -123,7 +132,14 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
     land_area: Yup.number().positive(),
     usable_area: Yup.number().positive(),
     primary_type_id: Yup.string().required("Toto pole je povinné"),
-    secondary_type_id: Yup.string().required("Toto pole je povinné")
+    secondary_type_id: Yup.string().required("Toto pole je povinné"),
+    terrace: Yup.bool(),
+    parking: Yup.bool(),
+    garage: Yup.bool(),
+    swimming_pool: Yup.bool(),
+    elevator: Yup.bool(),
+    cellar: Yup.bool(),
+    furnished: Yup.bool()
   })
 
   const handleClose = (): void => {
@@ -146,7 +162,6 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
       return
     }
     const { primary_type_id, secondary_type_id, ...cleanArgs } = removeEmptyStrings(args)
-
     const variables: CreateEstateMutationVariables = {
       // @ts-ignore
       estateInput: {
@@ -157,7 +172,6 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
         ...cleanArgs
       }
     }
-
     try {
       if (appState.estateModal.editMode.estateId) {
         const response = await updateEstate({
@@ -203,7 +217,6 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
           const onAddressGeocode = async (): Promise<void> => {
             const composedAddress = `${values.street_address} ${values.city_address} ${values.postal_code}`
             const geocodeResults = await geocodeLocation({ address: composedAddress })
-
             if (!geocodeResults?.results.length) {
               snackStore.toggle("error", `Pro zadanou adresu nebyly nalezeny žádné souřadnice`)
               setFieldValue("coordinates", "")
@@ -220,7 +233,6 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
               </DialogTitle>
               <form onSubmit={handleSubmit}>
                 <DialogContent dividers>
-
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <Typography variant='subtitle2' className={classes.formLabel}>
@@ -480,6 +492,114 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                           startAdornment: <InputAdornment position='start'>m2</InputAdornment>
                         }}
                       />
+                    </Grid>
+                  </Grid>
+
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <Typography variant='subtitle2' className={classes.formLabel}>
+                        Doplňky
+                      </Typography>
+                    </Grid>
+                    <Grid item container xs={12}>
+                      <Grid item className={classes.checkbox}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              id='terrace'
+                              onChange={handleChange}
+                              value={values.terrace}
+                              checked={!!values.terrace}
+                              color='primary'
+                            />
+                          }
+                          label='Terasa'
+                        />
+                      </Grid>
+                      <Grid item className={classes.checkbox}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              id='parking'
+                              onChange={handleChange}
+                              value={values.parking}
+                              checked={!!values.parking}
+                              color='primary'
+                            />
+                          }
+                          label='Parkování'
+                        />
+                      </Grid>
+                      <Grid item className={classes.checkbox}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              id='garage'
+                              onChange={handleChange}
+                              value={values.garage}
+                              checked={!!values.garage}
+                              color='primary'
+                            />
+                          }
+                          label='Garáž'
+                        />
+                      </Grid>
+                      <Grid item className={classes.checkbox}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              id='swimming_pool'
+                              onChange={handleChange}
+                              value={values.swimming_pool}
+                              checked={!!values.swimming_pool}
+                              color='primary'
+                            />
+                          }
+                          label='Bazén'
+                        />
+                      </Grid>
+                      <Grid item className={classes.checkbox}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              id='furnished'
+                              onChange={handleChange}
+                              value={values.furnished}
+                              checked={!!values.furnished}
+                              color='primary'
+                            />
+                          }
+                          label='Vybavení'
+                        />
+                      </Grid>
+                      <Grid item className={classes.checkbox}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              id='elevator'
+                              onChange={handleChange}
+                              value={values.elevator}
+                              checked={!!values.elevator}
+                              color='primary'
+                            />
+                          }
+                          label='Výtah'
+                        />
+                      </Grid>
+                      <Grid item className={classes.checkbox}>
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              id='cellar'
+                              onChange={handleChange}
+                              value={values.cellar}
+                              checked={!!values.cellar}
+                              color='primary'
+                            />
+                          }
+                          label='Sklepení'
+                        />
+                      </Grid>
                     </Grid>
                   </Grid>
 
