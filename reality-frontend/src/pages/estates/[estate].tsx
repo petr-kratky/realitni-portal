@@ -81,9 +81,9 @@ const useStyles = makeStyles((theme: Theme) =>
     },
     listItem: {
       width: 210,
-			[theme.breakpoints.down('xs')]: {
-				maxWidth: 160
-			}
+      [theme.breakpoints.down("xs")]: {
+        maxWidth: 160
+      }
     },
     menuButtonDivider: {
       width: 1,
@@ -261,6 +261,11 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                       </Typography>
                     </Grid>
                     <Grid container item direction='row' alignItems='center'>
+                      <Tooltip title='Zobrazit na mapě'>
+                        <IconButton edge='start' onClick={goToLocation}>
+                          <Map />
+                        </IconButton>
+                      </Tooltip>
                       <Typography variant='h6' color='textSecondary'>
                         {street_address}, {city_address}, {postal_code}
                       </Typography>
@@ -284,11 +289,6 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
                     <Tooltip title='Přílohy'>
                       <IconButton onClick={openFileLibrary}>
                         <FileLibraryIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title='Zobrazit na mapě'>
-                      <IconButton onClick={goToLocation}>
-                        <Map />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title='Odstranit'>
