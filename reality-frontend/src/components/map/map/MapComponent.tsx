@@ -1,14 +1,15 @@
-import React, { FunctionComponent, useEffect, useRef, useState } from "react"
+import React, { FunctionComponent, useEffect, useLayoutEffect, useRef, useState } from "react"
 import { useRouter } from "next/router"
 import { GeoJSONSource } from "mapbox-gl"
+import { ParsedUrlQuery } from "querystring"
 import ReactMapGL, { ExtraState, PointerEvent, ViewportProps } from "react-map-gl"
-import { easeCubic } from "d3-ease"
+
 import { createStyles, Fab, makeStyles, Theme, Tooltip } from "@material-ui/core"
 import { Remove, Add } from "@material-ui/icons"
 
-import { pushViewportToUrl } from "../../../utils/utils"
-import authFetch from "../../../lib/auth/authFetch"
 import { viewportStore, snackStore, geojsonStore } from "src/lib/stores"
+import { filterObject, isUndef, pushViewportToUrl } from "../../../utils/utils"
+import authFetch from "../../../lib/auth/authFetch"
 import {
   AppState,
   EstateCluster,
@@ -49,7 +50,7 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
   setContextMenuProps,
   popupProps,
   setPopupProps,
-  appState: { geojson, viewport }
+  appState
 }) => {
   const classes = useStyles()
   const router = useRouter()
@@ -127,13 +128,8 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
             "circle-stroke-color": "#fff"
           }
         })
-        // Get initial viewport 'height' and 'width' to match its container div
-        const { clientWidth: width, clientHeight: height } = map.getContainer()
-        viewportStore.setViewport({ ...viewport, width, height })
-        // @ts-ignore
-        pushViewportToUrl(router, { ...viewport, width, height })
         // Refresh geoJSON data source from API
-        updateGeojsonSource()
+        setTimeout(() => updateGeojsonSource(), 200)
       } catch (err: any) {
         // console.error(err.message)
       }
@@ -142,14 +138,21 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
 
   useEffect(() => {
     updateGeojsonSource()
-  }, [geojson.refetchCounter, geojson.filter])
+  }, [appState.geojson.refetchCounter, appState.geojson.filter])
+
+  useEffect(() => {
+    const queryViewport = getQueryViewport(router.query)
+    const initViewport = { ...appState.viewport, ...queryViewport, ready: true }
+    viewportStore.setViewport(initViewport)
+    pushViewportToUrl(router, initViewport)
+  }, [])
 
   const zoomIn = () => {
-    viewportStore.setViewport({ ...viewport, zoom: viewport.zoom + 1 }, true, 300)
+    viewportStore.setViewport({ ...appState.viewport, zoom: appState.viewport.zoom + 1 }, true, 300)
   }
 
   const zoomOut = () => {
-    viewportStore.setViewport({ ...viewport, zoom: viewport.zoom - 1 }, true, 300)
+    viewportStore.setViewport({ ...appState.viewport, zoom: appState.viewport.zoom - 1 }, true, 300)
   }
 
   const __onContextMenu = (e: PointerEvent): void => {
@@ -181,16 +184,17 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
   }
 
   const __onViewPortChange = (viewportProps: ViewportProps) => {
-    viewportStore.setViewport(viewportProps)
+    viewportStore.setViewport({ ...viewportProps, ready: appState.viewport.ready })
     setContextMenuProps({ ...contextMenuProps, isVisible: false })
   }
 
   const __onInteractionStateChange = async (interactionState: ExtraState) => {
     const { isZooming, isPanning, inTransition, isDragging } = interactionState
-
     if (!isZooming && !isPanning && !inTransition && !isDragging) {
-      await pushViewportToUrl(router, viewport)
-      await updateGeojsonSource()
+      if (appState.viewport.width && appState.viewport.height) {
+        await pushViewportToUrl(router, appState.viewport)
+        await updateGeojsonSource()
+      }
     }
   }
 
@@ -296,16 +300,16 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
         return `${key}=${value}`
       }
     }
-    return Object.entries(geojson.filter)
+    return Object.entries(appState.geojson.filter)
       .filter(entry => !!entry[1])
       .map(parseFilters)
       .filter(value => value.length)
       .join(" AND ")
   }
 
-  return (
+  return appState.viewport.ready ? (
     <ReactMapGL
-      {...viewport}
+      {...appState.viewport}
       onLoad={__onLoad}
       onClick={__onClick}
       onContextMenu={__onContextMenu}
@@ -319,7 +323,7 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
       width='100%'
       height='100%'
       maxZoom={18}
-      minZoom={6.5}
+      minZoom={7}
     >
       {children}
       <Tooltip placement='left' title='Přiblížit' enterDelay={1250}>
@@ -333,7 +337,26 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
         </Fab>
       </Tooltip>
     </ReactMapGL>
-  )
+  ) : null
+}
+
+type QueryViewport = {
+  zoom?: number
+  longitude?: number
+  latitude?: number
+}
+
+function getQueryViewport(query: ParsedUrlQuery): QueryViewport {
+  const { latitude: qLatitude, longitude: qLongitude, zoom: qZoom } = query
+
+  const [latitude, longitude, zoom]: Array<number | undefined> = [qLatitude, qLongitude, qZoom]
+    .map(value => (isUndef(value) ? NaN : Number(value)))
+    .map(value => (isNaN(value) ? undefined : value))
+
+  const viewport: QueryViewport = { longitude, latitude, zoom }
+  const filteredViewport = filterObject<QueryViewport, number | undefined>(viewport, value => !isUndef(value))
+
+  return filteredViewport
 }
 
 export default RSMap

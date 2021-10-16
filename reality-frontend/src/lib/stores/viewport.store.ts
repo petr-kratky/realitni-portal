@@ -9,6 +9,7 @@ type Transition = {
 }
 
 export type ViewportState = Transition & {
+	ready: boolean
   width: number
   height: number
   latitude: number
@@ -25,11 +26,12 @@ const transition = {
 const subject = new Subject<ViewportState>()
 
 const initialState: ViewportState = {
+  ready: false,
   width: 0,
   height: 0,
   latitude: 50.035007,
   longitude: 15.318121,
-  zoom: 6.5
+  zoom: 7
 }
 
 let state = initialState
@@ -42,7 +44,7 @@ export const viewportStore = {
         ...state,
         ...viewport,
         ...transition,
-				transitionDuration
+        transitionDuration
       }
     } else {
       state = {
@@ -50,6 +52,7 @@ export const viewportStore = {
         ...viewport
       }
     }
+    console.log("state", state)
     subject.next(state)
   },
   clearViewport: () => {

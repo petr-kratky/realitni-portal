@@ -7,8 +7,6 @@ import { HttpLink } from "@apollo/client/link/http";
 
 import fetch from "isomorphic-fetch";
 
-import { resolvers } from "./client-cache/resolvers";
-import { typeDefs } from "./client-cache/local-schema";
 import {
   getAccessToken,
   setAccessToken,
@@ -73,9 +71,7 @@ let apolloClient: ApolloClient<NormalizedCacheObject> | null = null;
   return new ApolloClient({
     ssrMode: typeof window === "undefined", // Disables forceFetch on the server (so queries are only run once)
     link: ApolloLink.from([refreshLink, authLink, errorLink, httpLink]),
-    cache: new InMemoryCache().restore(initialState),
-    resolvers,
-    typeDefs,
+    cache: new InMemoryCache().restore(initialState)
   });
 }
 

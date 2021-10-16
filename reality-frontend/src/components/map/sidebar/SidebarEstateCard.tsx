@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme: Theme) =>
       flexDirection: "column",
       overflowY: "scroll",
       height: CARD_HEIGHT,
-			paddingBottom: '4px !important'
+      paddingBottom: "4px !important"
     },
     header: {
       textTransform: "capitalize",
@@ -301,12 +301,11 @@ const Component: React.FunctionComponent<ComponentProps & AppState> = ({ id }) =
               {chips.map(
                 chip =>
                   chip !== null && (
-                    <Tooltip title={chip.title}>
+                    <Tooltip key={chip.label} title={chip.title}>
                       <Chip
                         className={classes.chip}
                         size='small'
                         avatar={chip.prefix ? <Avatar>{chip.prefix}</Avatar> : <></>}
-                        key={chip.label}
                         label={chip.label}
                       />
                     </Tooltip>

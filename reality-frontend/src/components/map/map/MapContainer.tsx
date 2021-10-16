@@ -1,11 +1,11 @@
 import React, { Dispatch, FunctionComponent, SetStateAction, useState } from "react"
-import { createStyles, Fab, makeStyles, Theme, Tooltip, useMediaQuery, useTheme } from "@material-ui/core"
+import { createStyles, Fab, makeStyles, NoSsr, Theme, Tooltip, useMediaQuery, useTheme } from "@material-ui/core"
 import AddIcon from "@material-ui/icons/Add"
 
 import { estateModalStore } from "src/lib/stores"
 import CustomPopup, { CustomPopupProps } from "./CustomPopup"
 import ContextMenu, { ContextMenuProps } from "./ContextMenu"
-import RSMap from "./RSMap"
+import RSMap from "./MapComponent"
 import { AppState } from "src/types"
 import Search from "@material-ui/icons/Search"
 
@@ -33,9 +33,9 @@ const useStyles = makeStyles((theme: Theme) =>
 
 const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ appState, toggleSidebar }) => {
   const classes = useStyles()
-	const theme = useTheme()
+  const theme = useTheme()
 
-	const sm = useMediaQuery(theme.breakpoints.down("sm"))
+  const sm = useMediaQuery(theme.breakpoints.down("sm"))
 
   const [contextMenuProps, setContextMenuProps] = useState<ContextMenuProps>(
     ContextMenu.defaultProps as ContextMenuProps
@@ -48,27 +48,35 @@ const MapContainer: FunctionComponent<MapContainerProps & AppState> = ({ appStat
 
   return (
     <div className={classes.mapContainer}>
-      <RSMap
-        appState={appState}
-        contextMenuProps={contextMenuProps}
-        popupProps={popupProps}
-        setContextMenuProps={setContextMenuProps}
-        setPopupProps={setPopupProps}
-      >
-        {popupProps.features && (
-          <CustomPopup
-            {...popupProps}
-            handleClose={_handlePopupClose}
-            popupProps={popupProps}
-            setPopupProps={setPopupProps}
-          />
-        )}
-        {contextMenuProps.isVisible && (
-          <ContextMenu {...contextMenuProps} appState={appState} handleClose={_handleContextMenuClose} />
-        )}
-      </RSMap>
+      <NoSsr>
+        <RSMap
+          appState={appState}
+          contextMenuProps={contextMenuProps}
+          popupProps={popupProps}
+          setContextMenuProps={setContextMenuProps}
+          setPopupProps={setPopupProps}
+        >
+          {popupProps.features && (
+            <CustomPopup
+              {...popupProps}
+              handleClose={_handlePopupClose}
+              popupProps={popupProps}
+              setPopupProps={setPopupProps}
+            />
+          )}
+          {contextMenuProps.isVisible && (
+            <ContextMenu {...contextMenuProps} appState={appState} handleClose={_handleContextMenuClose} />
+          )}
+        </RSMap>
+      </NoSsr>
       <Tooltip title='Vyhledávání'>
-        <Fab variant='extended' color='default' size={sm ? 'medium' : 'large'} onClick={toggleSidebar} classes={{ root: classes.searchFab }}>
+        <Fab
+          variant='extended'
+          color='default'
+          size={sm ? "medium" : "large"}
+          onClick={toggleSidebar}
+          classes={{ root: classes.searchFab }}
+        >
           <Search />
         </Fab>
       </Tooltip>
