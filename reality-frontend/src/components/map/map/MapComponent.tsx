@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect, useLayoutEffect, useRef, useState } from "react"
+import React, { FunctionComponent, useEffect, useRef, useState } from "react"
 import { useRouter } from "next/router"
 import { GeoJSONSource } from "mapbox-gl"
 import { ParsedUrlQuery } from "querystring"
@@ -129,7 +129,7 @@ const RSMap: FunctionComponent<MapComponentProps & AppState> = ({
           }
         })
         // Refresh geoJSON data source from API
-        setTimeout(() => updateGeojsonSource(), 200)
+        updateGeojsonSource()
       } catch (err: any) {
         // console.error(err.message)
       }
