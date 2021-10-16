@@ -132,7 +132,7 @@ const EstatesSidebar: React.FunctionComponent<EstatesSidebarProps & AppState> = 
   const endIndex = currentPage * pageSize
 
   const estates = React.useMemo(
-    () => features.map(ftr => ftr.properties.id).slice(startIndex, endIndex),
+    () => features.map(ftr => ftr.properties.id).slice(startIndex, endIndex).sort((a, b) => a > b ? -1 : 1),
     [features, currentPage]
   )
 

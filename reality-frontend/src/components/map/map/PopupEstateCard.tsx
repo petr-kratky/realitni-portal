@@ -61,7 +61,6 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
   const [removeFavoriteEstate] = useRemoveFavoriteEstateMutation()
 
   const [menuAnchor, setMenuAnchor] = React.useState<null | HTMLElement>(null)
-  const [estateTab, setEstateTab] = React.useState<null | Window>(null)
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState<boolean>(false)
 
   const isMenuOpen = Boolean(menuAnchor)
@@ -131,12 +130,7 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
   }
 
   const handleItemClick = () => {
-    if (estateTab && !estateTab.closed) {
-      estateTab.focus()
-    } else {
-      const estateWindow = window.open(`/estates/${id}`)
-      setEstateTab(estateWindow)
-    }
+    const estateWindow = window.open(`/estates/${id}`, "_blank")
   }
 
   if (estateData?.estate) {
@@ -176,11 +170,11 @@ const PopupEstateCard: FunctionComponent<PopupEstateCardProps> = ({ id, features
             <EstateMenu
               open={isMenuOpen}
               menuAnchor={menuAnchor}
-							favorite={!!isFavorite}
+              favorite={!!isFavorite}
               onClose={handleMenuClose}
               onEditClick={onEditButton}
               onDeleteClick={handleDeleteDialogOpen}
-							onFavoriteClick={onFavorite}
+              onFavoriteClick={onFavorite}
             />
             <DeleteDialogue
               open={deleteDialogOpen}
