@@ -24,7 +24,8 @@ import {
   useTheme,
   useMediaQuery,
   Checkbox,
-  FormControlLabel
+  FormControlLabel,
+  DialogContentText
 } from "@material-ui/core"
 
 import {
@@ -32,6 +33,7 @@ import {
   EstateDocument,
   EstateWithoutMediaDocument,
   useCreateEstateMutation,
+  useEstateQuery,
   useEstateTypesQuery,
   useUpdateEstateMutation
 } from "src/graphql/queries/generated/graphql"
@@ -85,9 +87,9 @@ const useStyles = makeStyles((theme: Theme) =>
     errorLabel: {
       color: theme.palette.secondary.main
     },
-		checkbox: {
-			width: 125
-		}
+    checkbox: {
+      width: 125
+    }
   })
 )
 
@@ -96,6 +98,11 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
   const theme = useTheme()
 
   const isXs = useMediaQuery(theme.breakpoints.down("xs"))
+
+  const { data: estateData } = useEstateQuery({
+    variables: { id: appState.estateModal.editMode.estateId },
+    skip: !appState.estateModal.editMode.estateId
+  })
 
   const {
     data: estateTypesData,
@@ -231,8 +238,22 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
               <DialogTitle>
                 {appState.estateModal.editMode.estateId ? "Upravit nemovitost" : "Nová nemovitost"}
               </DialogTitle>
-              <form onSubmit={handleSubmit}>
-                <DialogContent dividers>
+              <DialogContent dividers>
+                {appState.estateModal.editMode.estateId && estateData?.estate && (
+                  <>
+                    <DialogContentText>
+                      Vytvořil uživatel <b>{estateData.estate.created_by.username}</b> dne{" "}
+                      <b>{new Date(estateData.estate.created_on).toLocaleDateString()}</b> v{" "}
+                      <b>{new Date(estateData.estate.created_on).toLocaleTimeString().slice(0, -3)}</b>.
+                    </DialogContentText>
+                    <DialogContentText>
+                      Naposledy upravil uživatel <b>{estateData.estate.last_modified_by.username}</b> dne{" "}
+                      <b>{new Date(estateData.estate.last_modified_on).toLocaleDateString()}</b> v{" "}
+                      <b>{new Date(estateData.estate.last_modified_on).toLocaleTimeString().slice(0, -3)}</b>.
+                    </DialogContentText>
+                  </>
+                )}
+                <form onSubmit={handleSubmit}>
                   <Grid container spacing={2}>
                     <Grid item xs={12}>
                       <Typography variant='subtitle2' className={classes.formLabel}>
@@ -626,22 +647,22 @@ const EstateModal: FunctionComponent<AppState> = ({ appState }) => {
                       />
                     </Grid>
                   </Grid>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleClose} color='default'>
-                    zavřít
-                  </Button>
-                  <Button onClick={submitForm} disabled={isSubmitting} color='primary'>
-                    {appState.estateModal.editMode.estateId ? "uložit změny" : "vytvořit"}
-                    {isSubmitting && (
-                      <>
-                        &nbsp;
-                        <CircularProgress size={20} color='primary' />{" "}
-                      </>
-                    )}
-                  </Button>
-                </DialogActions>
-              </form>
+                </form>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClose} color='default'>
+                  zavřít
+                </Button>
+                <Button onClick={submitForm} disabled={isSubmitting} color='primary'>
+                  {appState.estateModal.editMode.estateId ? "uložit změny" : "vytvořit"}
+                  {isSubmitting && (
+                    <>
+                      &nbsp;
+                      <CircularProgress size={20} color='primary' />{" "}
+                    </>
+                  )}
+                </Button>
+              </DialogActions>
             </>
           )
         }}

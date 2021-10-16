@@ -119,14 +119,6 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
 
   const navigationOptions = [
     {
-      text: "Vyhledat",
-      icon: <Search />,
-      onClick: () => {
-        toggleDrawer()
-        console.log("vyhledat")
-      }
-    },
-    {
       text: "Mapa",
       icon: <Map />,
       onClick: () => {
@@ -213,7 +205,7 @@ const Layout: React.FunctionComponent<AppState & LayoutProps> = ({ children, pag
             </Tooltip>
           )}
           {!isAuth && (
-            <IconButton edge='start' color='inherit' >
+            <IconButton edge='start' color='inherit'>
               <Home />
             </IconButton>
           )}

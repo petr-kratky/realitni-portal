@@ -41,7 +41,10 @@ import {
   StarOutline,
   SwapVert,
   Weekend,
-  ZoomOutMap
+  ZoomOutMap,
+  Info,
+  InfoOutlined,
+  Add
 } from "@material-ui/icons"
 
 import { Photo } from "react-bnb-gallery"
@@ -63,6 +66,7 @@ import { estateModalStore, snackStore } from "src/lib/stores"
 import ImageLibrary from "../../components/estate/ImageLibrary"
 import FileLibrary from "../../components/estate/FileLibrary"
 import DeleteDialogue from "../../components/utils/DeleteDialogue"
+import Edit from "@material-ui/icons/Edit"
 
 type ParameterListItemProps = {
   icon: React.ReactNode
@@ -200,9 +204,9 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
       id,
       name,
       description,
-      created_by,
+      created_by: { username: createdBy },
       created_on,
-      last_modified_by,
+      last_modified_by: { username: lastModifiedBy },
       last_modified_on,
       images,
       files,
@@ -235,13 +239,13 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
       thumbnail: img.small
     }))
 
-    const fullAddress: string = `${street_address}, ${city_address}`
+    const address: string = `${street_address}, ${city_address}`
 
     return (
       <>
         <Head>
           <title>
-            {primary_type.desc_cz}, {secondary_type.desc_cz} - {fullAddress} | Realitní Portál
+            {primary_type.desc_cz}, {secondary_type.desc_cz} - {address} | Realitní Portál
           </title>
         </Head>
         <Grid container justifyContent='center'>
@@ -377,7 +381,7 @@ const EstatePage: NextPage<AppState> = ({ appState }) => {
             onClose={closeDeleteDialogue}
             onDelete={onDelete}
             title='Smazat nemovitost'
-            text={`Opravdu si přejete smazat nemovitost na adrese "${fullAddress}"? Tato akce je nevratná a nemovitost bude permanentně odstraněna společně se všemi přílohami a fotografiemi.`}
+            text={`Opravdu si přejete smazat nemovitost na adrese "${address}"? Tato akce je nevratná a nemovitost bude permanentně odstraněna společně se všemi přílohami a fotografiemi.`}
           />
         </Grid>
       </>
@@ -391,10 +395,10 @@ const ParameterListItem: React.FunctionComponent<ParameterListItemProps> = ({ pa
   const classes = useStyles()
   const theme = useTheme()
 
-  const xs = useMediaQuery(theme.breakpoints.down("xs"), { noSsr: true })
+  const xs = useMediaQuery(theme.breakpoints.down("xs"))
 
   return (
-    <ListItem classes={{ root: classes.listItem }}>
+    <ListItem disableGutters={xs} classes={{ root: classes.listItem }}>
       {!xs && (
         <ListItemAvatar>
           <Avatar>{icon}</Avatar>
